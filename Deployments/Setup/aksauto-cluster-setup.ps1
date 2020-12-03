@@ -4,15 +4,14 @@ param([Parameter(Mandatory=$true)]    [string] $mode,
         [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
         [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
         [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
-        [Parameter(Mandatory=$false)] [string] $aksSubnetName = "aks-workshop-subnet",        
-        [Parameter(Mandatory=$false)] [string] $version = "1.16.15",
+        [Parameter(Mandatory=$false)] [string] $aksSubnetName = "aks-workshop-subnet",
+        [Parameter(Mandatory=$false)] [string] $vrnSubnetName = "vrn-workshop-subnet",
+        [Parameter(Mandatory=$false)] [string] $version = "1.17.13",
         [Parameter(Mandatory=$false)] [string] $addons = "monitoring",
-        [Parameter(Mandatory=$false)] [string] $nodeCount = 2,
-        [Parameter(Mandatory=$false)] [string] $minNodeCount = $nodeCount,
-        [Parameter(Mandatory=$false)] [string] $maxNodeCount = 20,
-        [Parameter(Mandatory=$false)] [string] $maxPods = 40,
+        [Parameter(Mandatory=$false)] [string] $nodeCount = 2,        
+        [Parameter(Mandatory=$false)] [string] $maxPods = 30,
         [Parameter(Mandatory=$false)] [string] $vmSetType = "VirtualMachineScaleSets",
-        [Parameter(Mandatory=$false)] [string] $nodeVMSize = "Standard_DS3_V2",
+        [Parameter(Mandatory=$false)] [string] $nodeVMSize = "Standard_DS2_v2",
         [Parameter(Mandatory=$false)] [string] $networkPlugin= "azure",
         [Parameter(Mandatory=$false)] [string] $networkPolicy = "azure",
         [Parameter(Mandatory=$false)] [string] $nodePoolName = "akslnxpool",
@@ -143,7 +142,7 @@ elseif ($mode -eq "vn")
     $result = az aks enable-addons --name $clusterName `
     --resource-group $resourceGroup `
     --addons virtual-node `
-    --subnet-name vrn-workshop-subnet    
+    --subnet-name $vrnSubnetName
     
 }
 
