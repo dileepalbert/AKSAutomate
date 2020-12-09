@@ -12,7 +12,7 @@ param([Parameter(Mandatory=$true)]    [string] $mode,
         [Parameter(Mandatory=$false)] [string] $maxPods = 40,
         [Parameter(Mandatory=$false)] [string] $vmSetType = "AvailabilitySet",
         [Parameter(Mandatory=$false)] [string] $nodeVMSize = "Standard_DS3_V2",        
-        [Parameter(Mandatory=$false)] [string] $nodePoolName = "aksiotpool",
+        [Parameter(Mandatory=$false)] [string] $nodePoolName = "aksjobspool",
         [Parameter(Mandatory=$false)] [string] $osType = "Linux")
 
 $configSuccessCommand =  "length(@)"

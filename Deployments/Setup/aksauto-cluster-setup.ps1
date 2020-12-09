@@ -1,7 +1,8 @@
-param([Parameter(Mandatory=$true)]    [string] $mode,
+param([Parameter(Mandatory=$true)]    [string] $mode,        
         [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
         [Parameter(Mandatory=$false)] [string] $location = "eastus",
         [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
+        [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
         [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
         [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
         [Parameter(Mandatory=$false)] [string] $aksSubnetName = "aks-workshop-subnet",
@@ -10,16 +11,14 @@ param([Parameter(Mandatory=$true)]    [string] $mode,
         [Parameter(Mandatory=$false)] [string] $addons = "monitoring",
         [Parameter(Mandatory=$false)] [string] $nodeCount = 2,        
         [Parameter(Mandatory=$false)] [string] $maxPods = 30,
-        [Parameter(Mandatory=$false)] [string] $vmSetType = "VirtualMachineScaleSets",
+        [Parameter(Mandatory=$false)] [string] $vmSetType = "AvailabilitySet",
         [Parameter(Mandatory=$false)] [string] $nodeVMSize = "Standard_DS2_v2",
         [Parameter(Mandatory=$false)] [string] $networkPlugin= "azure",
         [Parameter(Mandatory=$false)] [string] $networkPolicy = "azure",
         [Parameter(Mandatory=$false)] [string] $nodePoolName = "akslnxpool",
         [Parameter(Mandatory=$false)] [string] $winNodeUserName = "azureuser",
-        [Parameter(Mandatory=$false)] [string] $winNodePassword = "PassW0rd@123",        
-        [Parameter(Mandatory=$false)] [string] $aadServerAppID = "3adf37ca-d914-43e9-9b24-8c081e0b3a08",
-        [Parameter(Mandatory=$false)] [string] $aadServerAppSecret = ".Te.--TTxrcU7gZl6U_9ic70D.GVrTLCsN",
-        [Parameter(Mandatory=$false)] [string] $aadClientAppID = "70dba699-0fba-4c1d-805e-213acea0a63e",
+        [Parameter(Mandatory=$false)] [string] $winNodePassword = "PassW0rd@12345",        
+        [Parameter(Mandatory=$false)] [array]  $aadAdminGroupIDs = @("6ec3a0a8-a6c6-4cdf-a6e3-c296407a5ec1"),
         [Parameter(Mandatory=$false)] [string] $aadTenantID = "3851f269-b22b-4de6-97d6-aa9fe60fe301")
 
 
@@ -92,11 +91,13 @@ if ($mode -eq "create")
     --generate-ssh-keys `
     --windows-admin-username $winNodeUserName `
     --windows-admin-password $winNodePassword `
-    --aad-client-app-id $aadClientAppID `
-    --aad-server-app-id $aadServerAppID `
-    --aad-server-app-secret $aadServerAppSecret `
+    --enable-aad `
+    --aad-admin-group-object-ids $aadAdminGroupIDs `
     --aad-tenant-id $aadTenantID `
+    --attach-acr $acrName `
     --query $configSuccessCommand
+
+    # --enable-private-cluster `
 
     Write-Host "Result - $result"
 
