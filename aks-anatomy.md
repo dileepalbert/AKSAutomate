@@ -64,11 +64,12 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
 
   Preferred is *Hub-n-Spoke* as it makes entire topology flexible
 
-  In both the cases decide on the list of VNETs and Subnets to used (Existing or New). At the minimum follwoing is the list that are needed -
+  In both the cases decide on the list of VNETs and Subnets to used (Existing or New). At the minimum following is the list that are needed -
 
   **VNETs** - 
 
   - **Hub VNET** - Contains Subnets that are used across multiple resources, clusters or services e.g.
+    
     - **Application Gateway Subnet** - **/27** should be a good choice for Dev/UAT and Prod both
       - Select **Standard_V2** at least and **WAF_V2** if WAF service is needed as well
       - Used as external LoadBalancer, performs SSL Offloading (*optional*), maintains a backend pool of Private IPs - e.g. Private IP of Nginx Ingress controller. This way communication remains secure yet flexible
@@ -83,47 +84,48 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
         - *PowerShell Core*
         - *VS Code IDE and associated plugins - azure, git, PowerShell*
     - **Firewall Subnet** *(Optional) -* https://docs.microsoft.com/en-us/azure/firewall/features 
-    - **Gateway Subnet** (*Optional*) -  For On-Prem Connectivity over *site-to-site* or *point-to-site*
-
+- **Gateway Subnet** (*Optional*) -  For On-Prem Connectivity over *site-to-site* or *point-to-site*
+    
   - **AKS+ VNET** - **/20** for *Dev* and /**18** for *Prod* at least
-    - **AKS subnet** - A completely dedicated Subnet for AKS cluster. No other resources to be planned on this. 
-
-      **<u>/21, 22</u>** for Dev/UAT and **<u>/18, /20</u>** for Prod id safe to choose. *If Address space is an issue then Kubenet*. This should be a dedicated subnet for AKS cluster.
-
-      The question that should debated at this stage are -
-
+  
+  - **AKS subnet** - A completely dedicated Subnet for AKS cluster. No other resources to be planned on this. 
+  
+    **<u>/21, 22</u>** for Dev/UAT and **<u>/18, /20</u>** for Prod id safe to choose. *If Address space is an issue then Kubenet*. This should be a dedicated subnet for AKS cluster.
+  
+    The question that should debated at this stage are -
+    
       - How many micro-services approximately to be deployed (*now* and *in future*)
       - What would the minimum and maximum no. of replicas for each
       - How much *CPU* and *Memory* that each micro-services could consume approximately
       - And based on all these –
         - What is Size of each *Node* (VM) i.e how many *Cores of CPU* and how much *GB of Runtime Memory*
-        - how many *Nodes* (VMs) that the cluster could expect (*initially and when scaled up?*) – basically *minimum* and *maximum* no. of such *Nodes*
-      - Finally *maximum* number of pods or app replicas you want in each *Node* – Ideally whatever be the size of the *Node*, this value should not go beyond 40-50; not an hard and fast rule but with standard VM sizes like 8 Core 16 GB, 40-50 *Pods* per *Node* is good enough Based on all these info, let us try to define a formulae to decide what would be the address space of VNET and Subnet for AKS.
-
-      Let us assume,
-
-      **Np** = Max. Number of Pods in each Node (Ideally should not be more ethan 40-50)
-
-      **Nd** = Max. Number of Nodes possible (approx.)
-
-      Then the total no. of addresses that you would need in AKS Subnet = **(Np \* (Nd + 1) + Np)**
-
-      *+1 for reserved IP by system for each Node*
-
-      *+Np for additional IPs you might need while Upgrade* – normally K8s system will pull down one Node at a time, transfer all workloads to another Node and then upgrade the previous Node
-
-      It is advisable to keep some more in buffer based on workloads and other unforeseen situations
-
-      What we have seen, for high end workloads, ideally for a *DEV-UAT* cluster, we should go with **/21 or /22** which means around 2k or 1k *Nodes*.
-
-      *PROD* cluster should have a bit more like **/18 or /20** which means around 16k or 4k *Nodes*.
-
-    - **APIM subnet** (*Optional*) - One dedicated subnet for APIM. Two options are there - *External VNET* or *Internal VNET*.
-
-      - *Same VNET or Separate VNET*? If one APIM across entire org then should be in a separate VNET and then peering with ARO VNET
-
-      - *Address Space* - **/29** is enough for both DEV and PROD
-
+      - how many *Nodes* (VMs) that the cluster could expect (*initially and when scaled up?*) – basically *minimum* and *maximum* no. of such *Nodes*
+    - Finally *maximum* number of pods or app replicas you want in each *Node* – Ideally whatever be the size of the *Node*, this value should not go beyond 40-50; not an hard and fast rule but with standard VM sizes like 8 Core 16 GB, 40-50 *Pods* per *Node* is good enough Based on all these info, let us try to define a formulae to decide what would be the address space of VNET and Subnet for AKS.
+  
+    Let us assume,
+  
+    **Np** = Max. Number of Pods in each Node (Ideally should not be more ethan 40-50)
+  
+    **Nd** = Max. Number of Nodes possible (approx.)
+  
+    Then the total no. of addresses that you would need in AKS Subnet = **(Np \* (Nd + 1) + Np)**
+  
+    *+1 for reserved IP by system for each Node*
+  
+    *+Np for additional IPs you might need while Upgrade* – normally K8s system will pull down one Node at a time, transfer all workloads to another Node and then upgrade the previous Node
+  
+    It is advisable to keep some more in buffer based on workloads and other unforeseen situations
+  
+    What we have seen, for high end workloads, ideally for a *DEV-UAT* cluster, we should go with **/21 or /22** which means around 2k or 1k *Nodes*.
+  
+    *PROD* cluster should have a bit more like **/18 or /20** which means around 16k or 4k *Nodes*.
+  
+  - **APIM subnet** (*Optional*) - One dedicated subnet for APIM. Two options are there - *External VNET* or *Internal VNET*.
+  
+    - *Same VNET or Separate VNET*? If one APIM across entire org then should be in a separate VNET and then peering with ARO VNET
+  
+    - *Address Space* - **/29** is enough for both DEV and PROD
+  
   - **Integration Services VNET** - Provide Private endpoint for these all integration services peered with *ARO VNET* viz.
 
     - *Azure Container Registry aka ACR*
@@ -141,8 +143,9 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
     - *Azure Service Bus*
 
   - **DevOps VNET** - Self-hosted DevOps agents - *Linux* or *Windows*
-
-  - **NSGs to be decided Upfront**
+  
+  - **NSGs** to be decided Upfront
+    
     - Decide basic NSGs for all the subnets
     - Some important *Inbound* rules to be followed -
       - App G/W allows communication only from Azure Front door
@@ -156,9 +159,9 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
 
 ### Plan Communication to Azure Services
 
-- **Private/Service Endpopints**
+- **Private/Service Endpoints**
 
-  ​	Plan to use  for *Private Endpoints* (Or atleast *Service Endpoints*) wherever possible for communiction with Azure resources 	like Storage, SQL, CosmosDB etc. This makes communication secure and fast
+  Plan to use  for *Private Endpoints* (Or at least *Service Endpoints*) wherever possible for communication with Azure resources 	like Storage, SQL, CosmosDB etc. This makes communication secure and fast
 
   
 
@@ -175,7 +178,7 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
 
 ### Plan DevOps setup
 
-- *Self Hosted agent* - This ideally should be Ubuntu machine with at least 2 Core 8 GB spec (Or Windows macin with similar configuration)
+- *Self Hosted agent* - This ideally should be Ubuntu machine with at least 2 Core 8 GB spec (Or Windows machine with similar configuration)
 - Same agent machine can be used both as *Build Agent* and *Deployment Agent*
 - The VNET (as described aloe) should be peered with *AKS VNET*
 - *Integration Services VNET* should be peered with *DevOps VNET*. This is to make sure that CI/CD pipeline can deploy these resources (*ACR, Key Vault, Service Bus, Storage, PaaS Databases etc.*)
@@ -183,7 +186,7 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
 ### Plan ACR setup
 
 - Ideally two ACRs - one for *DEV* and one for *PROD*
-- Private Emndpoint support
+- Private Endpoint support
 - DevOps VNET should be able to access the ACR Subnet
 - No Admin access enabled; Service principal to be used for accessing it from within the cluster as well as DevOps pipeline(s)
 
@@ -541,16 +544,16 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
 
     - Install a suitable Ingress Controller for AKS cluster; choices are aplenty but popular ones below -
 
-      - NGINX / NGINX PLUS (*Production*) - 
+      - **NGINX / NGINX PLUS (*Production*)** - 
 
         - https://www.nginx.com/products/nginx-ingress-controller/#:~:text=NGINX%20Ingress%20Controller%20provides%20a,apps%20securely%20and%20with%20agility
       - https://docs.microsoft.com/en-us/azure/dev-spaces/how-to/ingress-https-nginx
   
-      - Traefik - https://docs.microsoft.com/en-us/azure/dev-spaces/how-to/ingress-https-traefik
+      - **Traefik** - https://docs.microsoft.com/en-us/azure/dev-spaces/how-to/ingress-https-traefik
 
-      - HAProxy - https://www.haproxy.com/documentation/kubernetes/latest/installation/ 
+      - **HAProxy** - https://www.haproxy.com/documentation/kubernetes/latest/installation/ 
 
-      - Application Gateway - https://azure.github.io/application-gateway-kubernetes-ingress/
+      - **Application Gateway** - https://azure.github.io/application-gateway-kubernetes-ingress/
 
         
 
@@ -583,7 +586,63 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
     - **Backend Pool** - Pointing to ***APIM Private Endpoint*** as created above
     - **Basic Rule** with *Http Settings*
     - **Health Probe** - use *Health Probe Endpoint* from APIM as created above
+    
+  - **Deploy Azure FrontDoor**  -
+
+    - Define FrontEnd Host
   
+    - Define Backend Pool
+  
+    - Define Routing Rules
+  
+    - **Update NSGs for *Application Gateway*** - <u>Critical Step</u>
+  
+      ```bash
+      Source: Service Tag
+      Source service tag: AzureFrontDoor.Backend
+      Source Port ranges: *
+      Destination: Any
+      Destination port ranges: *
+      Protocol: Any
+      Action: Allow
+      Priority: 100
+      
+      Source: Service Tag
+      Source service tag: GatewayManager
+      Source Port ranges: *
+      Destination: Any
+      Destination port ranges: 65200-65535
+      Protocol: Any
+      Action: Allow
+      Priority: 200
+      
+      Source: Service Tag
+      Source service tag: VirtualNetwork
+      Source Port ranges: *
+      Destination: Any
+      Destination port ranges: *
+      Protocol: Any
+      Action: Allow
+      Priority: 300
+      
+      Source: Service Tag
+      Source service tag: AzureLoadBalancer
+      Source Port ranges: *
+      Destination: Any
+      Destination port ranges: *
+      Protocol: Any
+      Action: Allow
+      Priority: 400
+      
+      Source: Any
+      Source Port ranges: *
+      Destination: Any
+      Destination port ranges: *
+      Protocol: Any
+      Action: Deny
+      Priority: 500
+      
+      ```
   
 
 ### Handover Phase
