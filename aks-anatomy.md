@@ -303,39 +303,37 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
 
          - Contains *Ingress* object as a sample
     - Install One *Ingress* object per NameSpace
-         - Define *Service Routes* as per requirements
-
+         
+       - Define *Service Routes* as per requirements
   
 
-  ### Execution
-
-  Infrastructure Architects would execute multiple scripts to -
-
-  - Setup the Infrastructure around AKS cluster
-
-  - Create the AKS cluster
-
-  - Hardening the cluster
-
-  - Finally handover the cluster to Developer Architects
-
-  - Scripts ideally can be anyone  of this -
-
-    - Bash scripts running Azure CLI commands
-
-    - Single ARM template to deploy all resources - *AKS cluster, ACR, Key Vault, Application Gateway* etc.
-
-      One drawback with this approach is that, it would be a single point of failure; the script might become very long and difficult to debug or manage
-
-    - PowerShell script as the deployment manager and deploying various ARM templates for creating/managing individual  resources viz. *ACR, Key Vault* etc.
-
-      This way the resource creation/updates become smaller chunk of ARM template files and with PowerShell any failure/error cane handled easily as well as subsequent changes to the deployment process
-
-      
-
-      **Note**: <u>*All scripts are part of this repo; inside the **./Deployments** folder. These can be used as-is or used as a reference also and build something custom and more specific to the customer environment*</u>
-
-    
+  
+### Execution
+  
+**Infrastructure Architects** would execute multiple scripts to -
+  
+- Setup the Infrastructure around AKS cluster
+  
+- Create the AKS cluster
+  
+- Hardening the cluster
+  
+- Finally handover the cluster to Developer Architects
+  
+- Scripts ideally can be anyone  of this -
+  
+  - Bash scripts running Azure CLI commands
+  
+  - Single ARM template to deploy all resources - *AKS cluster, ACR, Key Vault, Application Gateway* etc.
+  
+    One drawback with this approach is that, it would be a single point of failure; the script might become very long and difficult to debug or manage
+  
+  - PowerShell script as the deployment manager and deploying various ARM templates for creating/managing individual  resources viz. *ACR, Key Vault* etc.
+  
+    This way the resource creation/updates become smaller chunk of ARM template files and with PowerShell any failure/error cane handled easily as well as subsequent changes to the deployment process
+  
+  
+  
 
   ### Prerequisites
 
@@ -352,18 +350,18 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
     - **Docker** - 
 
       - Windows - https://docs.docker.com/docker-for-windows/install/
-      - Linux - https://runnable.com/docker/install-docker-on-linux
-
+    - Linux - https://runnable.com/docker/install-docker-on-linux
+  
     - **Kubectl** - 
 
       - Windows - https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-binary-with-curl-on-windows
-      - Linux - https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-linux
-
+    - Linux - https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl-on-linux
+  
     - **Azure CLI** -
 
       - Windows - https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli
-      - Linux - https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt#install
-
+    - Linux - https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt#install
+  
     - **Helm** -
 
       - Windows and Linux - https://helm.sh/docs/intro/install/
@@ -371,8 +369,8 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
     - **Git** - 
 
       - Windows - https://git-scm.com/download/win
-      - Linux - https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
-
+    - Linux - https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+  
     - **GitHub Desktop** (*Windows only*) -
 
       - Windows - https://desktop.github.com/
@@ -380,8 +378,8 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
     - **PowerShell Core** -
 
       - Windows and Linux - 
-        - https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.1
-
+      - https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.1
+  
     - **VS Code IDE** -
 
       - Windows - https://code.visualstudio.com/
@@ -391,7 +389,7 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
   - **Security Keys**
 
     - The scripts below would communicate with *Azure Resource Manager* before/after deploying individual resources; hence the script(s) has to be login to Azure either thru Azure CLI or PowerShell
-    - Since the script can be run from CLI, PowerShell Console Or through DevOps processes - suggested approach is to have a non-interactive login to Azure
+  - Since the script can be run from CLI, PowerShell Console Or through DevOps processes - suggested approach is to have a non-interactive login to Azure
     - This can be achieved using Service Principal with appropriate Access control; and the service principal should be also kept securely and used multiple times whenever needed
     - Similarly there would many such information that would shared across various PowerShell steps viz. *SubscriptionId*, *TenantId* and *ObjectId* os the user running the script(s) etc.
     - Also note that, the same scripts would be used across various environments - *DEV, QA, Staging* and *PROD*
@@ -404,7 +402,7 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
         - *Service Principal Id* - with super access to the *Subscription*, may be, Or anything suitable as per org policy
         - *Service Principal Secret*
       - Script(s) at runtime would refer to this *Master Key Vault* and use the info to *Login* to Azure
-
+  
   
 
   ### **Pre-Config Script**
@@ -418,19 +416,19 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
   - Deploy **HUB VNET** including following Subnets -
 
     - Subnet for *Firewall*
-    - Subnet for on-Prem *Gateway*
+  - Subnet for on-Prem *Gateway*
     - Subnet for *Bastion Host VM*
     - Subnet for *Application Gateway*
-
+  
   - Deploy **AKS+ VNET**  including following Subnets -
 
     - Subnet for *AKS*
-    - Subnet for *APIM*
-
+  - Subnet for *APIM*
+  
   - Deploy **Integration Services VNET** including following Subnets -
 
     - Subnet for providing Private endpoint for - 
-      - *ACR*
+    - *ACR*
       - *Azure Key Vault*
       - *Azure Storage* 
       - Azure Function
@@ -438,23 +436,23 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
       - Azure SQL
       - Azure Redis Cache
       - .....more
-
+  
     (**Note**: <u>*The VNET/Subnet deployment entirely requirement specific, depends on Customer's Infra constraints and many other parameters. Things described above are generic only*</u>)
 
   - Deploy **Azure Container Registry**
 
     - **SKU** - Premium
-    - **Admin Access**  - Disabled; all access to ACR would be through *ACR-SP*
+  - **Admin Access**  - Disabled; all access to ACR would be through *ACR-SP*
     - **Private Endpoint** - Disabled; to be enabled later post the entire process
-
+  
   - Deploy **Azure Key Vault** - this is different from *Master Key Vault*; used for AKS+ deployments only
 
     - **SKU** - Standard 
-    - **Access Control** - 
+  - **Access Control** - 
       - Only to the current Logged in user object
       - Least access - e.g. only to Secrets section; preventing access to Keys and Certificates section, if not needed
     - Add the Service Principals - *AKS-SP* and *ACR-SP* into the Key Vault; will be referred later
-
+  
   - Read all Certificates from needed, if any, in subsequent steps - viz. Certificate for *Application Gateway* which would be used at *Https Listener* and for *SSL Offloading*. The certificate data read securely can be saved in the Key Vault as a Secret along with its *Password*
 
   - *AKS-SP* Service Principal should be given Network Contributor access on the above *AKS+ VNET*
@@ -530,9 +528,9 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
       - **Azure Policy**
 
         1. Go to Azure Portal and Select Policy
-        2. Filter by Kubernetes keyword
+      2. Filter by Kubernetes keyword
         3. Add All relevant built-in policies on the cluster
-
+  
     
 
   ## Day-2 Activities
@@ -546,8 +544,8 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
       - NGINX / NGINX PLUS (*Production*) - 
 
         - https://www.nginx.com/products/nginx-ingress-controller/#:~:text=NGINX%20Ingress%20Controller%20provides%20a,apps%20securely%20and%20with%20agility
-        - https://docs.microsoft.com/en-us/azure/dev-spaces/how-to/ingress-https-nginx
-
+      - https://docs.microsoft.com/en-us/azure/dev-spaces/how-to/ingress-https-nginx
+  
       - Traefik - https://docs.microsoft.com/en-us/azure/dev-spaces/how-to/ingress-https-traefik
 
       - HAProxy - https://www.haproxy.com/documentation/kubernetes/latest/installation/ 
@@ -579,13 +577,13 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
   - **Deploy Application Gateway**  -
 
     - **SKU** - *WAF_V2* or *Standard_V2*
-    - **Public IP**
+  - **Public IP**
     - **Https Listener**
     - **SSL Offloading**
     - **Backend Pool** - Pointing to ***APIM Private Endpoint*** as created above
     - **Basic Rule** with *Http Settings*
     - **Health Probe** - use *Health Probe Endpoint* from APIM as created above
-
+  
   
 
 ### Handover Phase
@@ -637,6 +635,8 @@ This is to ensure a proper RBAC is implemented providing restricted access to va
     
 
 <u>This should mark the proper end to end implementation of an AKS cluster with *Automation, Hardening, DevOps*</u>
+
+**Note**: <u>*All scripts are part of this repo; inside the **./Deployments** folder. These can be used as-is or used as a reference also and build something custom and more specific to the customer environment*</u>
 
 
 
