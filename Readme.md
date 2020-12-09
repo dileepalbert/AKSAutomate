@@ -46,7 +46,7 @@ With this much ammunition, let us get into some action
 
 ## AKS Reference Architecture
 
-![](./Assets/AKS-Ref-Achitecture.png)
+![](./Assets/AKS-Ref-Achitecture-v2.1.png)
 
 Let us list down all the necessary components to be used as we move along:
 
