@@ -2,7 +2,7 @@
 
 
 
-![AKS-Ref-Achitecture-v2.1](./Assets/AKS-Ref-Achitecture-v2.1.png)
+![](./Assets/AKS-Ref-Achitecture-v2.1.png)
 
 
 
