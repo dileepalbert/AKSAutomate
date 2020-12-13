@@ -15,8 +15,6 @@ param([Parameter(Mandatory=$true)]    [string] $mode,
         [Parameter(Mandatory=$false)] [string] $nodePoolName = "aksjobspool",
         [Parameter(Mandatory=$false)] [string] $osType = "Linux")
 
-$configSuccessCommand =  "length(@)"
-
 $aksVnet = Get-AzVirtualNetwork -Name $aksVNetName `
 -ResourceGroupName $resourceGroup
 if (!$aksVnet)
@@ -42,22 +40,20 @@ if ($mode -eq "create")
     
     Write-Host "Adding Nodepool... $nodePoolName"
 
-    $result = az aks nodepool add --cluster-name $clusterName `
+    az aks nodepool add --cluster-name $clusterName `
     --resource-group $resourceGroup `
     --name $nodePoolName `
     --kubernetes-version $version `
     --max-pods $maxPods `
     --node-count $nodeCount `
     --node-vm-size $nodeVMSize `
-    --os-type $osType `
-    --query $configSuccessCommand
+    --os-type $osType
 
-    Write-Host "Result - $result"
-
-    if ($result -le 0)
+    $LASTEXITCODE
+    if (!$?)
     {
 
-        Write-Host "Error Creating Nodepool - $nodePoolName"
+        Write-Host "Error Adding Nodepool... $nodePoolName"
         return;
     
     }
@@ -68,17 +64,16 @@ elseif ($mode -eq "update")
 
     Write-Host "Updating Nodepool... $nodePoolName; Enabling Cluster AutoScaler"
     
-    $result = az aks nodepool update --cluster-name $clusterName `
+    az aks nodepool update --cluster-name $clusterName `
     --resource-group $resourceGroup --enable-cluster-autoscaler `
     --min-count $minNodeCount --max-count $maxNodeCount `
-    --name $nodePoolName --query $configSuccessCommand
+    --name $nodePoolName
 
-    Write-Host "Result - $result"
-
-    if ($result -le 0)
+    $LASTEXITCODE
+    if (!$?)
     {
 
-        Write-Host "Error Updating Nodepool - $nodePoolName"
+        Write-Host "Error Updating Nodepool... $nodePoolName"
         return;
     
     }
@@ -89,17 +84,15 @@ elseif ($mode -eq "scale")
 
     Write-Host "Scaling Nodepool... $nodePoolName"
 
-    $result = az aks nodepool scale --cluster-name $clusterName `
+    az aks nodepool scale --cluster-name $clusterName `
     --resource-group $resourceGroup --node-count $nodeCount `
-    --name $nodePoolName `
-    --query $configSuccessCommand
+    --name $nodePoolName
 
-    Write-Host "Result - $result"
-
-    if ($result -le 0)
+    $LASTEXITCODE
+    if (!$?)
     {
 
-        Write-Host "Error Scaling Nodepool - $nodePoolName"
+        Write-Host "Error Scaling Nodepool... $nodePoolName"
         return;
     
     }
@@ -112,6 +105,15 @@ elseif ($mode -eq "delete")
 
     az aks nodepool delete --cluster-name $clusterName `
     --resource-group $resourceGroup --name $nodePoolName
+
+    $LASTEXITCODE
+    if (!$?)
+    {
+
+        Write-Host "Error Deleting Nodepool... $nodePoolName"
+        return;
+    
+    }
     
 }
 

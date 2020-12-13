@@ -1,9 +1,11 @@
-param([Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",        
+param([Parameter(Mandatory=$false)]   [string] $resourceGroup = "aks-workshop-rg",        
         [Parameter(Mandatory=$false)] [string] $projectName = "aks-workshop",
         [Parameter(Mandatory=$false)] [string] $location = "eastus",
         [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
         [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
         [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
+        [Parameter(Mandatory=$false)] [string] $aksSPName = "aks-workshop-sp",
+        [Parameter(Mandatory=$false)] [string] $acrSPName = "aks-workshop-acr-sp",
         [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
         [Parameter(Mandatory=$false)] [string] $aksVNetPrefix = "173.0.0.0/16",        
         [Parameter(Mandatory=$false)] [string] $aksSubnetName = "aks-workshop-subnet",
@@ -16,11 +18,13 @@ param([Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
         [Parameter(Mandatory=$false)] [string] $networkTemplateFileName = "aksauto-network-deploy",
         [Parameter(Mandatory=$false)] [string] $acrTemplateFileName = "aksauto-acr-deploy",
         [Parameter(Mandatory=$false)] [string] $kvTemplateFileName = "aksauto-keyvault-deploy",        
-        [Parameter(Mandatory=$false)] [string] $subscriptionId = "<subscriptionId>",
-        [Parameter(Mandatory=$false)] [string] $objectId = "<objectId>",
-        [Parameter(Mandatory=$false)] [string] $baseFolderPath = "<baseFolderPath>") # on devops machine
+        [Parameter(Mandatory=$true)]  [string] $subscriptionId = "<subscriptionId>",
+        [Parameter(Mandatory=$true)]  [string] $objectId = "<objectId>",
+        [Parameter(Mandatory=$true)]  [string] $baseFolderPath = "<baseFolderPath>") # As per host devops machine
 
 $vnetRole = "Network Contributor"
+$aksSPRole = "Contributor"
+$acrSPRole = "acrpush"
 $aksSPIdName = $clusterName + "-sp-id"
 $aksSPSecretName = $clusterName + "-sp-secret"
 $acrSPIdName = $acrName + "-sp-id"
@@ -45,6 +49,13 @@ Select-AzSubscription -SubscriptionId $subscriptionId
 $subscriptionCommand = "az account set -s $subscriptionId"
 Invoke-Expression -Command $subscriptionCommand
 
+$subscription = Get-AzSubscription -SubscriptionId $subscriptionId
+if (!$subscription)
+{
+    Write-Host "Error fetching Subscription information"
+    return;
+}
+
 $rgRef = Get-AzResourceGroup -Name $resourceGroup -Location $location
 if (!$rgRef)
 {
@@ -57,32 +68,6 @@ if (!$rgRef)
    }
 
 }
-
-$aksSP = New-AzADServicePrincipal -SkipAssignment
-if (!$aksSP)
-{
-
-    Write-Host "Error creating Service Principal for AKS"
-    return;
-
-}
-
-Write-Host $aksSP.DisplayName
-Write-Host $aksSP.Id
-Write-Host $aksSP.ApplicationId
-
-$acrSP = New-AzADServicePrincipal -SkipAssignment
-if (!$acrSP)
-{
-
-    Write-Host "Error creating Service Principal for ACR"
-    return;
-
-}
-
-Write-Host $acrSP.DisplayName
-Write-Host $acrSP.Id
-Write-Host $acrSP.ApplicationId
 
 $networkDeployPath = $templatesFolderPath + $networkDeployCommand
 Invoke-Expression -Command $networkDeployPath
@@ -99,21 +84,70 @@ Invoke-Expression -Command $keyVaultDeployPath
 # $certContentsSecure = ConvertTo-SecureString -String $certContents -AsPlainText -Force
 # Write-Host $certPFXFilePath
 
-$aksSPObjectId = ConvertTo-SecureString -String $aksSP.ApplicationId `
--AsPlainText -Force
-Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $aksSPIdName `
--SecretValue $aksSPObjectId
+$aksSP = Get-AzADServicePrincipal -DisplayName $aksSPName
+if (!$aksSP)
+{
+    $aksSP = New-AzADServicePrincipal -SkipAssignment `
+    -Role $aksSPRole -DisplayName $aksSPName `
+    -Scope $subscription.Id
+    if (!$aksSP)
+    {
 
-Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $aksSPSecretName `
--SecretValue $aksSP.Secret
+        Write-Host "Error creating Service Principal for AKS"
+        return;
 
-$acrSPObjectId = ConvertTo-SecureString -String $acrSP.ApplicationId `
--AsPlainText -Force
-Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $acrSPIdName `
--SecretValue $acrSPObjectId
+    }
 
-Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $acrSPSecretName `
--SecretValue $acrSP.Secret
+    Write-Host $aksSPName
+
+    $aksSPObjectId = ConvertTo-SecureString -String $aksSP.ApplicationId `
+    -AsPlainText -Force
+    Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $aksSPIdName `
+    -SecretValue $aksSPObjectId
+
+    Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $aksSPSecretName `
+    -SecretValue $aksSP.Secret
+
+}
+
+$acrSP = Get-AzADServicePrincipal -DisplayName $acrSPName
+if (!$acrSP)
+{
+ 
+    $acrInfo = Get-AzContainerRegistry -Name $acrName `
+    -ResourceGroupName $resourceGroup
+    if (!$acrInfo)
+    {
+
+        Write-Host "Error fetching ACR information"
+        return;
+
+    }
+
+    Write-Host $acrInfo.Id
+
+    $acrSP = New-AzADServicePrincipal -SkipAssignment `
+    -Role $acrSPRole -DisplayName $acrSPName `
+    -Scope $acrInfo.ApplicationId
+    if (!$acrSP)
+    {
+
+        Write-Host "Error creating Service Principal for ACR"
+        return;
+
+    }
+
+    Write-Host $acrSPName
+    
+    $acrSPObjectId = ConvertTo-SecureString -String $acrSP.ApplicationId `
+    -AsPlainText -Force
+    Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $acrSPIdName `
+    -SecretValue $acrSPObjectId
+
+    Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $acrSPSecretName `
+    -SecretValue $acrSP.Secret
+    
+}
 
 # Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $certSecretName `
 # -SecretValue $certContentsSecure
@@ -124,17 +158,6 @@ if ($aksVnet)
 
     New-AzRoleAssignment -ApplicationId $aksSP.ApplicationId `
     -Scope $aksVnet.Id -RoleDefinitionName $vnetRole
-
-}
-
-$acrInfo = Get-AzContainerRegistry -Name $acrName `
--ResourceGroupName $resourceGroup
-if ($acrInfo)
-{
-
-    Write-Host $acrInfo.Id
-    New-AzRoleAssignment -ApplicationId $acrSP.ApplicationId `
-    -Scope $acrInfo.Id -RoleDefinitionName acrpush
 
 }
 

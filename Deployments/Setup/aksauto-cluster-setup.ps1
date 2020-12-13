@@ -24,7 +24,6 @@ param([Parameter(Mandatory=$true)]    [string] $mode,
 
 $aksSPIdName = $clusterName + "-sp-id"
 $aksSPSecretName = $clusterName + "-sp-secret"
-$configSuccessCommand =  "length(@)"
 
 $keyVault = Get-AzKeyVault -ResourceGroupName $resourceGroup -VaultName $keyVaultName
 if (!$keyVault)
@@ -78,7 +77,7 @@ if ($mode -eq "create")
 
     Write-Host "Creating Cluster... $clusterName"
 
-    $result = az aks create --name $clusterName `
+    az aks create --name $clusterName `
     --resource-group $resourceGroup `
     --kubernetes-version $version --location $location `
     --vnet-subnet-id $aksSubnet.Id --enable-addons $addons `
@@ -95,13 +94,10 @@ if ($mode -eq "create")
     --aad-admin-group-object-ids $aadAdminGroupIDs `
     --aad-tenant-id $aadTenantID `
     --attach-acr $acrName `
-    --query $configSuccessCommand
+    --enable-private-cluster
 
-    # --enable-private-cluster `
-
-    Write-Host "Result - $result"
-
-    if ($result -le 0)
+    $LASTEXITCODE
+    if (!$?)
     {
 
         Write-Host "Error Creating AKS Cluster - $clusterName"
@@ -121,6 +117,15 @@ elseif ($mode -eq "aad")
     --aad-server-app-secret $aadServerAppSecret `
     --aad-client-app-id $aadClientAppID `
     --aad-tenant-id $aadTenantID
+
+    $LASTEXITCODE
+    if (!$?)
+    {
+
+        Write-Host "Error Updating AAD for AKS Cluster - $clusterName"
+        return;
+    
+    }
     
 }
 elseif ($mode -eq "sp")
@@ -128,11 +133,20 @@ elseif ($mode -eq "sp")
 
     Write-Host "Updating Service Principal for the Cluster... $clusterName"
 
-    $result = az aks update-credentials --name $clusterName `
+    az aks update-credentials --name $clusterName `
     --resource-group $resourceGroup --reset-service-principal `
     --aad-server-app-id $aadServerAppID `
     --service-principal $spAppId.SecretValueText `
     --client-secret $spPassword.SecretValueText
+
+    $LASTEXITCODE
+    if (!$?)
+    {
+
+        Write-Host "Error Updating Service Principal for AKS Cluster - $clusterName"
+        return;
+    
+    }
     
 }
 elseif ($mode -eq "vn")
@@ -140,10 +154,19 @@ elseif ($mode -eq "vn")
 
     Write-Host "Enable Virtual Node addon for the Cluster... $clusterName"
 
-    $result = az aks enable-addons --name $clusterName `
+    az aks enable-addons --name $clusterName `
     --resource-group $resourceGroup `
     --addons virtual-node `
     --subnet-name $vrnSubnetName
+
+    $LASTEXITCODE
+    if (!$?)
+    {
+
+        Write-Host "Error Enabling Virtual Node for AKS Cluster - $clusterName"
+        return;
+    
+    }
     
 }
 
