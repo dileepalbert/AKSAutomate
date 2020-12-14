@@ -110,19 +110,19 @@ if (!$aksSP)
 
 }
 
+$acrInfo = Get-AzContainerRegistry -Name $acrName `
+-ResourceGroupName $resourceGroup
+if (!$acrInfo)
+{
+
+    Write-Host "Error fetching ACR information"
+    return;
+
+}
+
 $acrSP = Get-AzADServicePrincipal -DisplayName $acrSPName
 if (!$acrSP)
 {
- 
-    $acrInfo = Get-AzContainerRegistry -Name $acrName `
-    -ResourceGroupName $resourceGroup
-    if (!$acrInfo)
-    {
-
-        Write-Host "Error fetching ACR information"
-        return;
-
-    }
 
     Write-Host $acrInfo.Id
 
@@ -160,5 +160,8 @@ if ($aksVnet)
     -Scope $aksVnet.Id -RoleDefinitionName $vnetRole
 
 }
+
+New-AzRoleAssignment -ApplicationId $acrSP.ApplicationId `
+-RoleDefinitionName $acrSPRole -Scope $acrInfo.Id
 
 Write-Host "------Pre-Config------"
