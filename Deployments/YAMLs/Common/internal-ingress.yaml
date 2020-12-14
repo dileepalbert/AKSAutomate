@@ -1,5 +1,12 @@
 controller:
+  replicaCount: 2
+  nodeSelector: 
+   beta.kubernetes.io/os: linux
+  defaultBackend:
+    nodeSelector:
+      beta.kubernetes.io/os: linux
   service:
     loadBalancerIP: 173.0.0.255 #private IP
     annotations:
       service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+
