@@ -111,11 +111,9 @@ elseif ($mode -eq "aad")
 
     Write-Host "Updating AAD Credentials for the Cluster... $clusterName"
 
-    az aks update-credentials --name $clusterName `
-    --resource-group $resourceGroup --reset-aad `
-    --aad-server-app-id $aadServerAppID `
-    --aad-server-app-secret $aadServerAppSecret `
-    --aad-client-app-id $aadClientAppID `
+    az aks update --name $clusterName `
+    --resource-group $resourceGroup `
+    --aad-admin-group-object-ids $aadAdminGroupIDs `
     --aad-tenant-id $aadTenantID
 
     $LASTEXITCODE
@@ -135,7 +133,6 @@ elseif ($mode -eq "sp")
 
     az aks update-credentials --name $clusterName `
     --resource-group $resourceGroup --reset-service-principal `
-    --aad-server-app-id $aadServerAppID `
     --service-principal $spAppId.SecretValueText `
     --client-secret $spPassword.SecretValueText
 
