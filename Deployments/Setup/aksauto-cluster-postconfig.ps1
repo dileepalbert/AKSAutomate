@@ -38,7 +38,7 @@ $nginxNSCommand = "kubectl create namespace $ingControllerNSName"
 Invoke-Expression -Command $nginxNSCommand
 
 # Install nginx as ILB using Helm
-$nginxRepoUpdateCommand = "helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx"
+$nginxRepoUpdateCommand = "helm repo add ingress-nginx-stable https://charts.helm.sh/stable"
 Invoke-Expression -Command $nginxRepoUpdateCommand
 $nginxILBCommand = "helm install $ingControllerName ingress-nginx/ingress-nginx  --namespace $ingControllerNSName -f $yamlFilePath/Common/$ingControllerFileName.yaml --set controller.replicaCount=2 --set nodeSelector.'beta.kubernetes.io/os'=linux --set defaultBackend.nodeSelector.'beta\.kubernetes\.io/os'=linux"
 Invoke-Expression -Command $nginxILBCommand
