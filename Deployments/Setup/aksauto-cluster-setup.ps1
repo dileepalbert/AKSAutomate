@@ -18,8 +18,8 @@ param([Parameter(Mandatory=$true)]    [string] $mode,
         [Parameter(Mandatory=$false)] [string] $nodePoolName = "akslnxpool",
         [Parameter(Mandatory=$false)] [string] $winNodeUserName = "azureuser",
         [Parameter(Mandatory=$false)] [string] $winNodePassword = "PassW0rd@12345",        
-        [Parameter(Mandatory=$false)] [array]  $aadAdminGroupIDs = @("6ec3a0a8-a6c6-4cdf-a6e3-c296407a5ec1"),
-        [Parameter(Mandatory=$false)] [string] $aadTenantID = "3851f269-b22b-4de6-97d6-aa9fe60fe301")
+        [Parameter(Mandatory=$true)]  [array]  $aadAdminGroupIDs = @("<aadAdminGroupID>"),
+        [Parameter(Mandatory=$true)]  [string] $aadTenantID = "<aadTenantID>")
 
 
 $aksSPIdName = $clusterName + "-sp-id"
