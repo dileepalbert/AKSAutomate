@@ -41,7 +41,7 @@ Invoke-Expression -Command $nginxNSCommand
 $nginxRepoAddCommand = "helm repo add stable https://charts.helm.sh/stable"
 Invoke-Expression -Command $nginxRepoAddCommand
 
-$nginxRepoUpdateCommand = "helm repo add update"
+$nginxRepoUpdateCommand = "helm repo update"
 Invoke-Expression -Command $nginxRepoUpdateCommand
 
 $nginxILBCommand = "helm install $ingControllerName stable/ingress-nginx  --namespace $ingControllerNSName -f $yamlFilePath/Common/$ingControllerFileName.yaml --set controller.replicaCount=2 --set nodeSelector.'beta.kubernetes.io/os'=linux --set defaultBackend.nodeSelector.'beta\.kubernetes\.io/os'=linux"
