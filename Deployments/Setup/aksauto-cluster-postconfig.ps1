@@ -23,6 +23,8 @@ $ingControllerFileName = "internal-ingress"
 $kbctlContextCommand = "az aks get-credentials --resource-group $resourceGroup --name $clusterName --overwrite-existing --admin"
 Invoke-Expression -Command $kbctlContextCommand
 
+Write-Host $yamlFilePath
+
 # Configure ILB file
 $ipReplaceCommand = "sed -e 's|<ILB_IP>|$ingControllerIPAddress|' $yamlFilePath/Common/$ingControllerFileName.yaml > $yamlFilePath/Common/tmp.$ingControllerFileName.yaml"
 Invoke-Expression -Command $ipReplaceCommand
