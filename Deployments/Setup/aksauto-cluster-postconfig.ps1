@@ -40,14 +40,14 @@ $nginxNSCommand = "kubectl create namespace $ingControllerNSName"
 Invoke-Expression -Command $nginxNSCommand
 
 # Install nginx as ILB using Helm
-$nginxRepoAddCommand = "helm repo add bitnami https://charts.bitnami.com/bitnami"
+$nginxRepoAddCommand = "helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx"
 Invoke-Expression -Command $nginxRepoAddCommand
 
 $nginxRepoUpdateCommand = "helm repo update"
 Invoke-Expression -Command $nginxRepoUpdateCommand
 
 # $nginxILBCommand = "helm install $ingControllerName bitnami/nginx-ingress-controller --namespace $ingControllerNSName -f $yamlFilePath/Common/$ingControllerFileName.yaml --set controller.replicaCount=2 --set nodeSelector.'beta.kubernetes.io/os'=linux --set defaultBackend.nodeSelector.'beta\.kubernetes\.io/os'=linux"
-$nginxILBCommand = "helm install $ingControllerName bitnami/nginx-ingress-controller --namespace $ingControllerNSName -f $yamlFilePath/Common/$ingControllerFileName.yaml"
+$nginxILBCommand = "helm install $ingControllerName ingress-nginx --namespace $ingControllerNSName -f $yamlFilePath/Common/$ingControllerFileName.yaml"
 Invoke-Expression -Command $nginxILBCommand
 
 # Install AppGW
