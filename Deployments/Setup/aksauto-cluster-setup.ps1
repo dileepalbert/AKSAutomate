@@ -1,7 +1,7 @@
 param([Parameter(Mandatory=$true)]    [string] $mode,        
-        [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
+        [Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
         [Parameter(Mandatory=$false)] [string] $location = "eastus",
-        [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
+        [Parameter(Mandatory=$true)]  [string] $clusterName = "aks-workshop-cluster",
         [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
         [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
         [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
@@ -18,8 +18,8 @@ param([Parameter(Mandatory=$true)]    [string] $mode,
         [Parameter(Mandatory=$false)] [string] $nodePoolName = "akslnxpool",
         [Parameter(Mandatory=$false)] [string] $winNodeUserName = "azureuser",
         [Parameter(Mandatory=$false)] [string] $winNodePassword = "PassW0rd@12345",        
-        [Parameter(Mandatory=$true)]  [array]  $aadAdminGroupIDs = @("<aadAdminGroupID>"),
-        [Parameter(Mandatory=$true)]  [string] $aadTenantID = "<aadTenantID>")
+        [Parameter(Mandatory=$false)] [array]  $aadAdminGroupIDs = @("<aadAdminGroupID>"),
+        [Parameter(Mandatory=$false)] [string] $aadTenantID = "<aadTenantID>")
 
 
 $aksSPIdName = $clusterName + "-sp-id"
