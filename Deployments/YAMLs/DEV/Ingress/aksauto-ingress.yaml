@@ -28,3 +28,4 @@ spec:
         backend:
           serviceName: iotmqttsender-service
           servicePort: 80
+          
