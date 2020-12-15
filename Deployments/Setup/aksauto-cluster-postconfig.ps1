@@ -43,6 +43,7 @@ Invoke-Expression -Command $nginxNSCommand
 $nginxRepoAddCommand = "helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx"
 Invoke-Expression -Command $nginxRepoAddCommand
 
+
 $nginxRepoUpdateCommand = "helm repo update"
 Invoke-Expression -Command $nginxRepoUpdateCommand
 
