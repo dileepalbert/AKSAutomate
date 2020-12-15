@@ -22,3 +22,6 @@ subjects:
 - apiGroup: rbac.authorization.k8s.io
   name: 1d17d21a-86c1-48be-b09d-7398c13a85c0
   kind: Group
+# - apiGroup: rbac.authorization.k8s.io
+#   name: <user_id>
+#   kind: User
