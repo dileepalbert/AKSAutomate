@@ -24,7 +24,7 @@ spec:
         backend:
           serviceName: ratingsapi-service
           servicePort: 80
-      - path: /iot/?(.*)
-        backend:
-          serviceName: iotmqttsender-service
-          servicePort: 80      
+      # - path: /iot/?(.*)
+      #   backend:
+      #     serviceName: iotmqttsender-service
+      #     servicePort: 80      
