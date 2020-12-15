@@ -27,8 +27,4 @@ spec:
       - path: /iot/?(.*)
         backend:
           serviceName: iotmqttsender-service
-          servicePort: 80
-      - path: /apiproxy/?(.*)
-        backend:
-          serviceName: api-proxy-svc
-          servicePort: 80
+          servicePort: 80      
