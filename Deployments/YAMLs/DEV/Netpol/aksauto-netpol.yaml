@@ -10,14 +10,14 @@ spec:
   policyTypes:
   - Ingress
   ingress:
-  - {}
-  # - ports:
-  #   - protocol: TCP
-  #     port: 3000
-  #   from:
-  #     - namespaceSelector:
-  #         matchLabels:
-  #           name: aks-workshop-dev
-  #     - podSelector:
-  #         matchLabels:
-  #           app: ratingsweb-pod
+  # - {}
+  - ports:
+    - protocol: TCP
+      port: 3000
+    from:
+      - namespaceSelector:
+          matchLabels:
+            name: aks-workshop-dev
+      - podSelector:
+          matchLabels:
+            app: ratingsweb-pod
