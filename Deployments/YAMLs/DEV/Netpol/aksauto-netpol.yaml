@@ -10,7 +10,6 @@ spec:
   policyTypes:
   - Ingress
   ingress:
-  # - {}
   - ports:
     - protocol: TCP
       port: 3000
