@@ -10,3 +10,4 @@ subjects:
 - apiGroup: rbac.authorization.k8s.io
   name: 6ec3a0a8-a6c6-4cdf-a6e3-c296407a5ec1
   kind: Group
+  
