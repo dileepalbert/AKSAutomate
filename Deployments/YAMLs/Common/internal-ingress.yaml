@@ -1,5 +1,7 @@
 controller:
   replicaCount: 2
+  metrics:
+    enabled: "true"
   nodeSelector: 
    beta.kubernetes.io/os: linux
   defaultBackend:
