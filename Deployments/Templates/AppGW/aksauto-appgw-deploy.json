@@ -76,7 +76,8 @@
       "appGwRuleName":"[concat(parameters('applicationGatewayName'), '-rule')]",
       "appGwProbeName":"[concat(parameters('applicationGatewayName'), '-health-probe')]",
       "subnetRef":"[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",      
-      "appGwPublicIPRef":"[resourceId('Microsoft.Network/publicIPAddresses', variables('appGwPublicIpName'))]",      
+      "appGwPublicIPRef":"[resourceId('Microsoft.Network/publicIPAddresses', variables('appGwPublicIpName'))]",
+      "appGwProbeRef":"[concat(variables('applicationGatewayID'), '/probes/', variables('appGwProbeName'))]",      
       "appGwSize":"[parameters('skuName')]",
       "appGwTier":"[parameters('skuName')]"      
    },
@@ -148,6 +149,7 @@
             "probes": [
                {
                   "name": "[variables('appGwProbeName')]",
+                  "id": "[variables('appGwProbeRef')]",
                   "properties": {
                      "protocol": "http",                     
                      "path": "/",
@@ -178,7 +180,7 @@
                      "CookieBasedAffinity":"[parameters('cookieBasedAffinity')]",
                      "probe":
                      {
-                        "id": "[variables('appGwProbeName')]"
+                        "id": "[variables('appGwProbeRef')]"
                      }
                   }
                }
