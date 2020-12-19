@@ -148,8 +148,7 @@
             ],
             "probes": [
                {
-                  "name": "[variables('appGwProbeName')]",
-                  "id": "[variables('appGwProbeRef')]",
+                  "name": "[variables('appGwProbeName')]",                  
                   "properties": {
                      "protocol": "http",                     
                      "path": "/",
