@@ -177,6 +177,8 @@
                      "Port":"[parameters('backendPort')]",
                      "Protocol":"Http",
                      "CookieBasedAffinity":"[parameters('cookieBasedAffinity')]",
+                     "hostName": "ingress-dev.wkshpdev.com",
+                     "probeEnabled": true,
                      "probe":
                      {
                         "id": "[variables('appGwProbeRef')]"
