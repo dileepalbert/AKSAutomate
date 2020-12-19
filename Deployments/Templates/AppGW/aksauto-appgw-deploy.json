@@ -74,6 +74,7 @@
       "appGwPublicIpName":"[concat(parameters('applicationGatewayName'), '-pip')]",
       // "appGwSSLCertName":"[concat(parameters('applicationGatewayName'), '-ssl-cert')]",
       "appGwRuleName":"[concat(parameters('applicationGatewayName'), '-rule')]",
+      "appGwProbeName":"[concat(parameters('applicationGatewayName'), '-health-probe')]",
       "subnetRef":"[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",      
       "appGwPublicIPRef":"[resourceId('Microsoft.Network/publicIPAddresses', variables('appGwPublicIpName'))]",      
       "appGwSize":"[parameters('skuName')]",
@@ -144,6 +145,20 @@
                   }
                }
             ],
+            "probes": [
+               {
+                  "name": "[variables('appGwProbeName')]",
+                  "properties": {
+                     "protocol": "http",                     
+                     "path": "/",
+                     "interval": 30,
+                     "timeout": 30,
+                     "unhealthyThreshold": 3,
+                     "pickHostNameFromBackendHttpSettings": true,                     
+                     "port": "80"
+                  }
+               }
+            ],
             "backendAddressPools":[
                {
                   "name":"[variables('appGwBackendPoolName')]",
@@ -160,7 +175,11 @@
                   "properties":{
                      "Port":"[parameters('backendPort')]",
                      "Protocol":"Http",
-                     "CookieBasedAffinity":"[parameters('cookieBasedAffinity')]"
+                     "CookieBasedAffinity":"[parameters('cookieBasedAffinity')]",
+                     "probe":
+                     {
+                        "id": "[variables('appGwProbeName')]"
+                     }
                   }
                }
             ],
