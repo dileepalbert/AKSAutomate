@@ -11,10 +11,10 @@ metadata:
 spec:
   # tls:
   # - hosts:
-  #   - ingress.wkshpdev.com
+  #   - ingress-dev.wkshpdev.com
   #   secretName: aks-workshop-tls-secret  
   rules:
-  - host: ingress.wkshpdev.com
+  - host: ingress-dev.wkshpdev.com
     http:
       paths:
       - path: /?(.*)
