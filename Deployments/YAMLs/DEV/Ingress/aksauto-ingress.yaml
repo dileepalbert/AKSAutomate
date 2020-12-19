@@ -14,7 +14,9 @@ spec:
   #   - ingress.wkshpdev.com
   #   secretName: aks-workshop-tls-secret  
   rules:
-  - http:
+  - hosts:
+    - ingress.wkshpdev.com
+    http:
       paths:
       - path: /?(.*)
         backend:
