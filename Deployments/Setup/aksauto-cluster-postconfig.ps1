@@ -53,7 +53,7 @@ Invoke-Expression -Command $nginxILBCommand
 
 # Install AppGW
 $networkNames = "-appgwName $appgwName -vnetName $aksVNetName -subnetName $appgwSubnetName"
-$appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName -backendIPAddress $ingControllerIPAddress -ingressHostName $ingressHostName $networkNames"
+$appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName -backendIPAddress $ingControllerIPAddress -hostName $ingressHostName $networkNames"
 $appgwDeployPath = $templatesFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
 
