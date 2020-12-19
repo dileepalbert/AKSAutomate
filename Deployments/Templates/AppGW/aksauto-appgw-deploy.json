@@ -51,6 +51,9 @@
       "location":{
          "type":"string",
          "defaultValue":"[resourceGroup().location]"
+      },
+      "hostName":{
+         "type":"string"         
       }
       // ,                
       // "certData":{
@@ -156,7 +159,7 @@
                      "timeout": 30,
                      "unhealthyThreshold": 3,
                      "pickHostNameFromBackendHttpSettings": true,                     
-                     "port": "80"
+                     "port": 80
                   }
                }
             ],
@@ -177,7 +180,7 @@
                      "Port":"[parameters('backendPort')]",
                      "Protocol":"Http",
                      "CookieBasedAffinity":"[parameters('cookieBasedAffinity')]",
-                     "hostName": "ingress-dev.wkshpdev.com",
+                     "hostName": "[parameters('hostName')]",
                      "probeEnabled": true,
                      "probe":
                      {
