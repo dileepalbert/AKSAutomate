@@ -11,7 +11,7 @@ controller:
     nodeSelector:
       beta.kubernetes.io/os: linux
   service:
-    loadBalancerIP: <ILB_IP> #private IP
+    loadBalancerIP: 173.0.0.200 #private IP
     annotations:
       service.beta.kubernetes.io/azure-load-balancer-internal: "true"
 
