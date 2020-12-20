@@ -6,8 +6,7 @@ controller:
   metrics:
     enabled: "true"
   nodeSelector: 
-   beta.kubernetes.io/os: linux
-   agentpool: akswkpool
+   beta.kubernetes.io/os: linux   
   defaultBackend:
     nodeSelector:
       beta.kubernetes.io/os: linux
