@@ -7,8 +7,7 @@ controller:
     enabled: "true"
   nodeSelector: 
    beta.kubernetes.io/os: linux
-   agentpool:
-    name: akswkpool
+   agentpool: akswkpool
   defaultBackend:
     nodeSelector:
       beta.kubernetes.io/os: linux
