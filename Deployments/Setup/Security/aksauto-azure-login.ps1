@@ -2,8 +2,7 @@ param([Parameter(Mandatory=$true)]    [string]  $userName,
         [Parameter(Mandatory=$true)]  [string]  $password,
         [Parameter(Mandatory=$true)]  [string]  $resourceGroup,
         [Parameter(Mandatory=$true)]  [string]  $clusterName,
-        [Parameter(Mandatory=$true)]  [string]  $tenantId,
-        [Parameter(Mandatory=$true)]  [bool]    $shouldConnectCluster = $true)
+        [Parameter(Mandatory=$true)]  [string]  $tenantId)
 
 
 $securedPassword = ConvertTo-SecureString $password -AsPlainText -Force
@@ -14,9 +13,5 @@ Connect-AzAccount -Credential $spCreds -TenantId $tenantId -ServicePrincipal
 $loginCommand = "az login --service-principal -u $userName -p $password --tenant $tenantId"
 Invoke-Expression $loginCommand
 
-if ($shouldConnectCluster -eq $true)
-{
-        $kbctlContextCommand = "az aks get-credentials --resource-group $resourceGroup --name $clusterName --overwrite-existing --admin"
-        Invoke-Expression -Command $kbctlContextCommand
-}
-
+$kbctlContextCommand = "az aks get-credentials --resource-group $resourceGroup --name $clusterName --overwrite-existing --admin"
+Invoke-Expression -Command $kbctlContextCommand
