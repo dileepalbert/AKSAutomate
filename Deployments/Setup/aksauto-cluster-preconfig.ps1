@@ -42,19 +42,19 @@ $networkDeployCommand = "/Network/$networkTemplateFileName.ps1 -rg $resourceGrou
 $acrDeployCommand = "/ACR/$acrTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $acrTemplateFileName -acrName $acrName"
 $keyVaultDeployCommand = "/KeyVault/$kvTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $kvTemplateFileName -keyVaultName $keyVaultName -objectId $objectId"
 
-# PS Select Subscriotion 
-Select-AzSubscription -SubscriptionId $subscriptionId
-
-# CLI Select Subscriotion 
-$subscriptionCommand = "az account set -s $subscriptionId"
-Invoke-Expression -Command $subscriptionCommand
-
 $subscription = Get-AzSubscription -SubscriptionId $subscriptionId
 if (!$subscription)
 {
     Write-Host "Error fetching Subscription information"
     return;
 }
+
+# PS Select Subscriotion 
+Select-AzSubscription -SubscriptionId $subscriptionId
+
+# CLI Select Subscriotion 
+$subscriptionCommand = "az account set -s $subscriptionId"
+Invoke-Expression -Command $subscriptionCommand
 
 $rgRef = Get-AzResourceGroup -Name $resourceGroup -Location $location
 if (!$rgRef)
