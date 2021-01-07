@@ -3,9 +3,7 @@ param([Parameter(Mandatory=$false)]   [string] $resourceGroup = "aks-workshop-rg
         [Parameter(Mandatory=$false)] [string] $location = "eastus",
         [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
         [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
-        [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
-        [Parameter(Mandatory=$false)] [string] $aksSPName = "aks-workshop-sp",
-        [Parameter(Mandatory=$false)] [string] $acrSPName = "aks-workshop-acr-sp",
+        [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",        
         [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
         [Parameter(Mandatory=$false)] [string] $aksVNetPrefix = "173.0.0.0/16",        
         [Parameter(Mandatory=$false)] [string] $aksSubnetName = "aks-workshop-subnet",
@@ -23,10 +21,11 @@ param([Parameter(Mandatory=$false)]   [string] $resourceGroup = "aks-workshop-rg
         [Parameter(Mandatory=$true)]  [string] $baseFolderPath = "<baseFolderPath>") # As per host devops machine
 
 $vnetRole = "Network Contributor"
-$aksSPRole = "Contributor"
 $acrSPRole = "acrpush"
+$aksSPDisplayName = $clusterName + "-sp"
 $aksSPIdName = $clusterName + "-sp-id"
 $aksSPSecretName = $clusterName + "-sp-secret"
+$acrSPDisplayName = $clusterName + "-acr-sp"
 $acrSPIdName = $acrName + "-sp-id"
 $acrSPSecretName = $acrName + "-sp-secret"
 $templatesFolderPath = $baseFolderPath + "/Templates"
@@ -84,12 +83,20 @@ Invoke-Expression -Command $keyVaultDeployPath
 # $certContentsSecure = ConvertTo-SecureString -String $certContents -AsPlainText -Force
 # Write-Host $certPFXFilePath
 
-$aksSP = Get-AzADServicePrincipal -DisplayName $aksSPName
+$aksVnet = Get-AzVirtualNetwork -Name $aksVNetName -ResourceGroupName $resourceGroup
+if (!$aksVnet)
+{
+
+    Write-Host "Error fetching VNET information"
+    return;
+
+}
+
+$aksSP = Get-AzADServicePrincipal -DisplayName $aksSPDisplayName
 if (!$aksSP)
 {
     $aksSP = New-AzADServicePrincipal -SkipAssignment `
-    -Role $aksSPRole -DisplayName $aksSPName `
-    -Scope $subscription.Id
+    -DisplayName $aksSPDisplayName
     if (!$aksSP)
     {
 
@@ -98,7 +105,7 @@ if (!$aksSP)
 
     }
 
-    Write-Host $aksSPName
+    Write-Host $aksSPDisplayName
 
     $aksSPObjectId = ConvertTo-SecureString -String $aksSP.ApplicationId `
     -AsPlainText -Force
@@ -107,6 +114,9 @@ if (!$aksSP)
 
     Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $aksSPSecretName `
     -SecretValue $aksSP.Secret
+
+    New-AzRoleAssignment -RoleDefinitionName $vnetRole `
+    -ApplicationId $aksSP.ApplicationId -Scope $aksVnet.Id
 
 }
 
@@ -120,15 +130,14 @@ if (!$acrInfo)
 
 }
 
-$acrSP = Get-AzADServicePrincipal -DisplayName $acrSPName
+$acrSP = Get-AzADServicePrincipal -DisplayName $acrSPDisplayName
 if (!$acrSP)
 {
 
     Write-Host $acrInfo.Id
 
     $acrSP = New-AzADServicePrincipal -SkipAssignment `
-    -Role $acrSPRole -DisplayName $acrSPName `
-    -Scope $acrInfo.ApplicationId
+    -DisplayName $acrSPDisplayName
     if (!$acrSP)
     {
 
@@ -137,7 +146,7 @@ if (!$acrSP)
 
     }
 
-    Write-Host $acrSPName
+    Write-Host $acrSPDisplayName
     
     $acrSPObjectId = ConvertTo-SecureString -String $acrSP.ApplicationId `
     -AsPlainText -Force
@@ -146,22 +155,13 @@ if (!$acrSP)
 
     Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $acrSPSecretName `
     -SecretValue $acrSP.Secret
+
+    New-AzRoleAssignment -RoleDefinitionName $acrSPRole `
+    -ApplicationId $acrSP.ApplicationId -Scope $acrInfo.Id
     
 }
 
 # Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $certSecretName `
 # -SecretValue $certContentsSecure
 
-$aksVnet = Get-AzVirtualNetwork -Name $aksVNetName -ResourceGroupName $resourceGroup
-if ($aksVnet)
-{
-
-    New-AzRoleAssignment -ApplicationId $aksSP.ApplicationId `
-    -Scope $aksVnet.Id -RoleDefinitionName $vnetRole
-
-}
-
-New-AzRoleAssignment -ApplicationId $acrSP.ApplicationId `
--RoleDefinitionName $acrSPRole -Scope $acrInfo.Id
-
-Write-Host "------Pre-Config------"
+Write-Host "------------Pre-Config----------"
