@@ -1,25 +1,25 @@
-param([Parameter(Mandatory=$true)]    [string] $mode,        
-        [Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
-        [Parameter(Mandatory=$false)] [string] $location = "eastus",
-        [Parameter(Mandatory=$true)]  [string] $clusterName = "aks-workshop-cluster",
-        [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
-        [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
-        [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
-        [Parameter(Mandatory=$false)] [string] $aksSubnetName = "aks-workshop-subnet",
-        [Parameter(Mandatory=$false)] [string] $vrnSubnetName = "vrn-workshop-subnet",
-        [Parameter(Mandatory=$false)] [string] $version = "1.17.13",
-        [Parameter(Mandatory=$false)] [string] $addons = "monitoring",
-        [Parameter(Mandatory=$false)] [string] $nodeCount = 2,        
-        [Parameter(Mandatory=$false)] [string] $maxPods = 30,
-        [Parameter(Mandatory=$false)] [string] $vmSetType = "AvailabilitySet",
-        [Parameter(Mandatory=$false)] [string] $nodeVMSize = "Standard_DS2_v2",
-        [Parameter(Mandatory=$false)] [string] $networkPlugin= "azure",
-        [Parameter(Mandatory=$false)] [string] $networkPolicy = "azure",
-        [Parameter(Mandatory=$false)] [string] $nodePoolName = "akslnxpool",
-        [Parameter(Mandatory=$false)] [string] $winNodeUserName = "azureuser",
-        [Parameter(Mandatory=$false)] [string] $winNodePassword = "PassW0rd@12345",        
-        [Parameter(Mandatory=$false)] [array]  $aadAdminGroupIDs = @("<aadAdminGroupID>"),
-        [Parameter(Mandatory=$false)] [string] $aadTenantID = "<aadTenantID>")
+param([Parameter(Mandatory=$true)]  [string] $mode,        
+      [Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
+      [Parameter(Mandatory=$false)] [string] $location = "eastus",
+      [Parameter(Mandatory=$true)]  [string] $clusterName = "aks-workshop-cluster",
+      [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
+      [Parameter(Mandatory=$true)]  [string] $keyVaultName = "aks-workshop-kv",
+      [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
+      [Parameter(Mandatory=$false)] [string] $aksSubnetName = "aks-workshop-subnet",
+      [Parameter(Mandatory=$false)] [string] $vrnSubnetName = "vrn-workshop-subnet",
+      [Parameter(Mandatory=$false)] [string] $version = "1.17.13",
+      [Parameter(Mandatory=$false)] [string] $addons = "monitoring",
+      [Parameter(Mandatory=$false)] [string] $nodeCount = 2,        
+      [Parameter(Mandatory=$false)] [string] $maxPods = 30,
+      [Parameter(Mandatory=$false)] [string] $vmSetType = "VirtualMachineScaleSets",
+      [Parameter(Mandatory=$false)] [string] $nodeVMSize = "Standard_DS2_v2",
+      [Parameter(Mandatory=$false)] [string] $networkPlugin= "azure",
+      [Parameter(Mandatory=$false)] [string] $networkPolicy = "azure",
+      [Parameter(Mandatory=$false)] [string] $nodePoolName = "akslnxpool",
+      [Parameter(Mandatory=$false)] [string] $winNodeUserName = "azureuser",
+      [Parameter(Mandatory=$false)] [string] $winNodePassword = "PassW0rd@12345",        
+      [Parameter(Mandatory=$false)] [array]  $aadAdminGroupIDs = @("<aadAdminGroupID>"),
+      [Parameter(Mandatory=$false)] [string] $aadTenantID = "<aadTenantID>")
 
 
 $aksSPIdName = $clusterName + "-sp-id"
@@ -52,28 +52,28 @@ if (!$spPassword)
 
 }
 
-$aksVnet = Get-AzVirtualNetwork -Name $aksVNetName `
--ResourceGroupName $resourceGroup
-if (!$aksVnet)
-{
-
-    Write-Host "Error fetching Vnet"
-    return;
-
-}
-
-$aksSubnet = Get-AzVirtualNetworkSubnetConfig -Name $aksSubnetName `
--VirtualNetwork $aksVnet
-if (!$aksSubnet)
-{
-
-    Write-Host "Error fetching Subnet"
-    return;
-
-}
-
 if ($mode -eq "create")
 {
+
+    $aksVnet = Get-AzVirtualNetwork -Name $aksVNetName `
+    -ResourceGroupName $resourceGroup
+    if (!$aksVnet)
+    {
+
+        Write-Host "Error fetching Vnet"
+        return;
+
+    }
+
+    $aksSubnet = Get-AzVirtualNetworkSubnetConfig -Name $aksSubnetName `
+    -VirtualNetwork $aksVnet
+    if (!$aksSubnet)
+    {
+
+        Write-Host "Error fetching Subnet"
+        return;
+
+    }
 
     Write-Host "Creating Cluster... $clusterName"
 

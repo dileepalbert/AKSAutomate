@@ -1,39 +1,17 @@
-param([Parameter(Mandatory=$true)]    [string] $mode,
-        [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
-        [Parameter(Mandatory=$false)] [string] $location = "eastus",
-        [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",        
-        [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
-        [Parameter(Mandatory=$false)] [string] $aksSubnetName = "aks-workshop-subnet",        
-        [Parameter(Mandatory=$false)] [string] $version = "1.17.13",
-        [Parameter(Mandatory=$false)] [string] $addons = "monitoring",
-        [Parameter(Mandatory=$false)] [string] $nodeCount = 2,
-        [Parameter(Mandatory=$false)] [string] $minNodeCount = $nodeCount,
-        [Parameter(Mandatory=$false)] [string] $maxNodeCount = 100,
-        [Parameter(Mandatory=$false)] [string] $maxPods = 40,
-        [Parameter(Mandatory=$false)] [string] $vmSetType = "AvailabilitySet",
-        [Parameter(Mandatory=$false)] [string] $nodeVMSize = "Standard_DS3_V2",        
-        [Parameter(Mandatory=$false)] [string] $nodePoolName = "aksjobspool",
-        [Parameter(Mandatory=$false)] [string] $osType = "Linux")
-
-$aksVnet = Get-AzVirtualNetwork -Name $aksVNetName `
--ResourceGroupName $resourceGroup
-if (!$aksVnet)
-{
-
-    Write-Host "Error fetching Vnet"
-    return;
-
-}
-
-$aksSubnet = Get-AzVirtualNetworkSubnetConfig -Name $aksSubnetName `
--VirtualNetwork $aksVnet
-if (!$aksSubnet)
-{
-
-    Write-Host "Error fetching Subnet"
-    return;
-
-}
+param([Parameter(Mandatory=$true)]  [string] $mode,
+      [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
+      [Parameter(Mandatory=$false)] [string] $location = "eastus",
+      [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",      
+      [Parameter(Mandatory=$false)] [string] $version = "1.17.13",      
+      [Parameter(Mandatory=$false)] [string] $nodeCount = 2,
+      [Parameter(Mandatory=$false)] [string] $minNodeCount = $nodeCount,
+      [Parameter(Mandatory=$false)] [string] $maxNodeCount = 100,
+      [Parameter(Mandatory=$false)] [string] $maxPods = 40,
+      [Parameter(Mandatory=$false)] [string] $vmSetType = "VirtualMachineScaleSets",
+      [Parameter(Mandatory=$false)] [string] $nodeVMSize = "Standard_DS3_V2",        
+      [Parameter(Mandatory=$false)] [string] $nodePoolName = "aksjobspool",
+      [Parameter(Mandatory=$false)] [string] $osType = "Linux",
+      [Parameter(Mandatory=$false)] [string] $nodepoolMode = "User")
 
 if ($mode -eq "create")
 {
@@ -47,7 +25,7 @@ if ($mode -eq "create")
     --max-pods $maxPods `
     --node-count $nodeCount `
     --node-vm-size $nodeVMSize `
-    --os-type $osType
+    --os-type $osType --mode $nodepoolMode
 
     $LASTEXITCODE
     if (!$?)
@@ -117,5 +95,5 @@ elseif ($mode -eq "delete")
     
 }
 
-Write-Host "Nodepool Config Successfully Done!"
+Write-Host "-----------Nodepool Config------------"
 
