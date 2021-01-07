@@ -1,6 +1,5 @@
 param([Parameter(Mandatory=$true)]  [string] $mode,
-      [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
-      [Parameter(Mandatory=$false)] [string] $location = "eastus",
+      [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",      
       [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",      
       [Parameter(Mandatory=$false)] [string] $version = "1.17.13",      
       [Parameter(Mandatory=$false)] [string] $nodeCount = 2,
