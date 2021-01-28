@@ -68,8 +68,15 @@ if (!$rgRef)
 
 }
 
+$aksVnet = Get-AzVirtualNetwork -Name $aksVNetName `
+-ResourceGroupName $resourceGroup
 $networkDeployPath = $templatesFolderPath + $networkDeployCommand
-Invoke-Expression -Command $networkDeployPath
+if (!$aksVnet)
+{
+    
+    Invoke-Expression -Command $networkDeployPath    
+
+}
 
 $acrDeployPath = $templatesFolderPath + $acrDeployCommand
 Invoke-Expression -Command $acrDeployPath
@@ -82,15 +89,6 @@ Invoke-Expression -Command $keyVaultDeployPath
 # $certContents = [Convert]::ToBase64String($certBytes)
 # $certContentsSecure = ConvertTo-SecureString -String $certContents -AsPlainText -Force
 # Write-Host $certPFXFilePath
-
-$aksVnet = Get-AzVirtualNetwork -Name $aksVNetName -ResourceGroupName $resourceGroup
-if (!$aksVnet)
-{
-
-    Write-Host "Error fetching VNET information"
-    return;
-
-}
 
 $aksSP = Get-AzADServicePrincipal -DisplayName $aksSPDisplayName
 if (!$aksSP)
