@@ -1,11 +1,11 @@
-param([Parameter(Mandatory=$true)] [string] $resourceGroup = "aks-workshop-rg",        
+param([Parameter(Mandatory=$true)] [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$true)] [string] $projectName = "aks-workshop",
       [Parameter(Mandatory=$true)] [string] $location = "eastus",
       [Parameter(Mandatory=$true)] [string] $clusterName = "aks-workshop-cluster",
       [Parameter(Mandatory=$true)] [string] $acrName = "akswkshpacr",
-      [Parameter(Mandatory=$true)] [string] $keyVaultName = "aks-workshop-kv",        
+      [Parameter(Mandatory=$true)] [string] $keyVaultName = "aks-workshop-kv",
       [Parameter(Mandatory=$true)] [string] $aksVNetName = "aks-workshop-vnet",
-      [Parameter(Mandatory=$true)] [string] $aksVNetPrefix = "173.0.0.0/16",        
+      [Parameter(Mandatory=$true)] [string] $aksVNetPrefix = "173.0.0.0/16",
       [Parameter(Mandatory=$true)] [string] $aksSubnetName = "aks-workshop-subnet",
       [Parameter(Mandatory=$true)] [string] $aksSubNetPrefix = "173.0.0.0/22",
       [Parameter(Mandatory=$true)] [string] $appgwSubnetName = "aks-workshop-appgw-subnet",
@@ -15,7 +15,9 @@ param([Parameter(Mandatory=$true)] [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$true)] [string] $appgwName = "aks-workshop-appgw",
       [Parameter(Mandatory=$true)] [string] $networkTemplateFileName = "aksauto-network-deploy",
       [Parameter(Mandatory=$true)] [string] $acrTemplateFileName = "aksauto-acr-deploy",
-      [Parameter(Mandatory=$true)] [string] $kvTemplateFileName = "aksauto-keyvault-deploy",        
+      [Parameter(Mandatory=$true)] [string] $kvTemplateFileName = "aksauto-keyvault-deploy",
+      [Parameter(Mandatory=$true)] [string] $pfxCertFileName = "star.wkshpdev.com",
+      [Parameter(Mandatory=$true)] [string] $rootCertFileName = "star_wkshpdev_com_116159745TrustedRoot",
       [Parameter(Mandatory=$true)] [string] $subscriptionId = "<subscriptionId>",
       [Parameter(Mandatory=$true)] [string] $objectId = "<objectId>",
       [Parameter(Mandatory=$true)] [string] $baseFolderPath = "<baseFolderPath>") # As per host devops machine
@@ -30,8 +32,11 @@ $acrSPIdName = $acrName + "-sp-id"
 $acrSPSecretName = $acrName + "-sp-secret"
 $templatesFolderPath = $baseFolderPath + "/Templates"
 
-# $certSecretName = $appgwName + "-cert-secret"
-# $certPFXFilePath = $baseFolderPath + "/Certs/aksauto.pfx"
+$certSecretName = $appgwName + "-cert-secret"
+$certPFXFilePath = $baseFolderPath + "/Certs/$pfxCertFileName.pfx"
+
+$rootCertSecretName = $appgwName + "-root-cert-secret"
+$certCERFilePath = $baseFolderPath + "/Certs/$rootCertFileName.cer"
 
 # Assuming Logged In
 
@@ -84,11 +89,12 @@ Invoke-Expression -Command $acrDeployPath
 $keyVaultDeployPath = $templatesFolderPath + $keyVaultDeployCommand
 Invoke-Expression -Command $keyVaultDeployPath
 
-# Write-Host $certPFXFilePath
-# $certBytes = [System.IO.File]::ReadAllBytes($certPFXFilePath)
-# $certContents = [Convert]::ToBase64String($certBytes)
-# $certContentsSecure = ConvertTo-SecureString -String $certContents -AsPlainText -Force
-# Write-Host $certPFXFilePath
+$certPFXBytes = [System.IO.File]::ReadAllBytes($certPFXFilePath)
+$certPFXContents = [Convert]::ToBase64String($certPFXBytes)
+$certPFXContentsSecure = ConvertTo-SecureString -String $certPFXContents -AsPlainText -Force
+
+$certCERContents = [System.IO.File]::ReadAllText($certCERFilePath)
+$certCERContentsSecure = ConvertTo-SecureString -String $certCERContents -AsPlainText -Force
 
 $aksSP = Get-AzADServicePrincipal -DisplayName $aksSPDisplayName
 if (!$aksSP)
@@ -159,7 +165,10 @@ if (!$acrSP)
     
 }
 
-# Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $certSecretName `
-# -SecretValue $certContentsSecure
+Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $certSecretName `
+-SecretValue $certPFXContentsSecure
+
+Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertSecretName `
+-SecretValue $certCERContentsSecure
 
 Write-Host "------------Pre-Config----------"
