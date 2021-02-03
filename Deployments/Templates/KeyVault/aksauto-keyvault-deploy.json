@@ -49,13 +49,13 @@
     "secretsPermissions": {
       "type": "array",
       "defaultValue": [
-        "get", "list", "set", "delete"
+        "get", "list", "set", "delete", "recover", "backup", "restore"
       ]
     },
     "certificatesPermissions": {
       "type": "array",
       "defaultValue": [
-        "get", "list", "create", "delete", "update"
+        "get", "list", "create", "delete", "update", "import", "recover", "backup", "restore"
       ]
     },
     "skuName": {
