@@ -1,31 +1,32 @@
-param([Parameter(Mandatory=$true)]  [string] $mode,        
-      [Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
+param([Parameter(Mandatory=$true)]  [string] $mode,
+      [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $location = "eastus",
-      [Parameter(Mandatory=$true)]  [string] $clusterName = "aks-workshop-cluster",
+      [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
       [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
-      [Parameter(Mandatory=$true)]  [string] $keyVaultName = "aks-workshop-kv",
+      [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
       [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
       [Parameter(Mandatory=$false)] [string] $aksSubnetName = "aks-workshop-subnet",
       [Parameter(Mandatory=$false)] [string] $vrnSubnetName = "vrn-workshop-subnet",
       [Parameter(Mandatory=$false)] [string] $version = "1.17.13",
       [Parameter(Mandatory=$false)] [string] $addons = "monitoring",
-      [Parameter(Mandatory=$false)] [string] $nodeCount = 2,        
+      [Parameter(Mandatory=$false)] [string] $nodeCount = 2,
       [Parameter(Mandatory=$false)] [string] $maxPods = 30,
       [Parameter(Mandatory=$false)] [string] $vmSetType = "VirtualMachineScaleSets",
       [Parameter(Mandatory=$false)] [string] $nodeVMSize = "Standard_DS2_v2",
       [Parameter(Mandatory=$false)] [string] $networkPlugin= "azure",
       [Parameter(Mandatory=$false)] [string] $networkPolicy = "azure",
-      [Parameter(Mandatory=$false)] [string] $nodePoolName = "akslnxpool",
+      [Parameter(Mandatory=$false)] [string] $nodePoolName = "akssyspool",
       [Parameter(Mandatory=$false)] [string] $winNodeUserName = "azureuser",
       [Parameter(Mandatory=$false)] [string] $winNodePassword = "PassW0rd@12345",        
-      [Parameter(Mandatory=$false)] [array]  $aadAdminGroupIDs = @("<aadAdminGroupID>"),
-      [Parameter(Mandatory=$false)] [string] $aadTenantID = "<aadTenantID>")
+      [Parameter(Mandatory=$false)] [array]  $aadAdminGroupIDs = @("<aadAdmin-Group-IDs>"),
+      [Parameter(Mandatory=$false)] [string] $aadTenantID = "<aad-Tenant-ID>")
 
 
 $aksSPIdName = $clusterName + "-sp-id"
 $aksSPSecretName = $clusterName + "-sp-secret"
 
-$keyVault = Get-AzKeyVault -ResourceGroupName $resourceGroup -VaultName $keyVaultName
+$keyVault = Get-AzKeyVault -ResourceGroupName $resourceGroup `
+-VaultName $keyVaultName
 if (!$keyVault)
 {
 
@@ -34,7 +35,8 @@ if (!$keyVault)
 
 }
 
-$spAppId = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $aksSPIdName
+$spAppId = Get-AzKeyVaultSecret -VaultName $keyVaultName `
+-Name $aksSPIdName -AsPlainText
 if (!$spAppId)
 {
 
@@ -43,7 +45,8 @@ if (!$spAppId)
 
 }
 
-$spPassword = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $aksSPSecretName
+$spPassword = Get-AzKeyVaultSecret -VaultName $keyVaultName `
+-Name $aksSPSecretName -AsPlainText
 if (!$spPassword)
 {
 
@@ -65,8 +68,8 @@ if ($mode -eq "create")
 
     }
 
-    $aksSubnet = Get-AzVirtualNetworkSubnetConfig -Name $aksSubnetName `
-    -VirtualNetwork $aksVnet
+    $aksSubnet = Get-AzVirtualNetworkSubnetConfig `
+    -Name $aksSubnetName -VirtualNetwork $aksVnet
     if (!$aksSubnet)
     {
 
@@ -83,8 +86,8 @@ if ($mode -eq "create")
     --vnet-subnet-id $aksSubnet.Id --enable-addons $addons `
     --node-vm-size $nodeVMSize `
     --node-count $nodeCount --max-pods $maxPods `
-    --service-principal $spAppId.SecretValueText `
-    --client-secret $spPassword.SecretValueText `
+    --service-principal $spAppId `
+    --client-secret $spPassword `
     --network-plugin $networkPlugin --network-policy $networkPolicy `
     --nodepool-name $nodePoolName --vm-set-type $vmSetType `
     --generate-ssh-keys `

@@ -8,7 +8,7 @@ param([Parameter(Mandatory=$true)]  [string] $mode,
       [Parameter(Mandatory=$false)] [string] $maxPods = 40,
       [Parameter(Mandatory=$false)] [string] $vmSetType = "VirtualMachineScaleSets",
       [Parameter(Mandatory=$false)] [string] $nodeVMSize = "Standard_DS3_V2",        
-      [Parameter(Mandatory=$false)] [string] $nodePoolName = "aksjobspool",
+      [Parameter(Mandatory=$false)] [string] $nodePoolName = "<node-pool-name>",
       [Parameter(Mandatory=$false)] [string] $osType = "Linux",
       [Parameter(Mandatory=$false)] [string] $nodepoolMode = "User")
 
