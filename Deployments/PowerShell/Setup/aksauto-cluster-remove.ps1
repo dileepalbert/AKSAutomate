@@ -11,6 +11,8 @@ $aksSPName = $clusterName + "-sp"
 $publicIpAddressName = "$appgwName-pip"
 $subscriptionCommand = "az account set -s $subscriptionId"
 
+# Assuming Logged in (Azure CLI and PowerShell)
+
 # PS Select Subscriotion 
 Select-AzSubscription -SubscriptionId $subscriptionId
 
