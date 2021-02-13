@@ -44,10 +44,11 @@ if (!$spAppId)
     return;
 
 }
-$spAppId = ConvertFrom-SecureString $spAppId.SecretValue -AsPlainText
+$spAppId = ConvertFrom-SecureString $spAppId.SecretValue `
+-AsPlainText
 
 $spPassword = Get-AzKeyVaultSecret -VaultName $keyVaultName `
--Name $aksSPSecretName -AsPlainText
+-Name $aksSPSecretName
 if (!$spPassword)
 {
 
@@ -55,7 +56,8 @@ if (!$spPassword)
     return;
 
 }
-$spPassword = ConvertFrom-SecureString $spPassword.SecretValue -AsPlainText
+$spPassword = ConvertFrom-SecureString $spPassword.SecretValue `
+-AsPlainText
 
 if ($mode -eq "create")
 {
