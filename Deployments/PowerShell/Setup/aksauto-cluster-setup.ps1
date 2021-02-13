@@ -140,8 +140,8 @@ elseif ($mode -eq "sp")
 
     az aks update-credentials --name $clusterName `
     --resource-group $resourceGroup --reset-service-principal `
-    --service-principal $spAppId.SecretValueText `
-    --client-secret $spPassword.SecretValueText
+    --service-principal $spAppId `
+    --client-secret $spPassword
 
     $LASTEXITCODE
     if (!$?)
