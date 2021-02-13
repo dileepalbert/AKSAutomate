@@ -1,7 +1,6 @@
 param([Parameter(Mandatory=$true)]  [string] $shouldRemoveAll = "false",
       [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",        
-      [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
-      [Parameter(Mandatory=$false)] [string] $spIdName = "aks-workshop-sp-id",
+      [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",      
       [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
       [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
       [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
