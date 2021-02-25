@@ -21,10 +21,10 @@ spec:
         backend:
           serviceName: ratingsweb-service
           servicePort: 80
-      - path: /bkend/?(.*)
-        backend:
-          serviceName: ratingsapi-service
-          servicePort: 80
+      # - path: /bkend/?(.*)
+      #   backend:
+      #     serviceName: ratingsapi-service
+      #     servicePort: 80
       - path: /iot/?(.*)
         backend:
           serviceName: iotmqttsender-service
