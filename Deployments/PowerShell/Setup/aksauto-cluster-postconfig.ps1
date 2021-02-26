@@ -49,7 +49,7 @@ $nginxILBCommand = "helm install $ingControllerName ingress-nginx/ingress-nginx 
 Invoke-Expression -Command $nginxILBCommand
 
 # Install AppGW
-$appgwParameters = "-appgwName $appgwName -projectName $projectName -vnetName $aksVNetName -subnetName $appgwSubnetName backendIpAddress1 $ingControllerIPAddress -backendPoolHostName $ingHostName -listenerHostName $listenerHostName"
+$appgwParameters = "-appgwName $appgwName -projectName $projectName -vnetName $aksVNetName -subnetName $appgwSubnetName -backendIpAddress1 $ingControllerIPAddress -backendPoolHostName $ingHostName -listenerHostName $listenerHostName"
 $appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName $appgwParameters"
 $appgwDeployPath = $templatesFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
