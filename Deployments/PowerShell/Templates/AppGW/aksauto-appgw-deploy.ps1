@@ -6,6 +6,7 @@ param([Parameter(Mandatory=$false)] [string] $rg,
       [Parameter(Mandatory=$false)] [string] $vnetName,
       [Parameter(Mandatory=$false)] [string] $subnetName,
       [Parameter(Mandatory=$false)] [string] $hostName,
+      [Parameter(Mandatory=$false)] [string] $listenerHostName,
       [Parameter(Mandatory=$false)] [string] $backendIPAddress)
 
 Test-AzResourceGroupDeployment -ResourceGroupName $rg `
@@ -14,7 +15,7 @@ Test-AzResourceGroupDeployment -ResourceGroupName $rg `
 -applicationGatewayName $appgwName `
 -projectName $projectName `
 -vnetName $vnetName -subnetName $subnetName `
--listenerHostName $hostName `
+-backendPoolHostName $hostName -listenerHostName $listenerHostName `
 -backendIpAddress1 $backendIPAddress
 
 New-AzResourceGroupDeployment -ResourceGroupName $rg `
@@ -23,5 +24,5 @@ New-AzResourceGroupDeployment -ResourceGroupName $rg `
 -applicationGatewayName $appgwName `
 -projectName $projectName `
 -vnetName $vnetName -subnetName $subnetName `
--listenerHostName $hostName `
+-backendPoolHostName $hostName -listenerHostName $listenerHostName `
 -backendIpAddress1 $backendIPAddress

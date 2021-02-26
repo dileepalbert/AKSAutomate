@@ -85,8 +85,7 @@
       "appGwIPConfigName":"[concat(parameters('applicationGatewayName'), '-ipc')]",
       "appGwFrontendIPConfigName":"[concat(parameters('applicationGatewayName'), '-fre-ipc')]",      
       "appGwFrontendPortName":"[concat(parameters('applicationGatewayName'), '-fre-port')]",
-      "appGwBackendPoolName":"[concat(parameters('applicationGatewayName'), '-bkend-pool')]",
-      "appGwBackendPoolHostName":"[concat(parameters('projectName'), '.', parameters('backendPoolHostName'))]",
+      "appGwBackendPoolName":"[concat(parameters('applicationGatewayName'), '-bkend-pool')]",      
       "appGwBackendHttpSettings":"[concat(parameters('applicationGatewayName'), '-bkend-http-settings')]",
       "appGwBackendDEVHttpSettings":"[concat(variables('appGwBackendHttpSettings'), '-dev')]",
       "appGwBackendDEVHttpSettingsHostName":"[concat(parameters('projectName'), '-dev.', parameters('backendPoolHostName'))]",
@@ -201,9 +200,8 @@
                {
                   "name":"[variables('appGwBackendPoolName')]",
                   "properties":{
-                        "BackendAddresses":[{
-                           "fqdn": "[variables('appGwBackendPoolHostName')]"
-                           // "ipAddress": "[parameters('backendIpAddress1')]"
+                        "BackendAddresses":[{                           
+                           "ipAddress": "[parameters('backendIpAddress1')]"
                         }]
                   }
                }

@@ -12,6 +12,7 @@ param([Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $appgwTemplateFileName = "aksauto-appgw-deploy",        
       [Parameter(Mandatory=$false)] [string] $ingControllerIPAddress = "<ingress-private-ip>",
       [Parameter(Mandatory=$false)] [string] $ingHostName = "<ingress-host-name>",
+      [Parameter(Mandatory=$false)] [string] $listenerHostName = "<listener-host-name>",
       [Parameter(Mandatory=$false)] [string] $baseFolderPath = "<base-folder-path>")
 
 $templatesFolderPath = $baseFolderPath + "/PowerShell/Templates"
@@ -48,8 +49,8 @@ $nginxILBCommand = "helm install $ingControllerName ingress-nginx/ingress-nginx 
 Invoke-Expression -Command $nginxILBCommand
 
 # Install AppGW
-$networkNames = "-appgwName $appgwName -projectName $projectName -vnetName $aksVNetName -subnetName $appgwSubnetName"
-$appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName -backendIPAddress $ingControllerIPAddress -hostName $ingHostName $networkNames"
+$appgwParameters = "-appgwName $appgwName -projectName $projectName -vnetName $aksVNetName -subnetName $appgwSubnetName backendIpAddress1 $ingControllerIPAddress -backendPoolHostName $ingHostName -listenerHostName $listenerHostName"
+$appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName $appgwParameters"
 $appgwDeployPath = $templatesFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
 
