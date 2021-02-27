@@ -11,7 +11,7 @@ metadata:
 spec:
   tls:
   - hosts:
-    - ingress-dev.wkshpdev.com
+    - "*.internal.wkshpdev.com"
     secretName: aks-workshop-tls-secret
   rules:
   - host: ingress-dev.wkshpdev.com
