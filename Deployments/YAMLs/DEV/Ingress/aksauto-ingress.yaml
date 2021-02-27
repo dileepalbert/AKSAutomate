@@ -9,10 +9,10 @@ metadata:
     # nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/enable-cors: "true"    
 spec:
-  # tls:
-  # - hosts:
-  #   - ingress-dev.wkshpdev.com
-  #   secretName: aks-workshop-tls-secret  
+  tls:
+  - hosts:
+    - ingress-dev.wkshpdev.com
+    secretName: aks-workshop-tls-secret
   rules:
   - host: ingress-dev.wkshpdev.com
     http:
