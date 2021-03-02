@@ -143,6 +143,9 @@ if (!$aksSP)
     $acrRoleCommand = "az role assignment create --assignee $appId --role 'AcrPush' --scope $acrInfo"
     Invoke-Expression -Command $acrRoleCommand
 
+    $resourceGroupRoleCommand = "az role assignment create --assignee $appId --role 'Owner' --scope '/subscriptions/$subscriptionId/resourceGroups/$resourceGroup'"
+    Invoke-Expression -Command $resourceGroupRoleCommand
+
 }
 
 $kvShowPFXCommand = "az keyvault secret show -n $certSecretName --vault-name $keyVaultName --query 'id' -o json"
