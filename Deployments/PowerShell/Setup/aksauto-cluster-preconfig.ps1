@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",      
+param([Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $location = "eastus",
       [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
       [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
@@ -113,6 +113,15 @@ if (!$aksSP)
     New-AzRoleAssignment -RoleDefinitionName $vnetRole `
     -ApplicationId $aksSP.ApplicationId -Scope $aksVnet.Id
 
+    $acrInfo = Get-AzContainerRegistry -ResourceGroupName $resourceGroup `
+    -Name $acrName
+    if ($acrInfo)
+    {
+
+        New-AzRoleAssignment -RoleDefinitionName "AcrPush" `
+        -ApplicationId $aksSP.ApplicationId -Scope $acrInfo.Id
+
+    }
 }
 
 $certPFXBytes = [System.IO.File]::ReadAllBytes($certPFXFilePath)
