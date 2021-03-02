@@ -21,7 +21,6 @@ param([Parameter(Mandatory=$true)]  [string] $mode,
       [Parameter(Mandatory=$false)] [array]  $aadAdminGroupIDs = @("<aadAdmin-Group-IDs>"),
       [Parameter(Mandatory=$false)] [string] $aadTenantID = "<aad-Tenant-ID>")
 
-
 $aksSPIdName = $clusterName + "-sp-id"
 $aksSPSecretName = $clusterName + "-sp-secret"
 
