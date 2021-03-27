@@ -4,7 +4,7 @@
    "parameters":{
       "applicationGatewayName":{
          "type":"string",
-         "defaultValue": ""
+         "defaultValue": "[guid(resourceGroup().id)]"
       },
       "projectName":{
          "type":"string",

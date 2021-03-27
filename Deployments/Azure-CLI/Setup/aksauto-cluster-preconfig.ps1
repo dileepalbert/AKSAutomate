@@ -20,7 +20,7 @@ param([Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $rootCertFileName = "star_wkshpdev_com_116159745TrustedRoot",
       [Parameter(Mandatory=$false)] [string] $subscriptionId = "6bdcc705-8db6-4029-953a-e749070e6db6",
       [Parameter(Mandatory=$false)] [string] $objectId = "890c52c5-d318-4185-a548-e07827190ff6",
-      [Parameter(Mandatory=$false)] [string] $baseFolderPath = "/Users/monojitd/Materials/Projects/AKSProjects/AKSWorkshop/AKSAutomate/Deployments") # As per host devops machine
+      [Parameter(Mandatory=$false)] [string] $baseFolderPath = "/Users/monojitd/Materials/Projects/AKSProjects/AKSWorkshop/AKSAutomate/Deployments") # Till Deployments
 
 $vnetRole = "Network Contributor"
 $aksSPDisplayName = $clusterName + "-sp"
@@ -100,12 +100,6 @@ if (!$keyVaultInfo)
 
 }
 
-$certPFXBytes = [System.IO.File]::ReadAllBytes($certPFXFilePath)
-$certPFXContents = [Convert]::ToBase64String($certPFXBytes)
-
-$certCERBytes = [System.IO.File]::ReadAllBytes($certCERFilePath)
-$certCERContents = [Convert]::ToBase64String($certCERBytes)
-
 $aksSP = Invoke-Expression -Command $spShowCommand
 if (!$aksSP)
 {
@@ -147,6 +141,12 @@ if (!$aksSP)
     Invoke-Expression -Command $resourceGroupRoleCommand
 
 }
+
+$certPFXBytes = [System.IO.File]::ReadAllBytes($certPFXFilePath)
+$certPFXContents = [Convert]::ToBase64String($certPFXBytes)
+
+$certCERBytes = [System.IO.File]::ReadAllBytes($certCERFilePath)
+$certCERContents = [Convert]::ToBase64String($certCERBytes)
 
 $kvShowPFXCommand = "az keyvault secret show -n $certSecretName --vault-name $keyVaultName --query 'id' -o json"
 $kvPFXInfo = Invoke-Expression -Command $kvShowPFXCommand

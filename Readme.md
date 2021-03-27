@@ -8,12 +8,12 @@ The post management of cluster - Upgrade, Patching, Monitoring - all come as a p
 
 But AKS cluster is not the only thing that user(s) are going to create; rather the ancillary services around the cluster helping build the entire architecture is most important, painfully redundant and difficult to manage in long terms - more so when you think of the Operations team or Infrastructure management team - who might need to do this for multiple cluster to be managed and many applications to be deployed!
 
-Hence a disciplined, streamlined and automated approach is needed so that end to end architecture becomes robust, resilient and   easily manageable.
+Hence a disciplined, streamlined and automated approach is needed so that end to end architecture becomes robust, resilient and easily manageable.
 
 The purpose of this workshop would be to:
 
-- Use Kubernetes as the tool or orchestration of micro-services
-- Build micro-services of varying nature and tech-stack - NodeJS, 
+- Use Kubernetes as the tool for orchestration of micro-services
+- Build micro-services of varying nature and tech-stack
 - Build an automated pipeline and workflow for creating Infrastructure for the deploying micro-services - *3-Step Approach*
 - Extend the pipeline to automate deployment of micro-services
 - Leverage AKS as a hosted service around Kubernetes (a.k.a K8s) for better manageability, less complexity

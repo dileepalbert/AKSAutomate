@@ -19,7 +19,7 @@ param([Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $rootCertFileName = "<rootCertFileName>",
       [Parameter(Mandatory=$false)] [string] $subscriptionId = "<subscriptionId>",
       [Parameter(Mandatory=$false)] [string] $objectId = "<objectId>",
-      [Parameter(Mandatory=$false)] [string] $baseFolderPath = "<baseFolderPath>") # As per host devops machine
+      [Parameter(Mandatory=$false)] [string] $baseFolderPath = "<baseFolderPath>") # Till Deployments
 
 $vnetRole = "Network Contributor"
 $aksSPDisplayName = $clusterName + "-sp"
