@@ -1,6 +1,7 @@
 param([Parameter(Mandatory=$true)]  [string] $mode = "create",      
       [Parameter(Mandatory=$false)] [string] $isPrivateCluster = "false",
       [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
+      [Parameter(Mandatory=$false)] [string] $masterResourceGroup = "master-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $lwResourceGroup = "monitoring-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $location = "eastus",
       [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
