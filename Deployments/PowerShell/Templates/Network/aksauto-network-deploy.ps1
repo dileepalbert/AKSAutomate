@@ -7,6 +7,8 @@ param([Parameter(Mandatory=$true)] [string] $rg,
         [Parameter(Mandatory=$true)] [string] $aksSubNetPrefix,
         [Parameter(Mandatory=$true)] [string] $appgwSubnetName,
         [Parameter(Mandatory=$true)] [string] $appgwSubnetPrefix,
+        [Parameter(Mandatory=$true)] [string] $ingressSubnetName,
+        [Parameter(Mandatory=$true)] [string] $ingressSubnetPrefix,
         [Parameter(Mandatory=$true)] [string] $vrnSubnetName,
         [Parameter(Mandatory=$true)] [string] $vrnSubnetPrefix)
 
@@ -15,6 +17,7 @@ Test-AzResourceGroupDeployment -ResourceGroupName $rg `
 -aksVNetName $aksVNetName -aksVNetPrefix $aksVNetPrefix `
 -aksSubnetName $aksSubnetName -aksSubNetPrefix $aksSubNetPrefix `
 -appgwSubnetName $appgwSubnetName -appgwSubnetPrefix $appgwSubnetPrefix `
+-ingressSubnetName $ingressSubnetName -ingressSubnetPrefix $ingressSubnetPrefix `
 -vrnSubnetName $vrnSubnetName -vrnSubnetPrefix $vrnSubnetPrefix
 
 New-AzResourceGroupDeployment -ResourceGroupName $rg `
@@ -22,4 +25,5 @@ New-AzResourceGroupDeployment -ResourceGroupName $rg `
 -aksVNetName $aksVNetName -aksVNetPrefix $aksVNetPrefix `
 -aksSubnetName $aksSubnetName -aksSubNetPrefix $aksSubNetPrefix `
 -appgwSubnetName $appgwSubnetName -appgwSubnetPrefix $appgwSubnetPrefix `
+-ingressSubnetName $ingressSubnetName -ingressSubnetPrefix $ingressSubnetPrefix `
 -vrnSubnetName $vrnSubnetName -vrnSubnetPrefix $vrnSubnetPrefix

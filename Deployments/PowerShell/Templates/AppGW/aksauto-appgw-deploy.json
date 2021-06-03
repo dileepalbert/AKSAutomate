@@ -6,10 +6,6 @@
          "type":"string",
          "defaultValue": "[guid(resourceGroup().id)]"
       },
-      "projectName":{
-         "type":"string",
-         "defaultValue": ""
-      },
       "vnetName":{
          "type":"string",
          "defaultValue": ""
@@ -38,12 +34,35 @@
       "frontendPort":{
          "type":"int",
          "defaultValue":443
-      },
+      },      
+      "frontendProtocol":{
+         "type":"string",
+         "allowedValues": [
+           "Https"
+        ],
+        "defaultValue": "Https"
+      },     
       "backendPort":{
          "type":"int",
-         "defaultValue":443
+         "defaultValue":80
       },
-      "backendIpAddress1": {
+      "backendProtocol":{
+         "type":"string",
+         "allowedValues": [
+           "Http",
+           "Https"           
+        ],
+        "defaultValue": "Http"
+      },
+      "healthProbeHostName":{
+         "type":"string",
+         "defaultValue": "test.domain.com"
+      },
+      "healthProbePath":{
+         "type":"string",
+         "defaultValue": "/"
+      },
+      "backendIpAddress": {
         "type": "string",
          "defaultValue":""
       },
@@ -58,18 +77,18 @@
       "location":{
          "type":"string",
          "defaultValue":"[resourceGroup().location]"
+      },   
+      "httpsListenerNames": {
+            "type": "array",
+            "defaultValue": []
+      },
+      "listenerHostName": {
+            "type": "string",
+            "defaultValue": "test.domain.com"
       },
       "backendPoolHostName":{
          "type":"string",
          "defaultValue": "test.internal.testdomain.com"
-      },
-      "listenerHostName": {
-            "type": "string",
-            "defaultValue": "testdomain.com"
-        },
-      "rootCertData":{
-         "type": "securestring",
-         "defaultValue":""
       },
       "certData":{
          "type": "securestring",
@@ -80,32 +99,28 @@
          "defaultValue":""
       }
    },
-   "variables":{      
-      "applicationGatewayID": "[resourceId('Microsoft.Network/applicationGateways', parameters('applicationGatewayName'))]",
+   "variables":{
+      "appGwId": "[resourceId('Microsoft.Network/applicationGateways', parameters('applicationGatewayName'))]",
       "appGwIPConfigName":"[concat(parameters('applicationGatewayName'), '-ipc')]",
-      "appGwFrontendIPConfigName":"[concat(parameters('applicationGatewayName'), '-fre-ipc')]",      
-      "appGwFrontendPortName":"[concat(parameters('applicationGatewayName'), '-fre-port')]",
-      "appGwBackendPoolName":"[concat(parameters('applicationGatewayName'), '-bkend-pool')]",      
-      "appGwBackendHttpSettings":"[concat(parameters('applicationGatewayName'), '-bkend-http-settings')]",
-      "appGwBackendDEVHttpSettings":"[concat(variables('appGwBackendHttpSettings'), '-dev')]",
-      "appGwBackendDEVHttpSettingsHostName":"[concat(parameters('projectName'), '-dev.', parameters('backendPoolHostName'))]",
-      "appGwBackendQAHttpSettings":"[concat(variables('appGwBackendHttpSettings'), '-qa')]",
-      "appGwBackendQAHttpSettingsHostName":"[concat(parameters('projectName'), '-qa.', parameters('backendPoolHostName'))]",
-      "appGwHttpListener":"[concat(parameters('applicationGatewayName'), '-bkend-http-listener')]",
-      "appGwDEVHttpListener":"[concat(variables('appGwHttpListener'), '-dev')]",
-      "appGwDEVHttpListenerHostName":"[concat(parameters('projectName'), '-dev.', parameters('listenerHostName'))]",
-      "appGwQAHttpListener":"[concat(variables('appGwHttpListener'), '-qa')]",
-      "appGwQAHttpListenerHostName":"[concat(parameters('projectName'), '-qa.', parameters('listenerHostName'))]",
       "appGwPublicIpName":"[concat(parameters('applicationGatewayName'), '-pip')]",
+      "appGwFrontendIPConfigName":"[concat(parameters('applicationGatewayName'), '-fre-ipc')]",
+      "appGwFrontendPortName":"[concat(parameters('applicationGatewayName'), '-fre-port')]",      
+      "appGwBackendPoolName":"[concat(parameters('applicationGatewayName'), '-bkend-pool')]",
+      "appGwHttpsListenerName":"[concat(parameters('applicationGatewayName'), '-https-listener')]",      
+      "appGwHttpsListenerHostName":"[parameters('listenerHostName')]",
       "appGwSSLCertName":"[concat(parameters('applicationGatewayName'), '-ssl-cert')]",
-      "appGwTrustedRootCertName":"[concat(parameters('listenerHostName'), '.root')]",
-      "appGwRuleName":"[concat(parameters('applicationGatewayName'), '-rule')]",
-      "appGwDEVRuleName":"[concat(variables('appGwRuleName'), '-dev')]",
-      "appGwQARuleName":"[concat(variables('appGwRuleName'), '-qa')]",
+      "appGwSSLCertId":
+      {
+
+         "Id": "[concat(variables('appGwId'), '/sslCertificates/', variables('appGwSSLCertName'))]"
+      },
+      "appGwBackendHttpSettingsName":"[concat(parameters('applicationGatewayName'), '-bkend-http-settings')]",
+      "appGwBackendHttpSettingsHostName":"[parameters('backendPoolHostName')]",
+      "appGwHttpsRuleName":"[concat(parameters('applicationGatewayName'), '-rule')]",      
       "appGwProbeName":"[concat(parameters('applicationGatewayName'), '-health-probe')]",
-      "subnetRef":"[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",      
+      "subnetRef":"[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
       "appGwPublicIPRef":"[resourceId('Microsoft.Network/publicIPAddresses', variables('appGwPublicIpName'))]",
-      "appGwProbeRef":"[concat(variables('applicationGatewayID'), '/probes/', variables('appGwProbeName'))]",      
+      "appGwProbeRef":"[concat(variables('appGwId'), '/probes/', variables('appGwProbeName'))]",
       "appGwSize":"[parameters('skuName')]",
       "appGwTier":"[parameters('skuName')]"      
    },
@@ -129,23 +144,83 @@
          "location":"[parameters('location')]",
          "dependsOn":[
             "[variables('appGwPublicIPRef')]"
-         ],         
+         ],
          "properties":{
+            "copy":[
+            {
+               "name": "backendHttpSettingsCollection",
+               "count": "[length(parameters('httpsListenerNames'))]",
+               "input":
+               {
+
+                  "name": "[concat(parameters('httpsListenerNames')[copyIndex('backendHttpSettingsCollection')], '-', variables('appGwBackendHttpSettingsName'))]",
+                  "properties":
+                  {
+
+                     "Port":"[parameters('backendPort')]",
+                     "Protocol":"[parameters('backendProtocol')]",
+                     "CookieBasedAffinity":"[parameters('cookieBasedAffinity')]",
+                     "hostName": "[concat(parameters('httpsListenerNames')[copyIndex('backendHttpSettingsCollection')], variables('appGwBackendHttpSettingsHostName'))]",
+                     "probeEnabled": true,
+                     "probe":
+                     {
+                        "id": "[variables('appGwProbeRef')]"
+                     }
+                  }
+               }
+            },
+            {
+               "name": "httpListeners",
+               "count": "[length(parameters('httpsListenerNames'))]",
+               "input":
+               {
+
+                  "name":"[concat(parameters('httpsListenerNames')[copyIndex('httpListeners')], '-', variables('appGwHttpsListenerName'))]",
+                  "properties":
+                  {
+
+                     "FrontendIpConfiguration":{
+                        "Id":"[concat(variables('appGwId'), '/frontendIPConfigurations/', variables('appGwFrontendIPConfigName'))]"
+                     },
+                     "FrontendPort":{
+                        "Id":"[concat(variables('appGwId'), '/frontendPorts/', variables('appGwFrontendPortName'))]"
+                     },
+                     "Protocol":"[parameters('frontendProtocol')]",
+                     "SslCertificate":"[variables('appGwSSLCertId')]",  
+                     "hostName": "[concat(parameters('httpsListenerNames')[copyIndex('httpListeners')], variables('appGwHttpsListenerHostName'))]"
+                  }
+               }
+            },
+            {
+               "name": "requestRoutingRules",
+               "count": "[length(parameters('httpsListenerNames'))]",
+               "input":
+               {
+
+                  "name":"[concat(parameters('httpsListenerNames')[copyIndex('requestRoutingRules')], '-', variables('appGwHttpsRuleName'))]",
+                  "properties":
+                  {
+
+                     "RuleType": "Basic",
+                     "httpListener": {
+                        "id": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', parameters('applicationGatewayName'), concat(parameters('httpsListenerNames')[copyIndex('requestRoutingRules')], '-', variables('appGwHttpsListenerName')))]"
+                     },
+                     "backendAddressPool": {
+                        "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', parameters('applicationGatewayName'), variables('appGwBackendPoolName'))]"
+                     },                        
+                     "backendHttpSettings": {
+                        "id": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', parameters('applicationGatewayName'), concat(parameters('httpsListenerNames')[copyIndex('requestRoutingRules')], '-', variables('appGwBackendHttpSettingsName')))]"
+                     }
+                  }
+               }
+            }],
             "sku":{
                "name":"[variables('appGwSize')]",
                "tier":"[variables('appGwTier')]"
-            },            
+            },
             "autoscaleConfiguration":{
                "minCapacity":"[parameters('minCapacity')]"
             },
-            "trustedRootCertificates": [
-            {      
-                  "name": "[variables('appGwTrustedRootCertName')]",
-                  "properties": {                     
-                     "data": "[parameters('rootCertData')]"
-                  }
-               }
-            ],
             "sslCertificates": [{
                "name": "[variables('appGwSSLCertName')]",
                "properties": {
@@ -169,10 +244,10 @@
                   "name":"[variables('appGwFrontendIPConfigName')]",
                   "properties":{
                      "PublicIPAddress":{
-                        "id":"[variables('appGwPublicIpRef')]"                        
-                     }                     
+                        "id":"[variables('appGwPublicIpRef')]"
+                     }
                   }
-               }               
+               }
             ],
             "frontendPorts":[
                {
@@ -180,19 +255,20 @@
                   "properties":{
                      "Port":"[parameters('frontendPort')]"
                   }
-               }
+               }               
             ],
             "probes": [
                {
-                  "name": "[variables('appGwProbeName')]",                  
+                  "name": "[variables('appGwProbeName')]",
                   "properties": {
-                     "protocol": "https",                     
-                     "path": "/",
+                     "protocol": "http",
+                     "path": "[parameters('healthProbePath')]",
                      "interval": 30,
                      "timeout": 30,
                      "unhealthyThreshold": 3,
-                     "pickHostNameFromBackendHttpSettings": true,
-                     "port": "[parameters('backendPort')]"                     
+                     "pickHostNameFromBackendHttpSettings": false,
+                     "host": "[parameters('healthProbeHostName')]",
+                     "port": "[parameters('backendPort')]"
                   }
                }
             ],
@@ -200,117 +276,13 @@
                {
                   "name":"[variables('appGwBackendPoolName')]",
                   "properties":{
-                        "BackendAddresses":[{                           
-                           "ipAddress": "[parameters('backendIpAddress1')]"
+                        "BackendAddresses":[{
+                           "ipAddress": "[parameters('backendIpAddress')]"
                         }]
                   }
                }
-            ],
-            "backendHttpSettingsCollection":[
-               {
-                  "name":"[variables('appGwBackendDEVHttpSettings')]",
-                  "properties":{
-                     "Port":"[parameters('backendPort')]",
-                     "Protocol":"Https",
-                     "CookieBasedAffinity":"[parameters('cookieBasedAffinity')]",
-                     "hostName": "[variables('appGwBackendDEVHttpSettingsHostName')]",
-                     "probeEnabled": true,
-                     "probe":
-                     {
-                        "id": "[variables('appGwProbeRef')]"
-                     },
-                     "trustedRootCertificates": [
-                     {
-                        "Id": "[concat(variables('applicationGatewayID'), '/trustedRootCertificates/', variables('appGwTrustedRootCertName'))]"
-                     }]
-                  }
-               },
-               {
-                  "name":"[variables('appGwBackendQAHttpSettings')]",
-                  "properties":{
-                     "Port":"[parameters('backendPort')]",
-                     "Protocol":"Https",
-                     "CookieBasedAffinity":"[parameters('cookieBasedAffinity')]",
-                     "hostName": "[variables('appGwBackendQAHttpSettingsHostName')]",                     
-                     "probeEnabled": true,
-                     "probe":
-                     {
-                        "id": "[variables('appGwProbeRef')]"
-                     },
-                     "trustedRootCertificates": [
-                     {
-                        "Id": "[concat(variables('applicationGatewayID'), '/trustedRootCertificates/', variables('appGwTrustedRootCertName'))]"
-                     }]
-                  }                  
-               }
-            ],
-            "httpListeners":[
-               {
-                  "name":"[variables('appGwDEVHttpListener')]",                  
-                  "properties":{
-                     "FrontendIpConfiguration":{
-                        "Id":"[concat(variables('applicationGatewayID'), '/frontendIPConfigurations/', variables('appGwFrontendIPConfigName'))]"
-                     },
-                     "FrontendPort":{
-                        "Id":"[concat(variables('applicationGatewayID'), '/frontendPorts/', variables('appGwFrontendPortName'))]"
-                     },
-                     "Protocol":"Https",
-                     "SslCertificate": {
-                        "Id": "[concat(variables('applicationGatewayID'), '/sslCertificates/', variables('appGwSSLCertName'))]"
-                     },
-                     "hostName": "[variables('appGwDEVHttpListenerHostName')]" 
-                  }                  
-               },
-               {
-                  "name":"[variables('appGwQAHttpListener')]",                  
-                  "properties":{
-                     "FrontendIpConfiguration":{
-                        "Id":"[concat(variables('applicationGatewayID'), '/frontendIPConfigurations/', variables('appGwFrontendIPConfigName'))]"
-                     },
-                     "FrontendPort":{
-                        "Id":"[concat(variables('applicationGatewayID'), '/frontendPorts/', variables('appGwFrontendPortName'))]"
-                     },
-                     "Protocol":"Https",
-                     "SslCertificate": {
-                        "Id": "[concat(variables('applicationGatewayID'), '/sslCertificates/', variables('appGwSSLCertName'))]"
-                     },
-                     "hostName": "[variables('appGwQAHttpListenerHostName')]" 
-                  }                  
-               }
-            ],
-            "requestRoutingRules":[
-               {
-                  "name":"[variables('appGwDEVRuleName')]",  
-                  "properties": {
-                     "RuleType": "Basic",
-                     "httpListener": {
-                           "id": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', parameters('applicationGatewayName'), variables('appGwDEVHttpListener'))]"
-                        },
-                        "backendAddressPool": {
-                           "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', parameters('applicationGatewayName'), variables('appGwBackendPoolName'))]"
-                        },
-                        "backendHttpSettings": {
-                           "id": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', parameters('applicationGatewayName'), variables('appGwBackendDEVHttpSettings'))]"
-                        }
-                  }
-               },
-               {
-                  "name":"[variables('appGwQARuleName')]",  
-                  "properties": {
-                     "RuleType": "Basic",
-                     "httpListener": {
-                           "id": "[resourceId('Microsoft.Network/applicationGateways/httpListeners', parameters('applicationGatewayName'), variables('appGwQAHttpListener'))]"
-                        },
-                        "backendAddressPool": {
-                           "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', parameters('applicationGatewayName'), variables('appGwBackendPoolName'))]"
-                        },
-                        "backendHttpSettings": {
-                           "id": "[resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', parameters('applicationGatewayName'), variables('appGwBackendQAHttpSettings'))]"
-                        }
-                  }
-               }
-            ]
-         }
+            ]            
+         }         
       }       
    ]
 }
