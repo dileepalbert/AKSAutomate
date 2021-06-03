@@ -242,9 +242,6 @@ Add-AzVirtualNetworkPeering -Name $aksMasterPeeringName -VirtualNetwork $aksVnet
 
 if ($isPrivateCluster -eq "true")
 {
-
-    New-AzRoleAssignment -RoleDefinitionName $privateDNSRole `
-    -ApplicationId $aksSP.ApplicationId -Scope $rgRef.ResourceId
     
     $privateDNSZone = Get-AzPrivateDnsZone -ResourceGroupName $masterResourceGroup `
     -Name $aksPrivateDNSHostName
@@ -260,6 +257,10 @@ if ($isPrivateCluster -eq "true")
             return;
 
         }
+
+        New-AzRoleAssignment -RoleDefinitionName $privateDNSRole `
+        -ApplicationId $aksSP.ApplicationId -Scope $privateDNSZone.ResourceId
+
     }
 
     $masterVNetLink = Get-AzPrivateDnsVirtualNetworkLink -ZoneName $aksPrivateDNSHostName `
