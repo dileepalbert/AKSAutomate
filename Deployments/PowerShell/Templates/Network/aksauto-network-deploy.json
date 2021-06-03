@@ -25,7 +25,13 @@
       },
       "ingressSubnetPrefix": {
         "type": "string"
-      },      
+      },
+      "vrnSubnetName": {
+        "type": "string"
+      },
+      "vrnSubnetPrefix": {
+        "type": "string"
+      },
       "location": {
         "type": "string",
         "defaultValue": "[resourceGroup().location]"
@@ -83,6 +89,21 @@
             ],
             "properties": {
               "addressPrefix": "[parameters('ingressSubnetPrefix')]"
+            }
+          },
+          {
+            "apiVersion": "2018-10-01",
+            "type": "subnets",
+            "location": "[parameters('location')]",
+            "name": "[parameters('vrnSubnetName')]",
+            "dependsOn": [
+              "[parameters('aksVNetName')]",
+              "[parameters('aksSubnetName')]",
+              "[parameters('appgwSubnetName')]",
+              "[parameters('ingressSubnetName')]"
+            ],
+            "properties": {
+              "addressPrefix": "[parameters('vrnSubnetPrefix')]"
             }
           }
         ]
