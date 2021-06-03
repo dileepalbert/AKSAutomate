@@ -1,7 +1,7 @@
 param([Parameter(Mandatory=$true)]  [string] $shouldRemoveAll = "false",
       [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $lwResourceGroup = "monitoring-workshop-rg",
-      [Parameter(Mandatory=$false)] [string] $masterResourceGroup = "master-workshop-rg",      
+      [Parameter(Mandatory=$false)] [string] $masterResourceGroup = "master-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
       [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
       [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
@@ -10,7 +10,7 @@ param([Parameter(Mandatory=$true)]  [string] $shouldRemoveAll = "false",
       [Parameter(Mandatory=$false)] [string] $masterVNetName = "master-workshop-vnet",
       [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
       [Parameter(Mandatory=$false)] [string] $ingressHostName = "<ingressHostName>",
-      [Parameter(Mandatory=$false)] [string] $baseFolderPath = "<baseFolderPath>")
+      [Parameter(Mandatory=$false)] [string] $subscriptionId = "<subscriptionId>")
 
 $aksSPName = $clusterName + "-sp"
 $subscriptionCommand = "az account set -s $subscriptionId"
