@@ -257,11 +257,10 @@ if ($isPrivateCluster -eq "true")
             return;
 
         }
-
-        New-AzRoleAssignment -RoleDefinitionName $privateDNSRole `
-        -ApplicationId $aksSP.ApplicationId -Scope $privateDNSZone.ResourceId
-
     }
+
+    New-AzRoleAssignment -RoleDefinitionName $privateDNSRole `
+    -ApplicationId $aksSP.ApplicationId -Scope $privateDNSZone.ResourceId
 
     $masterVNetLink = Get-AzPrivateDnsVirtualNetworkLink -ZoneName $aksPrivateDNSHostName `
     -ResourceGroupName $masterResourceGroup -Name $masterVnetAKSLinkName
