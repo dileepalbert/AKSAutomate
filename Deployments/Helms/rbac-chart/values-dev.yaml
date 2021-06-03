@@ -1,0 +1,36 @@
+clusteradmin:
+  name: aks-workshop-cluster-admin-bindings
+  roleName: cluster-admin
+  subjects:
+  - name: cbc856ca-4814-4df5-a53a-43fe4eb8c424
+    kind: Group
+
+manager:
+  roleName: aks-workshop-manager-roles
+  roleNamespace: aks-workshop-dev
+  rules:
+  - apiGroups: ["", "apiextensions.k8s.io", "apps", "autoscaling", "batch", "events.k8s.io", "networking.k8s.io", "policy", "rbac.authorization.k8s.io", "scheduling.k8s.io"]
+    resources: ["configmaps", "endpoints", "events", "limitranges", "persistentvolumeclaims", "pods", "resourcequotas", "serviceaccounts", "namespaces", "services", "customresourcedefinitions", "daemonsets", "deployments", "replicasets", "statefulsets", "horizontalpodautoscalers", "cronjobs", "jobs", "events", "ingresses", "networkpolicies", "poddisruptionbudgets", "rolebindings", "roles", "priorityclasses"]
+    verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["nodes", "pods"]
+    verbs: ["get", "list"]
+  bindingName: aks-workshop-manager-rb
+  bindingNamespace: aks-workshop-dev
+  subjects:
+  - name: bec92a15-7c96-4c4e-ba46-1ac078c53709
+    kind: Group
+
+developer:
+  roleName: aks-workshop-developer-roles
+  roleNamespace: aks-workshop-dev
+  rules:
+  - apiGroups: ["", "apps", "networking.k8s.io"]
+    resources: ["configmaps", "pods", "pods/exec", "pods/log", "deployments", "services", "events", "ingresses"]
+    verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+  bindingName: aks-workshop-developer-rb
+  bindingNamespace: aks-workshop-dev
+  subjects:
+  - name: 5e2e058e-7979-48b9-bc96-126badd9e89a
+    kind: Group
+      
