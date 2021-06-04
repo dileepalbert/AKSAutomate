@@ -34,7 +34,7 @@ $ingControllerFilePath = "$setupFolderPath/Common/$ingControllerFileName.yaml"
 $masterVnetLinkName = "$masterVNetName-dns-plink"
 $aksVnetLinkName = "$aksVNetName-dns-plink"
 
-Creating Private DNS Zone
+# Creating Private DNS Zone
 $privateDNSZone = Get-AzPrivateDnsZone -ResourceGroupName $masterResourceGroup `
 -Name $ingressHostName
 if (!$privateDNSZone)
