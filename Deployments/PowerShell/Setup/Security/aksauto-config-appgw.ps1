@@ -1,4 +1,7 @@
 param([Parameter(Mandatory=$false)] [string] $resourceGroup,
+      [Parameter(Mandatory=$false)] [string] $keyVaultName,
+      [Parameter(Mandatory=$false)] [string] $certDataSecretName,
+      [Parameter(Mandatory=$false)] [string] $certSecretName,
       [Parameter(Mandatory=$false)] [array]  $httpsListeners,
       [Parameter(Mandatory=$false)] [array]  $httpListeners,
       [Parameter(Mandatory=$false)] [string] $appgwName,  
@@ -21,8 +24,15 @@ foreach ($listener in $httpsListeners)
 }
 $processedListeners = $processedListeners -join ","
 
+$certDataInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $certDataSecretName
+$certDataSecuredInfo = $certDataInfo.SecretValue | ConvertFrom-SecureString -AsPlainText
+
+$certPasswordInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $certSecretName
+$certPasswordSecuredInfo = $certPasswordInfo.SecretValue | ConvertFrom-SecureString -AsPlainText
+
 $appgwParameters = "-appgwName $appgwName -vnetName $appgwVNetName -subnetName $appgwSubnetName -httpsListenerNames @($processedListeners) -listenerHostName $listenerHostName -backendPoolHostName $backendPoolHostName -backendIpAddress $backendIpAddress -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath"
-$appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName $appgwParameters"
+$appgwSecuredParameters = "-certDataSecured $certDataSecuredInfo -certSecretSecured $certPasswordSecuredInfo"
+$appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName $appgwParameters $appgwSecuredParameters"
 $appgwDeployPath = $templatesFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
 
@@ -77,7 +87,6 @@ foreach ($listener in $httpListeners)
       }
 
       $httpRuleName = $listener + "-" + $appgwName + "-http-rule"
-
       $httpRule = Get-AzApplicationGatewayRequestRoutingRule -Name $httpRuleName `
       -ApplicationGateway $applicationGateway
 

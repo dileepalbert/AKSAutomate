@@ -7,6 +7,8 @@ param([Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
       [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
       [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
+      [Parameter(Mandatory=$false)] [string] $certDataSecretName = "aks-workshop-appgw-cert-secret",
+      [Parameter(Mandatory=$false)] [string] $certSecretName = "aks-workshop-appgw-cert-password",
       [Parameter(Mandatory=$false)] [string] $masterVNetName = "master-workshop-vnet",
       [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
       [Parameter(Mandatory=$false)] [string] $ingressSubnetName = "aks-workshop-ing-subnet",
@@ -32,7 +34,7 @@ $ingControllerFilePath = "$setupFolderPath/Common/$ingControllerFileName.yaml"
 $masterVnetLinkName = "$masterVNetName-dns-plink"
 $aksVnetLinkName = "$aksVNetName-dns-plink"
 
-# Creating Private DNS Zone
+Creating Private DNS Zone
 $privateDNSZone = Get-AzPrivateDnsZone -ResourceGroupName $masterResourceGroup `
 -Name $ingressHostName
 if (!$privateDNSZone)
@@ -156,7 +158,7 @@ $ingressHostName = "." + $ingressHostName
 $listenerHostName = "." + $listenerHostName
 
 $appgwParameters = "-httpListeners @($processedHttpListeners) -httpsListeners @($processedHttpsListeners) -appgwName $appgwName -appgwVNetName $aksVNetName -appgwSubnetName $appgwSubnetName -appgwTemplateFileName $appgwTemplateFileName -backendIpAddress $ingressControllerIPAddress -backendPoolHostName $ingressHostName -listenerHostName $listenerHostName -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath -baseFolderPath $baseFolderPath"
-$appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup $appgwParameters"
+$appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup $appgwParameters -keyVaultName $keyVaultName -certDataSecretName $certDataSecretName -certSecretName $certSecretName"
 $appgwDeployPath = $securityFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
 

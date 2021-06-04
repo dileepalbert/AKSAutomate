@@ -9,11 +9,15 @@ param([Parameter(Mandatory=$false)] [string] $rg,
       [Parameter(Mandatory=$false)] [string] $backendPoolHostName,
       [Parameter(Mandatory=$false)] [string] $backendIpAddress,
       [Parameter(Mandatory=$false)] [string] $healthProbeHostName,
-      [Parameter(Mandatory=$false)] [string] $healthProbePath)
+      [Parameter(Mandatory=$false)] [string] $healthProbePath,
+      [Parameter(Mandatory=$false)] [string] $certDataSecured,
+      [Parameter(Mandatory=$false)] [string] $certSecretSecured)
+
+$certData = $certDataSecured | ConvertTo-SecureString -AsPlainText -Force
+$certPassword = $certSecretSecured | ConvertTo-SecureString -AsPlainText -Force
 
 Test-AzResourceGroupDeployment -ResourceGroupName $rg `
 -TemplateFile "$fpath/AppGW/$deployFileName.json" `
--TemplateParameterFile "$fpath/AppGW/$deployFileName.parameters.json" `
 -applicationGatewayName $appgwName `
 -vnetName $vnetName -subnetName $subnetName `
 -httpsListenerNames $httpsListenerNames `
@@ -21,11 +25,11 @@ Test-AzResourceGroupDeployment -ResourceGroupName $rg `
 -backendPoolHostName $backendPoolHostName `
 -backendIpAddress $backendIpAddress `
 -healthProbeHostName $healthProbeHostName `
--healthProbePath $healthProbePath
+-healthProbePath $healthProbePath `
+-certData $certData -certPassword $certPassword
 
 New-AzResourceGroupDeployment -ResourceGroupName $rg `
 -TemplateFile "$fpath/AppGW/$deployFileName.json" `
--TemplateParameterFile "$fpath/AppGW/$deployFileName.parameters.json" `
 -applicationGatewayName $appgwName `
 -vnetName $vnetName -subnetName $subnetName `
 -httpsListenerNames $httpsListenerNames `
@@ -33,4 +37,5 @@ New-AzResourceGroupDeployment -ResourceGroupName $rg `
 -backendPoolHostName $backendPoolHostName `
 -backendIpAddress $backendIpAddress `
 -healthProbeHostName $healthProbeHostName `
--healthProbePath $healthProbePath
+-healthProbePath $healthProbePath `
+-certData $certData -certPassword $certPassword
