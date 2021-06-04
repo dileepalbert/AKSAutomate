@@ -28,39 +28,44 @@ param([Parameter(Mandatory=$true)]  [string] $mode = "create",
 $aksSPIdName = $clusterName + "-sp-id"
 $aksSPSecretName = $clusterName + "-sp-secret"
 
-$keyVault = Get-AzKeyVault -ResourceGroupName $resourceGroup `
--VaultName $keyVaultName
-if (!$keyVault)
+if ($keyVaultName)
 {
 
-    Write-Host "Error fetching KeyVault"
-    return;
+    $keyVault = Get-AzKeyVault -ResourceGroupName $resourceGroup `
+    -VaultName $keyVaultName
+    if (!$keyVault)
+    {
 
+        Write-Host "Error fetching KeyVault"
+        return;
+
+    }
+
+    $spAppId = Get-AzKeyVaultSecret -VaultName $keyVaultName `
+    -Name $aksSPIdName
+    if (!$spAppId)
+    {
+
+        Write-Host "Error fetching Service Principal Id"
+        return;
+
+    }
+    $spAppId = ConvertFrom-SecureString $spAppId.SecretValue `
+    -AsPlainText
+
+    $spPassword = Get-AzKeyVaultSecret -VaultName $keyVaultName `
+    -Name $aksSPSecretName
+    if (!$spPassword)
+    {
+
+        Write-Host "Error fetching Service Principal Password"
+        return;
+
+    }
+    $spPassword = ConvertFrom-SecureString $spPassword.SecretValue `
+    -AsPlainText
+    
 }
-
-$spAppId = Get-AzKeyVaultSecret -VaultName $keyVaultName `
--Name $aksSPIdName
-if (!$spAppId)
-{
-
-    Write-Host "Error fetching Service Principal Id"
-    return;
-
-}
-$spAppId = ConvertFrom-SecureString $spAppId.SecretValue `
--AsPlainText
-
-$spPassword = Get-AzKeyVaultSecret -VaultName $keyVaultName `
--Name $aksSPSecretName
-if (!$spPassword)
-{
-
-    Write-Host "Error fetching Service Principal Password"
-    return;
-
-}
-$spPassword = ConvertFrom-SecureString $spPassword.SecretValue `
--AsPlainText
 
 if ($mode -eq "create")
 {
