@@ -1,13 +1,13 @@
 param([Parameter(Mandatory=$true)]  [string] $mode,
       [Parameter(Mandatory=$true)]  [string] $nodePoolName = "<nodePoolName>",
-      [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",      
-      [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",      
+      [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
+      [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
       [Parameter(Mandatory=$false)] [string] $version = "1.18.17",
       [Parameter(Mandatory=$false)] [string] $nodeCount = 3,
       [Parameter(Mandatory=$false)] [string] $minNodeCount = $nodeCount,
       [Parameter(Mandatory=$false)] [string] $maxNodeCount = 20,
-      [Parameter(Mandatory=$false)] [string] $maxPods = 40,      
-      [Parameter(Mandatory=$false)] [string] $nodePoolVMSize = "Standard_DS3_V2",              
+      [Parameter(Mandatory=$false)] [string] $maxPods = 40,
+      [Parameter(Mandatory=$false)] [string] $nodePoolVMSize = "Standard_DS3_V2",
       [Parameter(Mandatory=$false)] [string] $osType = "Linux",
       [Parameter(Mandatory=$false)] [string] $nodepoolMode = "User")
 
