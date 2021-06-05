@@ -1,0 +1,12 @@
+ingress:
+  name: smoke-ingress
+  namespace: smoke
+  annotations:
+   ingressClass: nginx
+   enableCors: "true"
+  hosts:
+  - name: smoke.internal.wkshpdev.com
+    paths:
+    - path: /nginx/?(.*)
+      service: nginx-svc
+      port: 80
