@@ -44,7 +44,7 @@ $templatesFolderPath = $baseFolderPath + "/PowerShell/Templates"
 $certSecretName = $appgwName + "-cert-secret"
 $certPFXFilePath = $baseFolderPath + "/Certs/$pfxCertFileName.pfx"
 
-$rootCertSecretName = $appgwName + "-root-cert-secret"
+$rootCertDataSecretName = $appgwName + "-root-cert-secret"
 $certCERFilePath = $baseFolderPath + "/Certs/$rootCertFileName.cer"
 
 # Assuming Logged In
@@ -217,11 +217,11 @@ if ($rootCertFileName)
     -AsPlainText -Force
 
     $certCERInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName `
-    -Name $rootCertSecretName
+    -Name $rootCertDataSecretName
     if (!$certCERInfo)
     {
 
-        Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertSecretName `
+        Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertDataSecretName `
         -SecretValue $certCERContentsSecure
         
     }

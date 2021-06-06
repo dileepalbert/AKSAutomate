@@ -9,7 +9,7 @@ param([Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$true)]  [string] $keyVaultName = "aks-workshop-kv",
       [Parameter(Mandatory=$true)]  [string] $certDataSecretName = "aks-workshop-appgw-cert-secret",
       [Parameter(Mandatory=$true)]  [string] $certSecretName = "aks-workshop-appgw-cert-password",
-      [Parameter(Mandatory=$false)] [string] $rootCertSecretName = "aks-workshop-appgw-root-cert-secret",
+      [Parameter(Mandatory=$false)] [string] $rootCertDataSecretName = "aks-workshop-appgw-root-cert-secret",
       [Parameter(Mandatory=$true)]  [string] $masterVNetName = "master-workshop-vnet",
       [Parameter(Mandatory=$true)]  [string] $aksVNetName = "aks-workshop-vnet",
       [Parameter(Mandatory=$true)]  [string] $ingressSubnetName = "aks-workshop-ing-subnet",
@@ -160,10 +160,10 @@ $listenerHostName = "." + $listenerHostName
 
 $appgwParameters = "-httpListeners @($processedHttpListeners) -httpsListeners @($processedHttpsListeners) -appgwName $appgwName -appgwVNetName $aksVNetName -appgwSubnetName $appgwSubnetName -appgwTemplateFileName $appgwTemplateFileName -backendIpAddress $ingressControllerIPAddress -backendPoolHostName $ingressHostName -listenerHostName $listenerHostName -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath -baseFolderPath $baseFolderPath"
 $appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup $appgwParameters -keyVaultName $keyVaultName -certDataSecretName $certDataSecretName -certSecretName $certSecretName"
-if ($rootCertSecretName)
+if ($rootCertDataSecretName)
 {
 
-      $appgwDeployCommand = $appgwDeployCommand + " -rootCertDataSecretName $rootCertSecretName"
+      $appgwDeployCommand = $appgwDeployCommand + " -rootCertDataSecretName $rootCertDataSecretName"
 
 }
 $appgwDeployPath = $securityFolderPath + $appgwDeployCommand

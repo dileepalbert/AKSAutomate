@@ -2,7 +2,7 @@ param([Parameter(Mandatory=$true)] [string] $resourceGroup,
       [Parameter(Mandatory=$true)] [string] $keyVaultName,
       [Parameter(Mandatory=$true)] [string] $certDataSecretName,
       [Parameter(Mandatory=$true)] [string] $certSecretName,
-      [Parameter(Mandatory=$true)] [string] $rootCertSecretName,
+      [Parameter(Mandatory=$true)] [string] $rootCertDataSecretName,
       [Parameter(Mandatory=$true)] [array]  $httpsListeners,
       [Parameter(Mandatory=$true)] [array]  $httpListeners,
       [Parameter(Mandatory=$true)] [string] $appgwName,  
@@ -32,7 +32,7 @@ $certPasswordInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $certSec
 $certPasswordSecuredInfo = $certPasswordInfo.SecretValue | ConvertFrom-SecureString -AsPlainText
 
 $appgwParameters = "-appgwName $appgwName -vnetName $appgwVNetName -subnetName $appgwSubnetName -httpsListenerNames @($processedListeners) -listenerHostName $listenerHostName -backendPoolHostName $backendPoolHostName -backendIpAddress $backendIpAddress -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath"
-if ($rootCertSecretName)
+if ($rootCertDataSecretName)
 {
 
       $appgwParameters = $appgwParameters + " -backendProtocol Https"
@@ -53,12 +53,12 @@ if (!$applicationGateway)
 
 }
 
-if ($rootCertSecretName)
+if ($rootCertDataSecretName)
 {
 
-      $rootCertDataInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertSecretName
+      $rootCertDataInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertDataSecretName
       $keyvaultSecretId = $rootCertDataInfo.Id
-      $appgwRootCertCommand = "az network application-gateway root-cert create --gateway-name $appgwName --name $rootCertSecretName --resource-group $resourceGroup --keyvault-secret $keyvaultSecretId"
+      $appgwRootCertCommand = "az network application-gateway root-cert create --gateway-name $appgwName --name $rootCertDataSecretName --resource-group $resourceGroup --keyvault-secret $keyvaultSecretId"
       Invoke-Expression -Command $appgwRootCertCommand
 
 }
