@@ -261,7 +261,7 @@
                {
                   "name": "[variables('appGwProbeName')]",
                   "properties": {
-                     "protocol": "http",
+                     "protocol": "[parameters('backendProtocol')]",
                      "path": "[parameters('healthProbePath')]",
                      "interval": 30,
                      "timeout": 30,

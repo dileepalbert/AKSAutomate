@@ -32,6 +32,13 @@ $certPasswordInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $certSec
 $certPasswordSecuredInfo = $certPasswordInfo.SecretValue | ConvertFrom-SecureString -AsPlainText
 
 $appgwParameters = "-appgwName $appgwName -vnetName $appgwVNetName -subnetName $appgwSubnetName -httpsListenerNames @($processedListeners) -listenerHostName $listenerHostName -backendPoolHostName $backendPoolHostName -backendIpAddress $backendIpAddress -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath"
+if ($rootCertSecretName)
+{
+
+      $appgwParameters = $appgwParameters + " -backendProtocol Https"
+
+}
+
 $appgwSecuredParameters = "-certDataSecured $certDataSecuredInfo -certSecretSecured $certPasswordSecuredInfo"
 $appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName $appgwParameters $appgwSecuredParameters"
 $appgwDeployPath = $templatesFolderPath + $appgwDeployCommand
