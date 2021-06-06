@@ -30,40 +30,32 @@ $aksSPSecretName = $clusterName + "-sp-secret"
 
 $keyVault = Get-AzKeyVault -ResourceGroupName $resourceGroup `
 -VaultName $keyVaultName
-if (!$keyVault)
+if ($keyVault)
 {
 
-    Write-Host "Error fetching KeyVault"
-    return;
+    $spAppId = Get-AzKeyVaultSecret -VaultName $keyVaultName `
+    -Name $aksSPIdName
+    $spAppId = ConvertFrom-SecureString $spAppId.SecretValue `
+    -AsPlainText
+
+    $spPassword = Get-AzKeyVaultSecret -VaultName $keyVaultName `
+    -Name $aksSPSecretName
+
+    $spPassword = ConvertFrom-SecureString $spPassword.SecretValue `
+    -AsPlainText
 
 }
-
-$spAppId = Get-AzKeyVaultSecret -VaultName $keyVaultName `
--Name $aksSPIdName
-if (!$spAppId)
-{
-
-    Write-Host "Error fetching Service Principal Id"
-    return;
-
-}
-$spAppId = ConvertFrom-SecureString $spAppId.SecretValue `
--AsPlainText
-
-$spPassword = Get-AzKeyVaultSecret -VaultName $keyVaultName `
--Name $aksSPSecretName
-if (!$spPassword)
-{
-
-    Write-Host "Error fetching Service Principal Password"
-    return;
-
-}
-$spPassword = ConvertFrom-SecureString $spPassword.SecretValue `
--AsPlainText
 
 if ($mode -eq "create")
 {
+
+    if (!$spAppId || !$spPassword)
+    {
+
+        Write-Host "Error fetching Service Principal Info"
+        return;
+
+    }
 
     $aksVnet = Get-AzVirtualNetwork -Name $aksVNetName `
     -ResourceGroupName $resourceGroup
@@ -152,6 +144,14 @@ elseif ($mode -eq "aad")
 elseif ($mode -eq "sp")
 {
 
+    if (!$spAppId || !$spPassword)
+    {
+
+        Write-Host "Error fetching Service Principal Info"
+        return;
+
+    }
+    
     $aksSPCommand = "az aks update-credentials --name $clusterName --resource-group $resourceGroup --reset-service-principal --service-principal $spAppId --client-secret $spPassword"
 
     Write-Host "Updating Service Principal for the Cluster... $clusterName"    

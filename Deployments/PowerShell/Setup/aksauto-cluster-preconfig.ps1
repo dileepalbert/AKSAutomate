@@ -1,35 +1,35 @@
 param([Parameter(Mandatory=$true)]  [string] $isPrivateCluster = "false",
-      [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
-      [Parameter(Mandatory=$false)] [string] $lwResourceGroup = "monitoring-workshop-rg",
-      [Parameter(Mandatory=$false)] [string] $masterResourceGroup = "master-workshop-rg",
-      [Parameter(Mandatory=$false)] [string] $location = "eastus",
-      [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
-      [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
-      [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
-      [Parameter(Mandatory=$false)] [string] $logworkspaceName = "aks-workshop-lw",
-      [Parameter(Mandatory=$false)] [string] $appgwName = "aks-workshop-appgw",
-      [Parameter(Mandatory=$false)] [string] $masterVNetName = "master-workshop-vnet",
-      [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
-      [Parameter(Mandatory=$false)] [string] $aksVNetPrefix = "12.0.0.0/16",
-      [Parameter(Mandatory=$false)] [string] $aksSubnetName = "aks-workshop-subnet",
-      [Parameter(Mandatory=$false)] [string] $aksSubNetPrefix = "12.0.0.0/22",
-      [Parameter(Mandatory=$false)] [string] $appgwSubnetName = "aks-workshop-appgw-subnet",
-      [Parameter(Mandatory=$false)] [string] $appgwSubnetPrefix = "12.0.4.0/27",
-      [Parameter(Mandatory=$false)] [string] $ingressSubnetName = "aks-workshop-ing-subnet",
-      [Parameter(Mandatory=$false)] [string] $ingressSubnetPrefix = "12.0.5.0/24",
-      [Parameter(Mandatory=$false)] [string] $vrnSubnetName = "vrn-workshop-subnet",
-      [Parameter(Mandatory=$false)] [string] $vrnSubnetPrefix = "12.0.7.0/24",
-      [Parameter(Mandatory=$false)] [string] $aksPrivateDNSHostName = "aks.private.wkshpdev.com",
-      [Parameter(Mandatory=$false)] [string] $networkTemplateFileName = "aksauto-network-deploy",
-      [Parameter(Mandatory=$false)] [string] $acrTemplateFileName = "aksauto-acr-deploy",
-      [Parameter(Mandatory=$false)] [string] $kvTemplateFileName = "aksauto-keyvault-deploy",
-      [Parameter(Mandatory=$false)] [string] $pfxCertFileName = "<pfxCertFileName>",
+      [Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
+      [Parameter(Mandatory=$true)]  [string] $lwResourceGroup = "monitoring-workshop-rg",
+      [Parameter(Mandatory=$true)]  [string] $masterResourceGroup = "master-workshop-rg",
+      [Parameter(Mandatory=$true)]  [string] $location = "eastus",
+      [Parameter(Mandatory=$true)]  [string] $clusterName = "aks-workshop-cluster",
+      [Parameter(Mandatory=$true)]  [string] $acrName = "akswkshpacr",
+      [Parameter(Mandatory=$true)]  [string] $keyVaultName = "aks-workshop-kv",
+      [Parameter(Mandatory=$true)]  [string] $logworkspaceName = "aks-workshop-lw",
+      [Parameter(Mandatory=$true)]  [string] $appgwName = "aks-workshop-appgw",
+      [Parameter(Mandatory=$true)]  [string] $masterVNetName = "master-workshop-vnet",
+      [Parameter(Mandatory=$true)]  [string] $aksVNetName = "aks-workshop-vnet",
+      [Parameter(Mandatory=$true)]  [string] $aksVNetPrefix = "12.0.0.0/16",
+      [Parameter(Mandatory=$true)]  [string] $aksSubnetName = "aks-workshop-subnet",
+      [Parameter(Mandatory=$true)]  [string] $aksSubNetPrefix = "12.0.0.0/22",
+      [Parameter(Mandatory=$true)]  [string] $appgwSubnetName = "aks-workshop-appgw-subnet",
+      [Parameter(Mandatory=$true)]  [string] $appgwSubnetPrefix = "12.0.4.0/27",
+      [Parameter(Mandatory=$true)]  [string] $ingressSubnetName = "aks-workshop-ing-subnet",
+      [Parameter(Mandatory=$true)]  [string] $ingressSubnetPrefix = "12.0.5.0/24",
+      [Parameter(Mandatory=$true)]  [string] $vrnSubnetName = "vrn-workshop-subnet",
+      [Parameter(Mandatory=$true)]  [string] $vrnSubnetPrefix = "12.0.7.0/24",
+      [Parameter(Mandatory=$true)]  [string] $aksPrivateDNSHostName = "aks.private.wkshpdev.com",
+      [Parameter(Mandatory=$true)]  [string] $networkTemplateFileName = "aksauto-network-deploy",
+      [Parameter(Mandatory=$true)]  [string] $acrTemplateFileName = "aksauto-acr-deploy",
+      [Parameter(Mandatory=$true)]  [string] $kvTemplateFileName = "aksauto-keyvault-deploy",
+      [Parameter(Mandatory=$true)]  [string] $pfxCertFileName = "<pfxCertFileName>",
       [Parameter(Mandatory=$false)] [string] $rootCertFileName = "<rootCertFileName>",
-      [Parameter(Mandatory=$false)] [string] $subscriptionId = "<subscriptionId>",
-      [Parameter(Mandatory=$false)] [array]  $aadAdminGroupIDs = @("<aadAdminGroupID>"),
-      [Parameter(Mandatory=$false)] [string] $aadTenantID = "<aadTenantID>",
-      [Parameter(Mandatory=$false)] [string] $objectId = "<objectId>",
-      [Parameter(Mandatory=$false)] [string] $baseFolderPath = "<baseFolderPath>")
+      [Parameter(Mandatory=$true)]  [string] $subscriptionId = "<subscriptionId>",
+      [Parameter(Mandatory=$true)]  [array]  $aadAdminGroupIDs = @("<aadAdminGroupID>"),
+      [Parameter(Mandatory=$true)]  [string] $aadTenantID = "<aadTenantID>",
+      [Parameter(Mandatory=$true)]  [string] $objectId = "<objectId>",
+      [Parameter(Mandatory=$true)]  [string] $baseFolderPath = "<baseFolderPath>")
 
 $vnetRole = "Network Contributor"
 $privateDNSRole = "private dns zone contributor"
@@ -208,19 +208,23 @@ if (!$certPFXInfo)
 
 }
 
-$certCERBytes = [System.IO.File]::ReadAllBytes($certCERFilePath)
-$certCERContents = [Convert]::ToBase64String($certCERBytes)
-$certCERContentsSecure = ConvertTo-SecureString -String $certCERContents `
--AsPlainText -Force
-
-$certCERInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName `
--Name $rootCertSecretName
-if (!$certCERInfo)
+if ($rootCertFileName)
 {
 
-    Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertSecretName `
-    -SecretValue $certCERContentsSecure
-    
+    $certCERBytes = [System.IO.File]::ReadAllBytes($certCERFilePath)
+    $certCERContents = [Convert]::ToBase64String($certCERBytes)
+    $certCERContentsSecure = ConvertTo-SecureString -String $certCERContents `
+    -AsPlainText -Force
+
+    $certCERInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName `
+    -Name $rootCertSecretName
+    if (!$certCERInfo)
+    {
+
+        Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertSecretName `
+        -SecretValue $certCERContentsSecure
+        
+    }
 }
 
 $masterVnet = Get-AzVirtualNetwork -Name $masterVNetName `
