@@ -2,7 +2,7 @@ param([Parameter(Mandatory=$false)] [string] $resourceGroup,
       [Parameter(Mandatory=$false)] [string] $keyVaultName,
       [Parameter(Mandatory=$false)] [string] $certDataSecretName,
       [Parameter(Mandatory=$false)] [string] $certSecretName,
-      [Parameter(Mandatory=$false)] [string] $rootCertSecretName,
+      [Parameter(Mandatory=$false)] [string] $rootCertDataSecretName,
       [Parameter(Mandatory=$false)] [array]  $httpsListeners,
       [Parameter(Mandatory=$false)] [array]  $httpListeners,
       [Parameter(Mandatory=$false)] [string] $appgwName,  
@@ -46,12 +46,12 @@ if (!$applicationGateway)
 
 }
 
-if ($rootCertSecretName)
+if ($rootCertDataSecretName)
 {
 
-      $rootCertDataInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertSecretName
+      $rootCertDataInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertDataSecretName
       $keyvaultSecretId = $rootCertDataInfo.Id
-      $appgwRootCertCommand = "az network application-gateway root-cert create --gateway-name $appgwName --name $rootCertSecretName --resource-group $resourceGroup --keyvault-secret $keyvaultSecretId"
+      $appgwRootCertCommand = "az network application-gateway root-cert create --gateway-name $appgwName --name $rootCertDataSecretName --resource-group $resourceGroup --keyvault-secret $keyvaultSecretId"
       Invoke-Expression -Command $appgwRootCertCommand
 
 }

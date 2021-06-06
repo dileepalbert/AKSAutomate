@@ -24,7 +24,6 @@ param([Parameter(Mandatory=$true)]  [string] $isPrivateCluster = "false",
       [Parameter(Mandatory=$false)] [string] $acrTemplateFileName = "aksauto-acr-deploy",
       [Parameter(Mandatory=$false)] [string] $kvTemplateFileName = "aksauto-keyvault-deploy",
       [Parameter(Mandatory=$false)] [string] $pfxCertFileName = "<pfxCertFileName>",
-      [Parameter(Mandatory=$false)] [string] $rootCertFileName = "<rootCertFileName>",
       [Parameter(Mandatory=$false)] [string] $subscriptionId = "<subscriptionId>",
       [Parameter(Mandatory=$false)] [array]  $aadAdminGroupIDs = @("<aadAdminGroupID>"),
       [Parameter(Mandatory=$false)] [string] $aadTenantID = "<aadTenantID>",
@@ -43,9 +42,6 @@ $masterVnetAKSLinkName = "$masterVNetName-aks-dns-plink"
 $templatesFolderPath = $baseFolderPath + "/PowerShell/Templates"
 $certSecretName = $appgwName + "-cert-secret"
 $certPFXFilePath = $baseFolderPath + "/Certs/$pfxCertFileName.pfx"
-
-$rootCertSecretName = $appgwName + "-root-cert-secret"
-$certCERFilePath = $baseFolderPath + "/Certs/$rootCertFileName.cer"
 
 # Assuming Logged In
 
@@ -206,21 +202,6 @@ if (!$certPFXInfo)
     Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $certSecretName `
     -SecretValue $certPFXContentsSecure
 
-}
-
-$certCERBytes = [System.IO.File]::ReadAllBytes($certCERFilePath)
-$certCERContents = [Convert]::ToBase64String($certCERBytes)
-$certCERContentsSecure = ConvertTo-SecureString -String $certCERContents `
--AsPlainText -Force
-
-$certCERInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName `
--Name $rootCertSecretName
-if (!$certCERInfo)
-{
-
-    Set-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertSecretName `
-    -SecretValue $certCERContentsSecure
-    
 }
 
 $masterVnet = Get-AzVirtualNetwork -Name $masterVNetName `
