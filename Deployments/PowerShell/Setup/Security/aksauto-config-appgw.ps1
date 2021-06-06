@@ -2,6 +2,7 @@ param([Parameter(Mandatory=$false)] [string] $resourceGroup,
       [Parameter(Mandatory=$false)] [string] $keyVaultName,
       [Parameter(Mandatory=$false)] [string] $certDataSecretName,
       [Parameter(Mandatory=$false)] [string] $certSecretName,
+      [Parameter(Mandatory=$false)] [string] $rootCertDataSecretName,
       [Parameter(Mandatory=$false)] [array]  $httpsListeners,
       [Parameter(Mandatory=$false)] [array]  $httpListeners,
       [Parameter(Mandatory=$false)] [string] $appgwName,  
@@ -42,6 +43,16 @@ if (!$applicationGateway)
 
       Write-Host "Error fetching Application Gateway"
       return;
+
+}
+
+if ($rootCertDataSecretName)
+{
+
+      $rootCertDataInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertDataSecretName
+      $keyvaultSecretId = $rootCertDataInfo.Id
+      $appgwRootCertCommand = "az network application-gateway root-cert create --gateway-name $appgwName --name $rootCertDataSecretName --resource-group $resourceGroup --keyvault-secret $keyvaultSecretId"
+      Invoke-Expression -Command $appgwRootCertCommand
 
 }
 
