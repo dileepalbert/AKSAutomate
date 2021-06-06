@@ -6,7 +6,7 @@ metadata:
   namespace: {{ $ingress.namespace }}  
   annotations:
     kubernetes.io/ingress.class: {{ $ingress.annotations.ingressClass }}
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/rewrite-target: /ratingsapi/v1/$1
     nginx.ingress.kubernetes.io/enable-cors: {{ $ingress.annotations.enableCors | quote }}
   {{ if $ingress.proxyBodySize }}
     nginx.ingress.kubernetes.io/proxy-body-size: {{ $ingress.annotations.proxyBodySize | quote }}
