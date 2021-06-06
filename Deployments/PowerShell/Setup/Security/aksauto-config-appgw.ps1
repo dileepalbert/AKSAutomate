@@ -35,7 +35,7 @@ $appgwParameters = "-appgwName $appgwName -vnetName $appgwVNetName -subnetName $
 if ($rootCertDataSecretName)
 {
 
-      $appgwParameters = $appgwParameters + " -backendProtocol Https"
+      $appgwParameters = $appgwParameters + " -backendProtocol Https -backendPort 443"
 
 }
 
