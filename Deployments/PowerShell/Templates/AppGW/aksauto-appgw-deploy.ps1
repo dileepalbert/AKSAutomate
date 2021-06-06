@@ -8,6 +8,7 @@ param([Parameter(Mandatory=$false)] [string] $rg,
       [Parameter(Mandatory=$false)] [string] $listenerHostName,
       [Parameter(Mandatory=$false)] [string] $backendPoolHostName,
       [Parameter(Mandatory=$false)] [string] $backendIpAddress,
+      [Parameter(Mandatory=$false)] [string] $backendProtocol,
       [Parameter(Mandatory=$false)] [string] $healthProbeHostName,
       [Parameter(Mandatory=$false)] [string] $healthProbePath,
       [Parameter(Mandatory=$false)] [string] $certDataSecured,
@@ -24,6 +25,7 @@ Test-AzResourceGroupDeployment -ResourceGroupName $rg `
 -listenerHostName $listenerHostName `
 -backendPoolHostName $backendPoolHostName `
 -backendIpAddress $backendIpAddress `
+-backendProtocol $backendProtocol `
 -healthProbeHostName $healthProbeHostName `
 -healthProbePath $healthProbePath `
 -certData $certData -certPassword $certPassword
@@ -36,6 +38,7 @@ New-AzResourceGroupDeployment -ResourceGroupName $rg `
 -listenerHostName $listenerHostName `
 -backendPoolHostName $backendPoolHostName `
 -backendIpAddress $backendIpAddress `
+-backendProtocol $backendProtocol `
 -healthProbeHostName $healthProbeHostName `
 -healthProbePath $healthProbePath `
 -certData $certData -certPassword $certPassword
