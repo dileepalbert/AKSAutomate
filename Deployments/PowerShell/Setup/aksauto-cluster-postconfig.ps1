@@ -9,7 +9,7 @@ param([Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
       [Parameter(Mandatory=$false)] [string] $certDataSecretName = "aks-workshop-appgw-cert-secret",
       [Parameter(Mandatory=$false)] [string] $certSecretName = "aks-workshop-appgw-cert-password",
-      [Parameter(Mandatory=$false)] [string] $rootCertDataSecretName = "aks-workshop-appgw-root-cert-secret",
+      [Parameter(Mandatory=$false)] [string] $rootCertSecretName = "aks-workshop-appgw-root-cert-secret",
       [Parameter(Mandatory=$false)] [string] $masterVNetName = "master-workshop-vnet",
       [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
       [Parameter(Mandatory=$false)] [string] $ingressSubnetName = "aks-workshop-ing-subnet",
@@ -159,7 +159,13 @@ $ingressHostName = "." + $ingressHostName
 $listenerHostName = "." + $listenerHostName
 
 $appgwParameters = "-httpListeners @($processedHttpListeners) -httpsListeners @($processedHttpsListeners) -appgwName $appgwName -appgwVNetName $aksVNetName -appgwSubnetName $appgwSubnetName -appgwTemplateFileName $appgwTemplateFileName -backendIpAddress $ingressControllerIPAddress -backendPoolHostName $ingressHostName -listenerHostName $listenerHostName -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath -baseFolderPath $baseFolderPath"
-$appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup $appgwParameters -keyVaultName $keyVaultName -certDataSecretName $certDataSecretName -certSecretName $certSecretName -rootCertDataSecretName $rootCertDataSecretName"
+$appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup $appgwParameters -keyVaultName $keyVaultName -certDataSecretName $certDataSecretName -certSecretName $certSecretName"
+if ($rootCertSecretName)
+{
+
+      $appgwDeployCommand = $appgwDeployCommand + " -rootCertDataSecretName $rootCertSecretName"
+
+}
 $appgwDeployPath = $securityFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
 
