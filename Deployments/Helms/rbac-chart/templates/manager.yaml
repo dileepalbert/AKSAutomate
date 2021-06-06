@@ -4,12 +4,11 @@ metadata:
   name: {{ .Values.manager.roleName }}
   namespace: {{ .Values.manager.roleNamespace }}
 rules:
-- apiGroups: {{ (index .Values.manager.rules 0).apiGroups }}
-  resources: {{ (index .Values.manager.rules 0).resources }}
-  verbs: {{ (index .Values.manager.rules 0).verbs }}
-- apiGroups: {{ (index .Values.manager.rules 1).apiGroups }}
-  resources: {{ (index .Values.manager.rules 1).resources }}
-  verbs: {{ (index .Values.manager.rules 1).verbs }}
+{{- range $rule := .Values.developer.rules}}
+- apiGroups: {{ $rule.apiGroups }}
+  resources: {{ $rule.resources }}
+  verbs: {{ $rule.verbs }}
+{{- end }}
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -22,6 +21,8 @@ roleRef:
   kind: Role
   name: {{ .Values.manager.roleName }}
 subjects:
+{{- range $subject := .Values.developer.subjects}}
 - apiGroup: rbac.authorization.k8s.io
-  name: {{  (index .Values.manager.subjects 0).name }}
-  kind: {{  (index .Values.manager.subjects 0).kind }}
+  name: {{ $subject.name }}
+  kind: {{ $subject.kind }}
+{{- end }}
