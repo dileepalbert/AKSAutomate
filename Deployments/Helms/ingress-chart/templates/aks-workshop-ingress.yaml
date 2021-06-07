@@ -29,9 +29,9 @@ spec:
   {{- range $tls := $ingress.tls }}
   - hosts:
     {{- range $tlsHost := $tls.hosts }}
-    - $tlsHost
+    - {{ $tlsHost | quote }}
     {{- end }}
-    secretName: $tls.secretName
+    secretName: {{ $tls.secretName }}
   {{- end }}
 
   {{ end }}
