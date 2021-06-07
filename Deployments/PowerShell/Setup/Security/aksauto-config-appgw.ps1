@@ -1,4 +1,5 @@
 param([Parameter(Mandatory=$true)] [string] $resourceGroup,
+      [Parameter(Mandatory=$true)] [string] $location,
       [Parameter(Mandatory=$true)] [string] $keyVaultName,
       [Parameter(Mandatory=$true)] [string] $certDataSecretName,
       [Parameter(Mandatory=$true)] [string] $certSecretName,
@@ -13,7 +14,7 @@ param([Parameter(Mandatory=$true)] [string] $resourceGroup,
       [Parameter(Mandatory=$true)] [string] $backendPoolHostName,
       [Parameter(Mandatory=$true)] [string] $listenerHostName,
       [Parameter(Mandatory=$true)] [string] $healthProbeHostName,
-      [Parameter(Mandatory=$true)] [string] $healthProbePath,
+      [Parameter(Mandatory=$true)] [string] $healthProbePath,      
       [Parameter(Mandatory=$true)] [string] $baseFolderPath)
 
 $templatesFolderPath = $baseFolderPath + "/PowerShell/Templates"
@@ -56,8 +57,33 @@ if (!$applicationGateway)
 if ($rootCertDataSecretName)
 {
 
+      $userAssignedIdentityName = $appgwName + "-user-assigned-identity"
+      $userAssignedIdentity = Get-AzUserAssignedIdentity -Name $userAssignedIdentity `
+      -ResourceGroupName $resourceGroup
+      if (!$userAssignedIdentity)
+      {
+
+            $userAssignedIdentity = New-AzUserAssignedIdentity -Name $userAssignedIdentityName `
+            -Location $location -ResourceGroupName $resourceGroup
+
+      }
+
+      Set-AzKeyVaultAccessPolicy -VaultName $keyVaultName -ResourceGroupName $resourceGroup `
+      -PermissionsToSecrets get -ObjectId $userAssignedIdentity.PrincipalId
+
+      $appgwIdentity = Get-AzApplicationGatewayIdentity -ApplicationGateway $applicationGateway
+      if (!$appgwIdentity)
+      {
+
+            $appgwIdentity =  New-AzApplicationGatewayIdentity `
+            -UserAssignedIdentityId $userAssignedIdentity.Id
+            $applicationGateway.Identity = $appgwIdentity
+
+      }
+
       $rootCertDataInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertDataSecretName
       $keyvaultSecretId = $rootCertDataInfo.Id
+
       $appgwRootCertCommand = "az network application-gateway root-cert create --gateway-name $appgwName --name $rootCertDataSecretName --resource-group $resourceGroup --keyvault-secret $keyvaultSecretId"
       Invoke-Expression -Command $appgwRootCertCommand
 
