@@ -40,10 +40,10 @@ if ($rootCertDataSecretName)
 
 }
 
-# $appgwSecuredParameters = "-certDataSecured $certDataSecuredInfo -certSecretSecured $certPasswordSecuredInfo"
-# $appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName $appgwParameters $appgwSecuredParameters"
-# $appgwDeployPath = $templatesFolderPath + $appgwDeployCommand
-# Invoke-Expression -Command $appgwDeployPath
+$appgwSecuredParameters = "-certDataSecured $certDataSecuredInfo -certSecretSecured $certPasswordSecuredInfo"
+$appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName $appgwParameters $appgwSecuredParameters"
+$appgwDeployPath = $templatesFolderPath + $appgwDeployCommand
+Invoke-Expression -Command $appgwDeployPath
 
 $applicationGateway = Get-AzApplicationGateway -Name $appgwName -ResourceGroupName $resourceGroup
 if (!$applicationGateway)
