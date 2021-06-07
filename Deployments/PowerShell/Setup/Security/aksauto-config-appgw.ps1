@@ -40,10 +40,10 @@ if ($rootCertDataSecretName)
 
 }
 
-$appgwSecuredParameters = "-certDataSecured $certDataSecuredInfo -certSecretSecured $certPasswordSecuredInfo"
-$appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName $appgwParameters $appgwSecuredParameters"
-$appgwDeployPath = $templatesFolderPath + $appgwDeployCommand
-Invoke-Expression -Command $appgwDeployPath
+# $appgwSecuredParameters = "-certDataSecured $certDataSecuredInfo -certSecretSecured $certPasswordSecuredInfo"
+# $appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName $appgwParameters $appgwSecuredParameters"
+# $appgwDeployPath = $templatesFolderPath + $appgwDeployCommand
+# Invoke-Expression -Command $appgwDeployPath
 
 $applicationGateway = Get-AzApplicationGateway -Name $appgwName -ResourceGroupName $resourceGroup
 if (!$applicationGateway)
@@ -58,7 +58,7 @@ if ($rootCertDataSecretName)
 {
 
       $userAssignedIdentityName = $appgwName + "-user-assigned-identity"
-      $userAssignedIdentity = Get-AzUserAssignedIdentity -Name $userAssignedIdentity `
+      $userAssignedIdentity = Get-AzUserAssignedIdentity -Name $userAssignedIdentityName `
       -ResourceGroupName $resourceGroup
       if (!$userAssignedIdentity)
       {
@@ -70,14 +70,16 @@ if ($rootCertDataSecretName)
 
       Set-AzKeyVaultAccessPolicy -VaultName $keyVaultName -ResourceGroupName $resourceGroup `
       -PermissionsToSecrets get -ObjectId $userAssignedIdentity.PrincipalId
+      Write-Host $userAssignedIdentity.PrincipalId
 
       $appgwIdentity = Get-AzApplicationGatewayIdentity -ApplicationGateway $applicationGateway
       if (!$appgwIdentity)
       {
 
-            $appgwIdentity =  New-AzApplicationGatewayIdentity `
+            $appgwIdentity = Set-AzApplicationGatewayIdentity `
             -UserAssignedIdentityId $userAssignedIdentity.Id
-            $applicationGateway.Identity = $appgwIdentity
+            
+            Set-AzApplicationGateway -ApplicationGateway $applicationGateway
 
       }
 
