@@ -5,14 +5,15 @@ ingress:
     ingressClass: nginx
     proxyBodySize: "10m"
     enableCors: "true"
-  hosts:
-  - name: dev.internal.wkshpdev.com
-    paths:
-    - path: /?(.*)
-      service: ratingsweb-service
-      port: 80
+    rewriteTarget: /$1
   tls:
   - hosts:
     - "*.internal.wkshpdev.com"
     secretName: aks-workshop-tls-secret
+  hosts:
+  - name: dev-prv.internal.wkshpdev.com
+    paths:
+    - path: /?(.*)
+      service: ratingsweb-service
+      port: 80 
   

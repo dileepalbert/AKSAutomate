@@ -1,0 +1,17 @@
+ingress:
+  name: smoke-ingress
+  namespace: smoke
+  annotations:
+   ingressClass: nginx
+   enableCors: "true"
+  tls:
+  - hosts:
+    - "*.internal.wkshpdev.com"
+    secretName: aks-workshop-tls-secret
+  hosts:
+  - name: smoke-prv.internal.wkshpdev.com
+    paths:
+    - path: /nginx/?(.*)
+      service: nginx-svc
+      port: 80
+  
