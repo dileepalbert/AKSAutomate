@@ -1,9 +1,7 @@
 param([Parameter(Mandatory=$true)] [string] $resourceGroup,
-      [Parameter(Mandatory=$true)] [string] $location,
       [Parameter(Mandatory=$true)] [string] $keyVaultName,
       [Parameter(Mandatory=$true)] [string] $certDataSecretName,
-      [Parameter(Mandatory=$true)] [string] $certSecretName,
-      [Parameter(Mandatory=$true)] [string] $rootCertDataSecretName,
+      [Parameter(Mandatory=$true)] [string] $certSecretName,      
       [Parameter(Mandatory=$true)] [array]  $httpsListeners,
       [Parameter(Mandatory=$true)] [array]  $httpListeners,
       [Parameter(Mandatory=$true)] [string] $appgwName,  
@@ -33,13 +31,6 @@ $certPasswordInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $certSec
 $certPasswordSecuredInfo = $certPasswordInfo.SecretValue | ConvertFrom-SecureString -AsPlainText
 
 $appgwParameters = "-appgwName $appgwName -vnetName $appgwVNetName -subnetName $appgwSubnetName -httpsListenerNames @($processedListeners) -listenerHostName $listenerHostName -backendPoolHostName $backendPoolHostName -backendIpAddress $backendIpAddress -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath"
-if ($rootCertDataSecretName)
-{
-
-      $appgwParameters = $appgwParameters + " -backendProtocol Https -backendPort 443"
-
-}
-
 $appgwSecuredParameters = "-certDataSecured $certDataSecuredInfo -certSecretSecured $certPasswordSecuredInfo"
 $appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName $appgwParameters $appgwSecuredParameters"
 $appgwDeployPath = $templatesFolderPath + $appgwDeployCommand
@@ -51,43 +42,6 @@ if (!$applicationGateway)
 
       Write-Host "Error fetching Application Gateway"
       return;
-
-}
-
-if ($rootCertDataSecretName)
-{
-
-      $userAssignedIdentityName = $appgwName + "-user-assigned-identity"
-      $userAssignedIdentity = Get-AzUserAssignedIdentity -Name $userAssignedIdentityName `
-      -ResourceGroupName $resourceGroup
-      if (!$userAssignedIdentity)
-      {
-
-            $userAssignedIdentity = New-AzUserAssignedIdentity -Name $userAssignedIdentityName `
-            -Location $location -ResourceGroupName $resourceGroup
-
-      }
-
-      Set-AzKeyVaultAccessPolicy -VaultName $keyVaultName -ResourceGroupName $resourceGroup `
-      -PermissionsToSecrets get -ObjectId $userAssignedIdentity.PrincipalId
-      Write-Host $userAssignedIdentity.PrincipalId
-
-      $appgwIdentity = Get-AzApplicationGatewayIdentity -ApplicationGateway $applicationGateway
-      if (!$appgwIdentity)
-      {
-
-            $appgwIdentity = Set-AzApplicationGatewayIdentity `
-            -UserAssignedIdentityId $userAssignedIdentity.Id
-            
-            Set-AzApplicationGateway -ApplicationGateway $applicationGateway
-
-      }
-
-      $rootCertDataInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $rootCertDataSecretName
-      $keyvaultSecretId = $rootCertDataInfo.Id
-
-      $appgwRootCertCommand = "az network application-gateway root-cert create --gateway-name $appgwName --name $rootCertDataSecretName --resource-group $resourceGroup --keyvault-secret $keyvaultSecretId"
-      Invoke-Expression -Command $appgwRootCertCommand
 
 }
 
