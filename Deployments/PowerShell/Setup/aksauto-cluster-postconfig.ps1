@@ -158,14 +158,15 @@ $processedHttpListeners = $processedHttpListeners -join ","
 $ingressHostName = "." + $ingressHostName
 $listenerHostName = "." + $listenerHostName
 
-$appgwParameters = "-httpListeners @($processedHttpListeners) -httpsListeners @($processedHttpsListeners) -appgwName $appgwName -appgwVNetName $aksVNetName -appgwSubnetName $appgwSubnetName -appgwTemplateFileName $appgwTemplateFileName -backendIpAddress $ingressControllerIPAddress -backendPoolHostName $ingressHostName -listenerHostName $listenerHostName -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath -baseFolderPath $baseFolderPath"
-$appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup $appgwParameters -keyVaultName $keyVaultName -certDataSecretName $certDataSecretName -certSecretName $certSecretName"
+$appgwParameters = "-httpListeners @($processedHttpListeners) -httpsListeners @($processedHttpsListeners) -appgwName $appgwName -appgwVNetName $aksVNetName -appgwSubnetName $appgwSubnetName -appgwTemplateFileName $appgwTemplateFileName -backendIpAddress $ingressControllerIPAddress -backendPoolHostName $ingressHostName -listenerHostName $listenerHostName -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath -baseFolderPath $baseFolderPath -keyVaultName $keyVaultName -certDataSecretName $certDataSecretName -certSecretName $certSecretName"
+$appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup -location $location $appgwParameters"
 if ($rootCertDataSecretName)
 {
 
       $appgwDeployCommand = $appgwDeployCommand + " -rootCertDataSecretName $rootCertDataSecretName"
 
 }
+
 $appgwDeployPath = $securityFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
 
