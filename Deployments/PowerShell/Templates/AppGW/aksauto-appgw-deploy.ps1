@@ -27,6 +27,7 @@ Test-AzResourceGroupDeployment -ResourceGroupName $rg `
 -backendPoolHostName $backendPoolHostName `
 -backendIpAddress $backendIpAddress `
 -backendProtocol $backendProtocol `
+-backendPort $backendPort `
 -healthProbeHostName $healthProbeHostName `
 -healthProbePath $healthProbePath `
 -certData $certData -certPassword $certPassword
@@ -40,6 +41,7 @@ New-AzResourceGroupDeployment -ResourceGroupName $rg `
 -backendPoolHostName $backendPoolHostName `
 -backendIpAddress $backendIpAddress `
 -backendProtocol $backendProtocol `
+-backendPort $backendPort `
 -healthProbeHostName $healthProbeHostName `
 -healthProbePath $healthProbePath `
 -certData $certData -certPassword $certPassword
