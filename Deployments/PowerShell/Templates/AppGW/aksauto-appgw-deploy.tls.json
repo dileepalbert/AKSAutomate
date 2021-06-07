@@ -44,7 +44,7 @@
       },     
       "backendPort":{
          "type":"int",
-         "defaultValue":80
+         "defaultValue":443
       },
       "backendProtocol":{
          "type":"string",
@@ -52,7 +52,7 @@
            "Http",
            "Https"           
         ],
-        "defaultValue": "Http"
+        "defaultValue": "Https"
       },
       "healthProbeHostName":{
          "type":"string",

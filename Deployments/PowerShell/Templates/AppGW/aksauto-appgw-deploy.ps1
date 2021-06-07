@@ -17,31 +17,27 @@ $certData = $certDataSecured | ConvertTo-SecureString -AsPlainText -Force
 $certPassword = $certSecretSecured | ConvertTo-SecureString -AsPlainText -Force
 
 Test-AzResourceGroupDeployment -ResourceGroupName $rg `
--TemplateFile "$fpath/AppGW/$deployFileName.tls.json" `
--TemplateParameterFile "$fpath/AppGW/$deployFileName.tls.parameters.json" `
+-TemplateFile "$fpath/AppGW/$deployFileName.json" `
+-TemplateParameterFile "$fpath/AppGW/$deployFileName.parameters.json" `
 -applicationGatewayName $appgwName `
 -vnetName $vnetName -subnetName $subnetName `
 -httpsListenerNames $httpsListenerNames `
 -listenerHostName $listenerHostName `
 -backendPoolHostName $backendPoolHostName `
 -backendIpAddress $backendIpAddress `
--backendProtocol "Https" `
--backendPort 443 `
 -healthProbeHostName $healthProbeHostName `
 -healthProbePath $healthProbePath `
 -certData $certData -certPassword $certPassword
 
 New-AzResourceGroupDeployment -ResourceGroupName $rg `
--TemplateFile "$fpath/AppGW/$deployFileName.tls.json" `
--TemplateParameterFile "$fpath/AppGW/$deployFileName.tls.parameters.json" `
+-TemplateFile "$fpath/AppGW/$deployFileName.json" `
+-TemplateParameterFile "$fpath/AppGW/$deployFileName.parameters.json" `
 -applicationGatewayName $appgwName `
 -vnetName $vnetName -subnetName $subnetName `
 -httpsListenerNames $httpsListenerNames `
 -listenerHostName $listenerHostName `
 -backendPoolHostName $backendPoolHostName `
 -backendIpAddress $backendIpAddress `
--backendProtocol "Https" `
--backendPort 443 `
 -healthProbeHostName $healthProbeHostName `
 -healthProbePath $healthProbePath `
 -certData $certData -certPassword $certPassword

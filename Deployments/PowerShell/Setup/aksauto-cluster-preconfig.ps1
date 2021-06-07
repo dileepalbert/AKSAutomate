@@ -44,8 +44,13 @@ $templatesFolderPath = $baseFolderPath + "/PowerShell/Templates"
 $certSecretName = $appgwName + "-cert-secret"
 $certPFXFilePath = $baseFolderPath + "/Certs/$pfxCertFileName.pfx"
 
-$rootCertDataSecretName = $appgwName + "-root-cert-secret"
-$certCERFilePath = $baseFolderPath + "/Certs/$rootCertFileName.cer"
+if ($rootCertFileName)
+{
+
+    $rootCertDataSecretName = $appgwName + "-root-cert-secret"
+    $certCERFilePath = $baseFolderPath + "/Certs/$rootCertFileName.cer"
+
+}
 
 # Assuming Logged In
 
