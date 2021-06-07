@@ -7,7 +7,7 @@
               "keyVault": {                
                   "id": "/subscriptions/6bdcc705-8db6-4029-953a-e749070e6db6/resourceGroups/aks-workshop-private-rg/providers/Microsoft.KeyVault/vaults/aks-workshop-private-kv"
                 },
-            "secretName": "aks-workshop-appgw-root-cert-secret"
+            "secretName": "aks-workshop-private-appgw-root-cert-secret"
         }
       }      
     }

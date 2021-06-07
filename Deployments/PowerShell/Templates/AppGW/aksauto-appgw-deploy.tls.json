@@ -127,7 +127,7 @@
       "appGwProbeRef":"[concat(variables('appGwId'), '/probes/', variables('appGwProbeName'))]",
       "appGwSize":"[parameters('skuName')]",
       "appGwTier":"[parameters('skuName')]",
-      "appGwTrustedRootCertName":"[concat(parameters('listenerHostName'), '.root')]"
+      "appGwTrustedRootCertName":"[concat(parameters('applicationGatewayName'), '-root-cert')]"
    },
    "resources":[
       {

@@ -17,8 +17,8 @@ $certData = $certDataSecured | ConvertTo-SecureString -AsPlainText -Force
 $certPassword = $certSecretSecured | ConvertTo-SecureString -AsPlainText -Force
 
 Test-AzResourceGroupDeployment -ResourceGroupName $rg `
--TemplateFile "$fpath/AppGW/$deployFileName.private.json" `
--TemplateParameterFile "$fpath/AppGW/$deployFileName.private.parameters.json" `
+-TemplateFile "$fpath/AppGW/$deployFileName.tls.json" `
+-TemplateParameterFile "$fpath/AppGW/$deployFileName.tls.parameters.json" `
 -applicationGatewayName $appgwName `
 -vnetName $vnetName -subnetName $subnetName `
 -httpsListenerNames $httpsListenerNames `
@@ -32,8 +32,8 @@ Test-AzResourceGroupDeployment -ResourceGroupName $rg `
 -certData $certData -certPassword $certPassword
 
 New-AzResourceGroupDeployment -ResourceGroupName $rg `
--TemplateFile "$fpath/AppGW/$deployFileName.private.json" `
--TemplateParameterFile "$fpath/AppGW/$deployFileName.private.parameters.json" `
+-TemplateFile "$fpath/AppGW/$deployFileName.tls.json" `
+-TemplateParameterFile "$fpath/AppGW/$deployFileName.tls.parameters.json" `
 -applicationGatewayName $appgwName `
 -vnetName $vnetName -subnetName $subnetName `
 -httpsListenerNames $httpsListenerNames `
