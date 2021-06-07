@@ -1,0 +1,14 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",    
+    "parameters": {
+        "rootCertData": {
+          "reference": {
+              "keyVault": {                
+                  "id": "/subscriptions/6bdcc705-8db6-4029-953a-e749070e6db6/resourceGroups/aks-workshop-private-rg/providers/Microsoft.KeyVault/vaults/aks-workshop-private-kv"
+                },
+            "secretName": "aks-workshop-appgw-root-cert-secret"
+        }
+      }      
+    }
+  }
