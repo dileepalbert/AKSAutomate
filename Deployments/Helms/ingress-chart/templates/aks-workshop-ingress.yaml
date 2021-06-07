@@ -24,6 +24,18 @@ spec:
           servicePort: {{ $path.port }}
       {{- end }}
   {{- end }}
+  {{ if $ingress.tls }}
+  tls:
+  {{- range $tls := $ingress.tls }}
+  - hosts:
+    {{- range $tlsHost := $tls.hosts }}
+    - $tlsHost
+    {{- end }}
+    secretName: $tls.secretName
+  {{- end }}
+
+  {{ end }}
+
 
   
 
