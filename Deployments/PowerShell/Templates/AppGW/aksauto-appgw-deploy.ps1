@@ -7,9 +7,7 @@ param([Parameter(Mandatory=$false)] [string] $rg,
       [Parameter(Mandatory=$false)] [array]  $httpsListenerNames,
       [Parameter(Mandatory=$false)] [string] $listenerHostName,
       [Parameter(Mandatory=$false)] [string] $backendPoolHostName,
-      [Parameter(Mandatory=$false)] [string] $backendIpAddress,
-      [Parameter(Mandatory=$false)] [string] $backendProtocol,
-      [Parameter(Mandatory=$false)] [int]    $backendPort,
+      [Parameter(Mandatory=$false)] [string] $backendIpAddress,      
       [Parameter(Mandatory=$false)] [string] $healthProbeHostName,
       [Parameter(Mandatory=$false)] [string] $healthProbePath,
       [Parameter(Mandatory=$false)] [string] $certDataSecured,
@@ -19,29 +17,27 @@ $certData = $certDataSecured | ConvertTo-SecureString -AsPlainText -Force
 $certPassword = $certSecretSecured | ConvertTo-SecureString -AsPlainText -Force
 
 Test-AzResourceGroupDeployment -ResourceGroupName $rg `
--TemplateFile "$fpath/AppGW/$deployFileName.json" `
+-TemplateFile "$fpath/AppGW/$deployFileName.private.json" `
+-TemplateParameterFile "$fpath/AppGW/$deployFileName.private.parameters.json" `
 -applicationGatewayName $appgwName `
 -vnetName $vnetName -subnetName $subnetName `
 -httpsListenerNames $httpsListenerNames `
 -listenerHostName $listenerHostName `
 -backendPoolHostName $backendPoolHostName `
 -backendIpAddress $backendIpAddress `
--backendProtocol $backendProtocol `
--backendPort $backendPort `
 -healthProbeHostName $healthProbeHostName `
 -healthProbePath $healthProbePath `
 -certData $certData -certPassword $certPassword
 
 New-AzResourceGroupDeployment -ResourceGroupName $rg `
--TemplateFile "$fpath/AppGW/$deployFileName.json" `
+-TemplateFile "$fpath/AppGW/$deployFileName.private.json" `
+-TemplateParameterFile "$fpath/AppGW/$deployFileName.private.parameters.json" `
 -applicationGatewayName $appgwName `
 -vnetName $vnetName -subnetName $subnetName `
 -httpsListenerNames $httpsListenerNames `
 -listenerHostName $listenerHostName `
 -backendPoolHostName $backendPoolHostName `
 -backendIpAddress $backendIpAddress `
--backendProtocol $backendProtocol `
--backendPort $backendPort `
 -healthProbeHostName $healthProbeHostName `
 -healthProbePath $healthProbePath `
 -certData $certData -certPassword $certPassword
