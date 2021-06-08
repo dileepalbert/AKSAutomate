@@ -5,7 +5,7 @@
         "rootCertData": {
           "reference": {
               "keyVault": {
-                  "id": "/subscriptions/6bdcc705-8db6-4029-953a-e749070e6db6/resourceGroups/aks-workshop-private-rg/providers/Microsoft.KeyVault/vaults/aks-workshop-private-kv"
+                  "id": "/subscriptions/6bdcc705-8db6-4029-953a-e749070e6db6/resourceGroups/aks-wkshpprv-rg/providers/Microsoft.KeyVault/vaults/aks-wkshpprv-kv"
                 },
             "secretName": "aks-wkshpprv-appgw-root-cert-secret"
         }
@@ -13,7 +13,7 @@
         "certData": {
           "reference": {
               "keyVault": {
-                  "id": "/subscriptions/6bdcc705-8db6-4029-953a-e749070e6db6/resourceGroups/aks-workshop-private-rg/providers/Microsoft.KeyVault/vaults/aks-workshop-private-kv"
+                  "id": "/subscriptions/6bdcc705-8db6-4029-953a-e749070e6db6/resourceGroups/aks-wkshpprv-rg/providers/Microsoft.KeyVault/vaults/aks-wkshpprv-kv"
                 },
             "secretName": "aks-wkshpprv-appgw-cert-secret"
         }
@@ -21,7 +21,7 @@
       "certPassword": {
           "reference": {
               "keyVault": {
-                  "id": "/subscriptions/6bdcc705-8db6-4029-953a-e749070e6db6/resourceGroups/aks-workshop-private-rg/providers/Microsoft.KeyVault/vaults/aks-workshop-private-kv"
+                  "id": "/subscriptions/6bdcc705-8db6-4029-953a-e749070e6db6/resourceGroups/aks-wkshpprv-rg/providers/Microsoft.KeyVault/vaults/aks-wkshpprv-kv"
                 },
             "secretName": "aks-wkshpprv-appgw-cert-password"
         }
