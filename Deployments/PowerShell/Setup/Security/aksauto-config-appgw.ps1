@@ -1,7 +1,6 @@
-param([Parameter(Mandatory=$true)] [string] $resourceGroup,
-      [Parameter(Mandatory=$true)] [string] $keyVaultName,
-      [Parameter(Mandatory=$true)] [string] $certDataSecretName,
-      [Parameter(Mandatory=$true)] [string] $certSecretName,      
+param([Parameter(Mandatory=$true)] [string] $e2eSSL,
+      [Parameter(Mandatory=$true)] [string] $resourceGroup,
+      [Parameter(Mandatory=$true)] [string] $keyVaultName,      
       [Parameter(Mandatory=$true)] [array]  $httpsListeners,
       [Parameter(Mandatory=$true)] [array]  $httpListeners,
       [Parameter(Mandatory=$true)] [string] $appgwName,  
@@ -24,15 +23,16 @@ foreach ($listener in $httpsListeners)
 }
 $processedListeners = $processedListeners -join ","
 
-$certDataInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $certDataSecretName
-$certDataSecuredInfo = $certDataInfo.SecretValue | ConvertFrom-SecureString -AsPlainText
+if ($e2eSSL -eq "true")
+{
 
-$certPasswordInfo = Get-AzKeyVaultSecret -VaultName $keyVaultName -Name $certSecretName
-$certPasswordSecuredInfo = $certPasswordInfo.SecretValue | ConvertFrom-SecureString -AsPlainText
+      $appgwDeployFileName = $appgwTemplateFileName + ".tls"
+
+}
 
 $appgwParameters = "-appgwName $appgwName -vnetName $appgwVNetName -subnetName $appgwSubnetName -httpsListenerNames @($processedListeners) -listenerHostName $listenerHostName -backendPoolHostName $backendPoolHostName -backendIpAddress $backendIpAddress -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath"
 $appgwSecuredParameters = "-certDataSecured $certDataSecuredInfo -certSecretSecured $certPasswordSecuredInfo"
-$appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwTemplateFileName $appgwParameters $appgwSecuredParameters"
+$appgwDeployCommand = "/AppGW/$appgwTemplateFileName.ps1 -rg $resourceGroup -fpath $templatesFolderPath -deployFileName $appgwDeployFileName $appgwParameters $appgwSecuredParameters"
 $appgwDeployPath = $templatesFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
 

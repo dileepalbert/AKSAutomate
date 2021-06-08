@@ -1,4 +1,5 @@
-param([Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
+param([Parameter(Mandatory=$true)]  [string] $e2eSSL = "false",
+      [Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$true)]  [string] $masterResourceGroup = "master-workshop-rg",
       [Parameter(Mandatory=$true)]  [string] $location = "eastus",
       [Parameter(Mandatory=$true)]  [array]  $httpsListeners = @("dev", "qa", "smoke"),
@@ -6,9 +7,7 @@ param([Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$true)]  [array]  $namespaces = @("aks-workshop-dev", "aks-workshop-qa", "smoke"),
       [Parameter(Mandatory=$true)]  [string] $clusterName = "aks-workshop-cluster",
       [Parameter(Mandatory=$true)]  [string] $acrName = "akswkshpacr",
-      [Parameter(Mandatory=$true)]  [string] $keyVaultName = "aks-workshop-kv",
-      [Parameter(Mandatory=$true)]  [string] $certDataSecretName = "aks-workshop-appgw-cert-secret",
-      [Parameter(Mandatory=$true)]  [string] $certSecretName = "aks-workshop-appgw-cert-password",
+      [Parameter(Mandatory=$true)]  [string] $keyVaultName = "aks-workshop-kv",      
       [Parameter(Mandatory=$true)]  [string] $masterVNetName = "master-workshop-vnet",
       [Parameter(Mandatory=$true)]  [string] $aksVNetName = "aks-workshop-vnet",
       [Parameter(Mandatory=$true)]  [string] $ingressSubnetName = "aks-workshop-ing-subnet",
@@ -157,7 +156,7 @@ $processedHttpListeners = $processedHttpListeners -join ","
 $ingressHostName = "." + $ingressHostName
 $listenerHostName = "." + $listenerHostName
 
-$appgwParameters = "-httpListeners @($processedHttpListeners) -httpsListeners @($processedHttpsListeners) -appgwVNetName $aksVNetName -appgwSubnetName $appgwSubnetName -appgwTemplateFileName $appgwTemplateFileName -backendIpAddress $ingressControllerIPAddress -backendPoolHostName $ingressHostName -listenerHostName $listenerHostName -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath -certDataSecretName $certDataSecretName -certSecretName $certSecretName"
+$appgwParameters = "-e2eSSL $e2eSSL -httpListeners @($processedHttpListeners) -httpsListeners @($processedHttpsListeners) -appgwVNetName $aksVNetName -appgwSubnetName $appgwSubnetName -appgwTemplateFileName $appgwTemplateFileName -backendIpAddress $ingressControllerIPAddress -backendPoolHostName $ingressHostName -listenerHostName $listenerHostName -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath"
 $appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup -appgwName $appgwName -baseFolderPath $baseFolderPath -keyVaultName $keyVaultName $appgwParameters"
 $appgwDeployPath = $securityFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
