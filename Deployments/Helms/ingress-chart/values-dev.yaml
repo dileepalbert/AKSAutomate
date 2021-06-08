@@ -5,7 +5,7 @@ ingress:
     ingressClass: nginx
     proxyBodySize: "10m"
     enableCors: "true"
-    rewrite-target: /ratingsapi/v1/$1
+    rewriteTarget: /ratingsapi/v1/$1
   hosts:
   - name: dev.internal.wkshpdev.com
     paths:

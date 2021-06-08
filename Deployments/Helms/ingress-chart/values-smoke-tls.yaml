@@ -4,6 +4,7 @@ ingress:
   annotations:
    ingressClass: nginx
    enableCors: "true"
+   rewriteTarget: /$1
   tls:
   - hosts:
     - "*.internal.wkshpdev.com"
