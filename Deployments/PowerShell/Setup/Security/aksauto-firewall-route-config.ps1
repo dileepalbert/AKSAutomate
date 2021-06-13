@@ -47,15 +47,18 @@ if (!$rtInternetRouteInfo)
 
 }
 
+Set-AzRouteTable -RouteTable $rtInfo
+
 $aksSubnetInfo = Get-AzVirtualNetworkSubnetConfig -Name $aksSubnetName `
 -VirtualNetwork $aksVnet
 if ($aksSubnetInfo)
 {
 
       $aksSubnetInfo.RouteTable = $rtInfo
+
       Set-AzVirtualNetworkSubnetConfig -Name $aksSubnetName `
       -VirtualNetwork $aksVnet -AddressPrefix $aksSubnetInfo.AddressPrefix `
-      -RouteTable $rtInfo
+      -RouteTable $aksSubnetInfo.RouteTable
 
       Set-AzVirtualNetwork -VirtualNetwork $aksVnet
 
