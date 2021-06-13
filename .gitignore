@@ -1,3 +1,7 @@
 Deployments/Certs
 Misc
 R&Ds
+Deployments/Linkerd/root.key
+Deployments/Linkerd/issuer.crt
+Deployments/Linkerd/issuer.key
+Deployments/Linkerd/root.crt
