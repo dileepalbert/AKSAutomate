@@ -320,8 +320,8 @@ if ($isUdrCluster -eq "true")
     $fwConfigCommand = "$securityFolderPath/$fwConfigFileName.ps1 -fwResourceGroup $fwResourceGroup -location $location -fwName $fwName -fwVnetName $fwVnetName -subscriptionId $subscriptionId"
     Invoke-Expression -Command $fwConfigCommand
 
-    # $fwRouteConfigCommand = "$securityFolderPath/$fwRouteConfigFileName.ps1 -fwResourceGroup $fwResourceGroup -vnetResourceGroup $resourceGroup -location $location -fwName $fwName -aksVNetName $aksVNetName -aksSubnetName $aksSubnetName -aksSPDisplayName $aksSPDisplayName"
-    # Invoke-Expression -Command $fwRouteConfigCommand
+    $fwRouteConfigCommand = "$securityFolderPath/$fwRouteConfigFileName.ps1 -fwResourceGroup $fwResourceGroup -vnetResourceGroup $resourceGroup -location $location -fwName $fwName -aksVNetName $aksVNetName -aksSubnetName $aksSubnetName -aksSPDisplayName $aksSPDisplayName"
+    Invoke-Expression -Command $fwRouteConfigCommand
     
 }
 
