@@ -1,13 +1,16 @@
-param([Parameter(Mandatory=$true)]  [string] $isPrivateCluster = "false",
+param([Parameter(Mandatory=$true)]  [string] $isUdrCluster = "false",
+      [Parameter(Mandatory=$true)]  [string] $isPrivateCluster = "false",
       [Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$true)]  [string] $lwResourceGroup = "monitoring-workshop-rg",
       [Parameter(Mandatory=$true)]  [string] $masterResourceGroup = "master-workshop-rg",
+      [Parameter(Mandatory=$false)] [string] $fwResourceGroup = $masterResourceGroup,
       [Parameter(Mandatory=$true)]  [string] $location = "eastus",
       [Parameter(Mandatory=$true)]  [string] $clusterName = "aks-workshop-cluster",
       [Parameter(Mandatory=$true)]  [string] $acrName = "akswkshpacr",
       [Parameter(Mandatory=$true)]  [string] $keyVaultName = "aks-workshop-kv",
       [Parameter(Mandatory=$true)]  [string] $logworkspaceName = "aks-workshop-lw",
       [Parameter(Mandatory=$true)]  [string] $appgwName = "aks-workshop-appgw",
+      [Parameter(Mandatory=$false)] [string] $fwName = "master-hub-workshop-fw",
       [Parameter(Mandatory=$true)]  [string] $masterVNetName = "master-workshop-vnet",
       [Parameter(Mandatory=$true)]  [string] $aksVNetName = "aks-workshop-vnet",
       [Parameter(Mandatory=$true)]  [string] $aksVNetPrefix = "12.0.0.0/16",
@@ -19,10 +22,13 @@ param([Parameter(Mandatory=$true)]  [string] $isPrivateCluster = "false",
       [Parameter(Mandatory=$true)]  [string] $ingressSubnetPrefix = "12.0.5.0/24",
       [Parameter(Mandatory=$true)]  [string] $vrnSubnetName = "vrn-workshop-subnet",
       [Parameter(Mandatory=$true)]  [string] $vrnSubnetPrefix = "12.0.7.0/24",
+      [Parameter(Mandatory=$false)] [string] $fwVnetName = $masterVNetName,
       [Parameter(Mandatory=$true)]  [string] $aksPrivateDNSHostName = "aks.private.wkshpdev.com",
       [Parameter(Mandatory=$true)]  [string] $networkTemplateFileName = "aksauto-network-deploy",
       [Parameter(Mandatory=$true)]  [string] $acrTemplateFileName = "aksauto-acr-deploy",
       [Parameter(Mandatory=$true)]  [string] $kvTemplateFileName = "aksauto-keyvault-deploy",
+      [Parameter(Mandatory=$false)] [string] $fwConfigFileName = "aksauto-firewall-create",
+      [Parameter(Mandatory=$false)] [string] $fwRouteConfigFileName = "aksauto-firewall-route-config",
       [Parameter(Mandatory=$true)]  [string] $pfxCertFileName = "<pfxCertFileName>",
       [Parameter(Mandatory=$false)] [string] $rootCertFileName = "<rootCertFileName>",
       [Parameter(Mandatory=$true)]  [string] $subscriptionId = "<subscriptionId>",
@@ -41,6 +47,7 @@ $aksMasterPeeringName = "$aksVNetName-$masterVNetName-peering";
 $masterVnetAKSLinkName = "$masterVNetName-aks-dns-plink"
 
 $templatesFolderPath = $baseFolderPath + "/PowerShell/Templates"
+$securityFolderPath = $baseFolderPath + "/PowerShell/Setup/Security"
 $certSecretName = $appgwName + "-cert-secret"
 $certPFXFilePath = $baseFolderPath + "/Certs/$pfxCertFileName.pfx"
 
@@ -306,6 +313,16 @@ if ($isPrivateCluster -eq "true")
 
         }
     }
+}
+
+if ($isUdrCluster -eq "true")
+{
+    $fwConfigCommand = "$securityFolderPath/$fwConfigFileName.ps1 -fwResourceGroup $fwResourceGroup -location $location -fwName $fwName -fwVnetName $fwVnetName -subscriptionId $subscriptionId"
+    Invoke-Expression -Command $fwConfigCommand
+
+    # $fwRouteConfigCommand = "$securityFolderPath/$fwRouteConfigFileName.ps1 -fwResourceGroup $fwResourceGroup -vnetResourceGroup $resourceGroup -location $location -fwName $fwName -aksVNetName $aksVNetName -aksSubnetName $aksSubnetName -aksSPDisplayName $aksSPDisplayName"
+    # Invoke-Expression -Command $fwRouteConfigCommand
+    
 }
 
 Write-Host "------------Pre-Config----------"

@@ -1,8 +1,9 @@
-param([Parameter(Mandatory=$true)]  [string] $mode = "create",      
-      [Parameter(Mandatory=$false)] [string] $isPrivateCluster = "false",
+param([Parameter(Mandatory=$true)]  [string] $mode = "create",
+      [Parameter(Mandatory=$true)] [string] $isUdrCluster = "false",
+      [Parameter(Mandatory=$true)] [string] $isPrivateCluster = "false",      
       [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $masterResourceGroup = "master-workshop-rg",
-      [Parameter(Mandatory=$false)] [string] $lwResourceGroup = "monitoring-workshop-rg",      
+      [Parameter(Mandatory=$false)] [string] $lwResourceGroup = "monitoring-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $location = "eastus",
       [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
       [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
@@ -91,6 +92,7 @@ if ($mode -eq "create")
     $aksSubnetId = $aksSubnet.Id
     $aksCreateCommand = "az aks create --name $clusterName --resource-group $resourceGroup --kubernetes-version $version --location $location --vnet-subnet-id '$aksSubnetId' --enable-addons $addons --node-vm-size $nodeVMSize --node-count $nodeCount --max-pods $maxPods --service-cidr $aksServicePrefix --dns-service-ip $aksDNSServiceIP --service-principal '$spAppId' --client-secret '$spPassword' --network-plugin $networkPlugin --network-policy $networkPolicy --nodepool-name $nodePoolName --vm-set-type $vmSetType --generate-ssh-keys --enable-aad --aad-admin-group-object-ids $aadAdminGroupIDs --aad-tenant-id $aadTenantID --attach-acr $acrName --workspace-resource-id '$logWorkspaceId'"
     $privateClusterCommand = " --enable-private-cluster"
+    $udrClusterCommand = " --outbound-type userDefinedRouting"
 
     if ($isPrivateCluster -eq "true")
     {
@@ -110,6 +112,11 @@ if ($mode -eq "create")
         $privateClusterCommand = " --enable-private-cluster --private-dns-zone $privateDNSZoneId"
         $aksCreateCommand = $aksCreateCommand + $privateClusterCommand
 
+    }
+
+    if ($isUdrCluster -eq "true")
+    {
+        $aksCreateCommand = $aksCreateCommand + $udrClusterCommand
     }
 
     Write-Host "Creating Cluster... $clusterName"
