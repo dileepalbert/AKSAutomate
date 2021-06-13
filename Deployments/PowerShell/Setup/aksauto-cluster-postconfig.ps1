@@ -110,49 +110,9 @@ if (!$aksVNetLink)
 
 }
 
-$processedHttpsListeners = @()
-foreach ($listener in $httpsListeners)
-{
-      $processedHttpsListeners += "'$listener'"
-}
-$processedHttpsListeners = $processedHttpsListeners -join ","
-
-$processedHttpListeners = @()
-foreach ($listener in $httpListeners)
-{
-      $processedHttpListeners += "'$listener'"
-}
-$processedHttpListeners = $processedHttpListeners -join ","
-$ingressHostName = "." + $ingressHostName
-$listenerHostName = "." + $listenerHostName
-
-$appgwParameters = "-e2eSSL $e2eSSL -httpListeners @($processedHttpListeners) -httpsListeners @($processedHttpsListeners) -appgwVNetName $aksVNetName -appgwSubnetName $appgwSubnetName -appgwTemplateFileName $appgwTemplateFileName -backendIpAddress $ingressControllerIPAddress -backendPoolHostName $ingressHostName -listenerHostName $listenerHostName -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath"
-$appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup -appgwName $appgwName -baseFolderPath $baseFolderPath -keyVaultName $keyVaultName $appgwParameters"
-$appgwDeployPath = $securityFolderPath + $appgwDeployCommand
-Invoke-Expression -Command $appgwDeployPath
-
-$pip = Get-AzPublicIpAddress -Name $appgwName-pip -ResourceGroupName $resourceGroup
-$translatedIP = $pip.IpAddress
-
 # Switch Cluster context
 $kbctlContextCommand = "az aks get-credentials --resource-group $resourceGroup --name $clusterName --overwrite-existing --admin"
 Invoke-Expression -Command $kbctlContextCommand
-
-if ($isUdrCluster -eq "true")
-{
-      $apiServerCommand = "kubectl get endpoints -n default -o json"
-      $apiServerInfo = Invoke-Expression -Command $apiServerCommand
-      $apiServerInfoJson = $apiServerInfo | ConvertFrom-Json
-      $apiServerIP = $apiServerInfoJson.items.Where{$_.metadata.name -match "kubernetes"}.subsets[0].addresses[0].ip
-      Write-Host $apiServerIP
-
-      $fwPipInfo = Get-AzPublicIpAddress -Name $fwName-pip -ResourceGroupName $fwResourceGroup
-      $fwPublicIP = $fwPipInfo.IpAddress
-
-      $fwPostConfigCommand = "$securityFolderPath/$fwPostConfigFileName.ps1 -resourceGroup $fwResourceGroup -fwName $fwName -apiServerIP '$apiServerIP' -fwPublicIP '$fwPublicIP' -translatedIP '$translatedIP' -subscriptionId $subscriptionId"
-      Invoke-Expression -Command $fwPostConfigCommand
-
-}
 
 # Create enviorment specific Namespaces
 foreach ($namepaceName in $namespaces)
@@ -183,5 +143,45 @@ Invoke-Expression -Command $nginxRepoUpdateCommand
 $nginxConfigCommand = "--set controller.service.loadBalancerIP=$ingressControllerIPAddress --set controller.nodeSelector.agentpool=$ingressNodePoolName --set controller.defaultBackend.nodeSelector.agentpool=$ingressNodePoolName --set controller.service.annotations.'service\.beta\.kubernetes\.io/azure-load-balancer-internal-subnet'=$ingressSubnetName"
 $nginxILBCommand = "helm install $ingControllerName ingress-nginx/ingress-nginx --namespace $ingControllerNSName -f $ingControllerFilePath $nginxConfigCommand"
 Invoke-Expression -Command $nginxILBCommand
+
+$processedHttpsListeners = @()
+foreach ($listener in $httpsListeners)
+{
+      $processedHttpsListeners += "'$listener'"
+}
+$processedHttpsListeners = $processedHttpsListeners -join ","
+
+$processedHttpListeners = @()
+foreach ($listener in $httpListeners)
+{
+      $processedHttpListeners += "'$listener'"
+}
+$processedHttpListeners = $processedHttpListeners -join ","
+$ingressHostName = "." + $ingressHostName
+$listenerHostName = "." + $listenerHostName
+
+$appgwParameters = "-e2eSSL $e2eSSL -httpListeners @($processedHttpListeners) -httpsListeners @($processedHttpsListeners) -appgwVNetName $aksVNetName -appgwSubnetName $appgwSubnetName -appgwTemplateFileName $appgwTemplateFileName -backendIpAddress $ingressControllerIPAddress -backendPoolHostName $ingressHostName -listenerHostName $listenerHostName -healthProbeHostName $healthProbeHostName -healthProbePath $healthProbePath"
+$appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup -appgwName $appgwName -baseFolderPath $baseFolderPath -keyVaultName $keyVaultName $appgwParameters"
+$appgwDeployPath = $securityFolderPath + $appgwDeployCommand
+Invoke-Expression -Command $appgwDeployPath
+
+$pip = Get-AzPublicIpAddress -Name $appgwName-pip -ResourceGroupName $resourceGroup
+$translatedIP = $pip.IpAddress
+
+if ($isUdrCluster -eq "true")
+{
+      $apiServerCommand = "kubectl get endpoints -n default -o json"
+      $apiServerInfo = Invoke-Expression -Command $apiServerCommand
+      $apiServerInfoJson = $apiServerInfo | ConvertFrom-Json
+      $apiServerIP = $apiServerInfoJson.items.Where{$_.metadata.name -match "kubernetes"}.subsets[0].addresses[0].ip
+      Write-Host $apiServerIP
+
+      $fwPipInfo = Get-AzPublicIpAddress -Name $fwName-pip -ResourceGroupName $fwResourceGroup
+      $fwPublicIP = $fwPipInfo.IpAddress
+
+      $fwPostConfigCommand = "$securityFolderPath/$fwPostConfigFileName.ps1 -resourceGroup $fwResourceGroup -fwName $fwName -apiServerIP '$apiServerIP' -fwPublicIP '$fwPublicIP' -translatedIP '$translatedIP' -subscriptionId $subscriptionId"
+      Invoke-Expression -Command $fwPostConfigCommand
+
+}
 
 Write-Host "-----------Post-Config------------"
