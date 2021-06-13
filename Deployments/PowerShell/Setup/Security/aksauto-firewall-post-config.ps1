@@ -1,9 +1,9 @@
-param([Parameter(Mandatory=$false)] [string] $resourceGroup = "master-workshop-rg",
-      [Parameter(Mandatory=$false)] [string] $fwName = "master-hub-workshop-fw",
-      [Parameter(Mandatory=$false)] [string] $apiServerIP = "<api_Server_IP>",
-      [Parameter(Mandatory=$false)] [string] $fwPublicIP = "<fw_Public_IP>",
-      [Parameter(Mandatory=$false)] [string] $translatedIP = "<translated_IP>",
-      [Parameter(Mandatory=$false)] [string] $subscriptionId = "<subscriptionId>")
+param([Parameter(Mandatory=$true)] [string] $resourceGroup = "master-workshop-rg",
+      [Parameter(Mandatory=$true)] [string] $fwName = "master-hub-workshop-fw",
+      [Parameter(Mandatory=$true)] [string] $apiServerIP = "<api_Server_IP>",
+      [Parameter(Mandatory=$true)] [string] $fwPublicIP = "<fw_Public_IP>",
+      [Parameter(Mandatory=$true)] [string] $translatedIP = "<translated_IP>",
+      [Parameter(Mandatory=$true)] [string] $subscriptionId = "<subscriptionId>")
 
 $apiServerRulesCollectionName = "globalrules"
 $natRulesCollectionName = "wkshp-appgw-nat-rules"
