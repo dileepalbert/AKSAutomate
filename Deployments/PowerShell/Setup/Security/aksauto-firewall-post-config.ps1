@@ -60,7 +60,7 @@ if ($firewall)
             -Name $natRulesCollectionName -Rule $natRule `
             -Priority 100 
 
-            $firewall.NetworkRuleCollections.Add($natRulesCollection)
+            $firewall.AddNatRuleCollection(($natRulesCollection)
             Set-AzFirewall -AzureFirewall $firewall
             
       }
