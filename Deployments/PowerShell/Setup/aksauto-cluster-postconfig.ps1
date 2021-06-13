@@ -19,7 +19,7 @@ param([Parameter(Mandatory=$true)]  [string] $isUdrCluster,
       [Parameter(Mandatory=$true)]  [string] $appgwSubnetName = "aks-workshop-appgw-subnet",
       [Parameter(Mandatory=$true)]  [string] $appgwTemplateFileName = "aksauto-appgw-deploy",
       [Parameter(Mandatory=$true)]  [string] $appgwConfigFileName = "aksauto-config-appgw",
-      [Parameter(Mandatory=$false)] [string] $fwPostConfigFileName = "aksauto-firewall-post-config",
+      # [Parameter(Mandatory=$false)] [string] $fwPostConfigFileName = "aksauto-firewall-post-config",
       [Parameter(Mandatory=$true)]  [string] $ingressControllerIPAddress = "12.0.5.100",
       [Parameter(Mandatory=$true)]  [string] $ingressHostName = "<ingressHostName>",
       [Parameter(Mandatory=$true)]  [string] $listenerHostName = "<listenerHostName>",
@@ -165,23 +165,23 @@ $appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup -
 $appgwDeployPath = $securityFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
 
-$pip = Get-AzPublicIpAddress -Name $appgwName-pip -ResourceGroupName $resourceGroup
-$translatedIP = $pip.IpAddress
+# $pip = Get-AzPublicIpAddress -Name $appgwName-pip -ResourceGroupName $resourceGroup
+# $translatedIP = $pip.IpAddress
 
-if ($isUdrCluster -eq "true")
-{
-      $apiServerCommand = "kubectl get endpoints -n default -o json"
-      $apiServerInfo = Invoke-Expression -Command $apiServerCommand
-      $apiServerInfoJson = $apiServerInfo | ConvertFrom-Json
-      $apiServerIP = $apiServerInfoJson.items.Where{$_.metadata.name -match "kubernetes"}.subsets[0].addresses[0].ip
-      Write-Host $apiServerIP
+# if ($isUdrCluster -eq "true")
+# {
+#       $apiServerCommand = "kubectl get endpoints -n default -o json"
+#       $apiServerInfo = Invoke-Expression -Command $apiServerCommand
+#       $apiServerInfoJson = $apiServerInfo | ConvertFrom-Json
+#       $apiServerIP = $apiServerInfoJson.items.Where{$_.metadata.name -match "kubernetes"}.subsets[0].addresses[0].ip
+#       Write-Host $apiServerIP
 
-      $fwPipInfo = Get-AzPublicIpAddress -Name $fwName-pip -ResourceGroupName $fwResourceGroup
-      $fwPublicIP = $fwPipInfo.IpAddress
+#       $fwPipInfo = Get-AzPublicIpAddress -Name $fwName-pip -ResourceGroupName $fwResourceGroup
+#       $fwPublicIP = $fwPipInfo.IpAddress
 
-      $fwPostConfigCommand = "$securityFolderPath/$fwPostConfigFileName.ps1 -resourceGroup $fwResourceGroup -fwName $fwName -apiServerIP '$apiServerIP' -fwPublicIP '$fwPublicIP' -translatedIP '$translatedIP' -subscriptionId $subscriptionId"
-      Invoke-Expression -Command $fwPostConfigCommand
+#       $fwPostConfigCommand = "$securityFolderPath/$fwPostConfigFileName.ps1 -resourceGroup $fwResourceGroup -fwName $fwName -apiServerIP '$apiServerIP' -fwPublicIP '$fwPublicIP' -translatedIP '$translatedIP' -subscriptionId $subscriptionId"
+#       Invoke-Expression -Command $fwPostConfigCommand
 
-}
+# }
 
 Write-Host "-----------Post-Config------------"
