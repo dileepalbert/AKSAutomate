@@ -1,5 +1,5 @@
 param([Parameter(Mandatory=$true)]  [string] $isUdrCluster,
-      [Parameter(Mandatory=$true)]  [string] $e2eSSL = "false",
+      [Parameter(Mandatory=$true)]  [string] $e2eSSL,
       [Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$true)]  [string] $masterResourceGroup = "master-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $fwResourceGroup = $masterResourceGroup,
