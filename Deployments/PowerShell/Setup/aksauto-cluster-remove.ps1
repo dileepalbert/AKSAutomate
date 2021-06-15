@@ -1,16 +1,19 @@
 param([Parameter(Mandatory=$true)]  [string] $shouldRemoveAll = "false",
-      [Parameter(Mandatory=$false)] [string] $resourceGroup = "aks-workshop-rg",
+      [Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $lwResourceGroup = "monitoring-workshop-rg",
       [Parameter(Mandatory=$false)] [string] $masterResourceGroup = "master-workshop-rg",
-      [Parameter(Mandatory=$false)] [string] $clusterName = "aks-workshop-cluster",
+      [Parameter(Mandatory=$true)]  [string] $clusterName = "aks-workshop-cluster",
       [Parameter(Mandatory=$false)] [string] $acrName = "akswkshpacr",
       [Parameter(Mandatory=$false)] [string] $keyVaultName = "aks-workshop-kv",
       [Parameter(Mandatory=$false)] [string] $appGwName = "aks-workshop-appgw",
+      [Parameter(Mandatory=$false)] [string] $fwResourceGroup = $masterResourceGroup,
+      [Parameter(Mandatory=$false)] [string] $fwName = "master-hub-workshop-fw",
+      [Parameter(Mandatory=$false)] [array]  $httpsListeners = @("dev", "qa", "smoke"),
       [Parameter(Mandatory=$false)] [string] $logworkspaceName = "aks-workshop-lw",
       [Parameter(Mandatory=$false)] [string] $masterVNetName = "master-workshop-vnet",
       [Parameter(Mandatory=$false)] [string] $aksVNetName = "aks-workshop-vnet",
       [Parameter(Mandatory=$false)] [string] $ingressHostName = "<ingressHostName>",
-      [Parameter(Mandatory=$false)] [string] $subscriptionId = "<subscriptionId>")
+      [Parameter(Mandatory=$true)]  [string] $subscriptionId = "<subscriptionId>")
 
 $aksSPName = $clusterName + "-sp"
 $subscriptionCommand = "az account set -s $subscriptionId"
@@ -44,112 +47,181 @@ if ($shouldRemoveAll -eq "false")
 
 }
 
-$appgw = Get-AzApplicationGateway -Name $appGwName `
--ResourceGroupName $resourceGroup
-if ($appgw)
+if (![string]::IsNullOrWhiteSpace($appGwName))
 {
 
-      Remove-AzApplicationGateway -Name $appGwName `
-      -ResourceGroupName $resourceGroup -Force
-
-      $appgwPIP = Get-AzPublicIpAddress -Name $publicIpAddressName `
+      $appgw = Get-AzApplicationGateway -Name $appGwName `
       -ResourceGroupName $resourceGroup
-      if ($appgwPIP)
+      if ($appgw)
       {
 
-            Remove-AzPublicIpAddress -Name $publicIpAddressName `
+            Remove-AzApplicationGateway -Name $appGwName `
             -ResourceGroupName $resourceGroup -Force
 
+            $appgwPIP = Get-AzPublicIpAddress -Name $publicIpAddressName `
+            -ResourceGroupName $resourceGroup
+            if ($appgwPIP)
+            {
+
+                  Remove-AzPublicIpAddress -Name $publicIpAddressName `
+                  -ResourceGroupName $resourceGroup -Force
+
+            }
       }
 }
 
-$masterAKSPeering = Get-AzVirtualNetworkPeering -VirtualNetworkName $masterVNetName `
--ResourceGroupName $masterResourceGroup -Name $masterAKSPeeringName
-if ($masterAKSPeering)
+if (![string]::IsNullOrWhiteSpace($masterVNetName))
 {
 
-      Remove-AzVirtualNetworkPeering -VirtualNetworkName $masterVNetName `
-      -ResourceGroupName $masterResourceGroup -Name $masterAKSPeeringName -Force
-
-}
-
-$aksMasterPeering = Get-AzVirtualNetworkPeering -VirtualNetworkName $aksVNetName `
--ResourceGroupName $resourceGroup -Name $aksMasterPeeringName
-if ($aksMasterPeering)
-{
-
-      Remove-AzVirtualNetworkPeering -VirtualNetworkName $aksVNetName `
-      -ResourceGroupName $resourceGroup -Name $aksMasterPeeringName -Force
-
-}
-
-$aksDNSZone = Get-AzPrivateDnsZone -ResourceGroupName $masterResourceGroup `
--Name $ingressHostName
-if ($aksDNSZone)
-{
-
-      $masterDNSLink = Get-AzPrivateDnsVirtualNetworkLink -Name $masterVnetLinkName `
-      -ResourceGroupName $masterResourceGroup -ZoneName $ingressHostName       
-      if ($masterDNSLink)
+      $masterAKSPeering = Get-AzVirtualNetworkPeering `
+      -VirtualNetworkName $masterVNetName `
+      -ResourceGroupName $masterResourceGroup -Name $masterAKSPeeringName
+      if ($masterAKSPeering)
       {
 
-            Remove-AzPrivateDnsVirtualNetworkLink -Name $masterVnetLinkName `
-            -ResourceGroupName $masterResourceGroup -ZoneName $ingressHostName
+            Remove-AzVirtualNetworkPeering -VirtualNetworkName $masterVNetName `
+            -ResourceGroupName $masterResourceGroup `
+            -Name $masterAKSPeeringName -Force
 
       }
+}
 
-      $aksDNSLink = Get-AzPrivateDnsVirtualNetworkLink `
-      -ResourceGroupName $masterResourceGroup -ZoneName $ingressHostName `
-      -Name $aksVnetLinkName
-      if ($aksDNSLink)
+if (![string]::IsNullOrWhiteSpace($aksVNetName))
+{
+      $aksMasterPeering = Get-AzVirtualNetworkPeering `
+      -VirtualNetworkName $aksVNetName `
+      -ResourceGroupName $resourceGroup -Name $aksMasterPeeringName
+      if ($aksMasterPeering)
       {
+      
+            Remove-AzVirtualNetworkPeering -VirtualNetworkName $aksVNetName `
+            -ResourceGroupName $resourceGroup `
+            -Name $aksMasterPeeringName -Force
+      
+      }
 
-            Remove-AzPrivateDnsVirtualNetworkLink -Name $aksVnetLinkName `
-            -ResourceGroupName $masterResourceGroup -ZoneName $ingressHostName
+}
 
+if (![string]::IsNullOrWhiteSpace($ingressHostName))
+{
+      $aksDNSZone = Get-AzPrivateDnsZone -ResourceGroupName $masterResourceGroup `
+      -Name $ingressHostName
+      if ($aksDNSZone)
+      {
+      
+            $masterDNSLink = Get-AzPrivateDnsVirtualNetworkLink `
+            -Name $masterVnetLinkName -ResourceGroupName $masterResourceGroup `
+            -ZoneName $ingressHostName       
+            if ($masterDNSLink)
+            {
+      
+                  Remove-AzPrivateDnsVirtualNetworkLink -Name $masterVnetLinkName `
+                  -ResourceGroupName $masterResourceGroup `
+                  -ZoneName $ingressHostName
+      
+            }
+      
+            $aksDNSLink = Get-AzPrivateDnsVirtualNetworkLink `
+            -ResourceGroupName $masterResourceGroup -ZoneName $ingressHostName `
+            -Name $aksVnetLinkName
+            if ($aksDNSLink)
+            {
+      
+                  Remove-AzPrivateDnsVirtualNetworkLink -Name $aksVnetLinkName `
+                  -ResourceGroupName $masterResourceGroup `
+                  -ZoneName $ingressHostName
+      
+            }
+      
+            foreach ($httpsListener in $httpsListeners)
+            {
+                        
+                  $recordSet = Get-AzPrivateDnsRecordSet -ZoneName $ingressHostName `
+                  -Name $httpsListener -RecordType A `
+                  -ResourceGroupName $masterResourceGroup          
+                  if ($recordSet)
+                  {
+      
+                        Remove-AzPrivateDnsRecordSet -RecordSet $recordSet
+                        
+                  }
+            }
+            
+            # Remove-AzPrivateDnsZone -ResourceGroupName $masterResourceGroup `
+            # -Name $ingressHostName
+      
+      }
+
+}
+
+if (![string]::IsNullOrWhiteSpace($aksVNetName))
+{
+      $aksVnet = Get-AzVirtualNetwork -Name $aksVNetName `
+      -ResourceGroupName $resourceGroup
+      if ($aksVnet)
+      {
+      
+            Remove-AzVirtualNetwork -Name $aksVNetName `
+            -ResourceGroupName $resourceGroup -Force
+      
       }
       
-      Remove-AzPrivateDnsZone -ResourceGroupName $masterResourceGroup `
-      -Name $ingressHostName
-
 }
 
-$aksVnet = Get-AzVirtualNetwork -Name $aksVNetName `
--ResourceGroupName $resourceGroup
-if ($aksVnet)
+if (![string]::IsNullOrWhiteSpace($acrName))
 {
-
-      Remove-AzVirtualNetwork -Name $aksVNetName `
-      -ResourceGroupName $resourceGroup -Force
-
-}
-
-$acrInfo = Get-AzContainerRegistry -Name $acrName `
--ResourceGroupName $resourceGroup
-if ($acrInfo)
-{
-
-      Remove-AzContainerRegistry -Name $acrName `
+      $acrInfo = Get-AzContainerRegistry -Name $acrName `
       -ResourceGroupName $resourceGroup
-
+      if ($acrInfo)
+      {
+      
+            Remove-AzContainerRegistry -Name $acrName `
+            -ResourceGroupName $resourceGroup
+      
+      }
+      
 }
 
-$keyVault = Get-AzKeyVault -VaultName $keyVaultName
-if ($keyVault)
+if (![string]::IsNullOrWhiteSpace($keyVaultName))
 {
-      Remove-AzKeyVault -VaultName $keyVaultName `
-      -Force
+      $keyVault = Get-AzKeyVault -VaultName $keyVaultName
+      if ($keyVault)
+      {
+            Remove-AzKeyVault -VaultName $keyVaultName `
+            -Force
+      }
+      
 }
 
-$omsInfo = Get-AzOperationalInsightsWorkspace -ResourceGroupName $lwResourceGroup `
--Name $logworkspaceName
-if ($omsInfo)
+if (![string]::IsNullOrWhiteSpace($logworkspaceName))
 {
-
-      Remove-AzOperationalInsightsWorkspace -ResourceGroupName $lwResourceGroup `
-      -Name $logworkspaceName -Force
+      $omsInfo = Get-AzOperationalInsightsWorkspace `
+      -ResourceGroupName $lwResourceGroup `
+      -Name $logworkspaceName
+      if ($omsInfo)
+      {
+      
+            Remove-AzOperationalInsightsWorkspace `
+            -ResourceGroupName $lwResourceGroup `
+            -Name $logworkspaceName -Force
+      
+      }
 
 }
+
+if (![string]::IsNullOrWhiteSpace($fwName))
+{
+      $azFwd = Get-AzFirewall -Name $fwName `
+      -ResourceGroupName $fwResourceGroup
+      if ($azFwd)
+      {
+
+            Remove-AzFirewall -Name $fwName `
+            -ResourceGroupName $fwResourceGroup -Force
+
+      }
+}
+
 
 $spInfo = Get-AzADServicePrincipal -DisplayName $aksSPName
 if ($spInfo)

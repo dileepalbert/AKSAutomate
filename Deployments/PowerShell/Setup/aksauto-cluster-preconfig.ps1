@@ -51,7 +51,7 @@ $securityFolderPath = $baseFolderPath + "/PowerShell/Setup/Security"
 $certSecretName = $appgwName + "-cert-secret"
 $certPFXFilePath = $baseFolderPath + "/Certs/$pfxCertFileName.pfx"
 
-if ($rootCertFileName)
+if (![string]::IsNullOrWhiteSpace($rootCertFileName))
 {
 
     $rootCertDataSecretName = $appgwName + "-root-cert-secret"

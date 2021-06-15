@@ -150,7 +150,7 @@ if (!$serverRulesCollection)
       -TargetFqdn @("*.hcp.$location.azmk8s.io", "mcr.microsoft.com", "*.data.mcr.microsoft.com", "management.azure.com", "login.microsoftonline.com", "acs-mirror.azureedge.net")
 
       $checkipRules = New-AzFirewallApplicationRule -Name "allow-chcking-ip" `
-      -Protocol @("https:443") -Description "allow global rules" -SourceAddress "*" `
+      -Protocol @("http:80") -Description "allow global rules" -SourceAddress "*" `
       -TargetFqdn @("checkip.dyndns.org")
 
       $serverRulesCollection = New-AzFirewallApplicationRuleCollection `

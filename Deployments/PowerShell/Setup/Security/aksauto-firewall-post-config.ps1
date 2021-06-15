@@ -1,8 +1,8 @@
 param([Parameter(Mandatory=$true)] [string] $resourceGroup = "master-workshop-rg",
       [Parameter(Mandatory=$true)] [string] $fwName = "master-hub-workshop-fw",
-      [Parameter(Mandatory=$true)] [string] $apiServerIP = "<api_Server_IP>",
-      [Parameter(Mandatory=$true)] [string] $fwPublicIP = "<fw_Public_IP>",
+      [Parameter(Mandatory=$true)] [string] $apiServerIP = "<api_Server_IP>",      
       [Parameter(Mandatory=$true)] [string] $translatedIP = "<translated_IP>",
+      [Parameter(Mandatory=$true)] [string] $translatedPort = "<translated_Port>",
       [Parameter(Mandatory=$true)] [string] $subscriptionId = "<subscriptionId>")
 
 $apiServerRulesCollectionName = "globalrules"
@@ -28,7 +28,8 @@ Invoke-Expression -Command $fwExtensionCommand
 $firewall = Get-AzFirewall -Name $fwName -ResourceGroupName $resourceGroup
 if ($firewall)
 {
-
+      
+      $fwPrivateIP = $firewall.IpConfigurations[0].PrivateIPAddress
       $apiServerRulesCollection = $firewall.GetNetworkRuleCollectionByName($apiServerRulesCollectionName)
       if ($apiServerRulesCollection)
       {
@@ -52,9 +53,10 @@ if ($firewall)
             -Name "translate-to-appgw" `
             -Description "translate to appgw" `
             -Protocol Any -SourceAddress "*" `
-            -DestinationAddress "$fwPublicIP" `
+            -DestinationAddress "$fwPrivateIP" `
             -DestinationPort "443" `
-            -TranslatedAddress "$translatedIP" -TranslatedPort "80"
+            -TranslatedAddress "$translatedIP" `
+            -TranslatedPort $translatedPort
 
             $natRulesCollection = New-AzFirewallNatRuleCollection `
             -Name $natRulesCollectionName -Rule $natRule `

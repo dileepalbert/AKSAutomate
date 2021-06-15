@@ -19,7 +19,7 @@ param([Parameter(Mandatory=$true)]  [string] $isUdrCluster,
       [Parameter(Mandatory=$true)]  [string] $appgwSubnetName = "aks-workshop-appgw-subnet",
       [Parameter(Mandatory=$true)]  [string] $appgwTemplateFileName = "aksauto-appgw-deploy",
       [Parameter(Mandatory=$true)]  [string] $appgwConfigFileName = "aksauto-config-appgw",
-      # [Parameter(Mandatory=$false)] [string] $fwPostConfigFileName = "aksauto-firewall-post-config",
+      [Parameter(Mandatory=$false)] [string] $fwPostConfigFileName = "aksauto-firewall-post-config",
       [Parameter(Mandatory=$true)]  [string] $ingressControllerIPAddress = "12.0.5.100",
       [Parameter(Mandatory=$true)]  [string] $ingressHostName = "<ingressHostName>",
       [Parameter(Mandatory=$true)]  [string] $listenerHostName = "<listenerHostName>",
@@ -63,10 +63,12 @@ foreach ($httpsListener in $httpsListeners)
       if (!$recordSet)
       {
 
-            $recordConfigsList = New-AzPrivateDnsRecordConfig -IPv4Address $ingressControllerIPAddress
+            $recordConfigsList = New-AzPrivateDnsRecordConfig `
+            -IPv4Address $ingressControllerIPAddress
 
             New-AzPrivateDnsRecordSet -Name $httpsListener -RecordType A `
-            -ResourceGroupName $masterResourceGroup -TTL 3600 -ZoneName $ingressHostName `
+            -ResourceGroupName $masterResourceGroup -TTL 3600 `
+            -ZoneName $ingressHostName `
             -PrivateDnsRecords $recordConfigsList
             
       }
@@ -165,23 +167,63 @@ $appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup -
 $appgwDeployPath = $securityFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
 
-# $pip = Get-AzPublicIpAddress -Name $appgwName-pip -ResourceGroupName $resourceGroup
-# $translatedIP = $pip.IpAddress
+$appgwPublicIP = Get-AzPublicIpAddress -Name "$appgwName-pip" `
+-ResourceGroupName $resourceGroup
 
-# if ($isUdrCluster -eq "true")
-# {
-#       $apiServerCommand = "kubectl get endpoints -n default -o json"
-#       $apiServerInfo = Invoke-Expression -Command $apiServerCommand
-#       $apiServerInfoJson = $apiServerInfo | ConvertFrom-Json
-#       $apiServerIP = $apiServerInfoJson.items.Where{$_.metadata.name -match "kubernetes"}.subsets[0].addresses[0].ip
-#       Write-Host $apiServerIP
+$translatedIP = $ingressControllerIPAddress
+$translatedPort = "80"
+if ($e2eSSL -eq "true")
+{
 
-#       $fwPipInfo = Get-AzPublicIpAddress -Name $fwName-pip -ResourceGroupName $fwResourceGroup
-#       $fwPublicIP = $fwPipInfo.IpAddress
+      $translatedPort = "443"
 
-#       $fwPostConfigCommand = "$securityFolderPath/$fwPostConfigFileName.ps1 -resourceGroup $fwResourceGroup -fwName $fwName -apiServerIP '$apiServerIP' -fwPublicIP '$fwPublicIP' -translatedIP '$translatedIP' -subscriptionId $subscriptionId"
-#       Invoke-Expression -Command $fwPostConfigCommand
+}
 
-# }
+if ($isUdrCluster -eq "true")
+{
+
+      $aksVnet = Get-AzVirtualNetwork -Name $aksVNetName `
+      -ResourceGroupName $resourceGroup
+      if ($aksVnet)
+      {
+      
+            $appgwSubnet = Get-AzVirtualNetworkSubnetConfig -Name $appgwSubnetName `
+            -VirtualNetwork $appgwVnet
+            if ($appgwSubnet)
+            {
+                  
+                  $appgwRouteInfo = Get-AzRouteTable -Name $appgwUDRName `
+                  -ResourceGroupName $resourceGroup
+                  if (!$appgwRouteInfo)
+                  {
+                  
+                        $appgwRouteInfo = New-AzRouteTable -Name $appgwUDRName `
+                        -ResourceGroupName $resourceGroup -Location $location
+                  
+                  }
+                  $rtDefaultRouteInfo = $appgwRouteInfo.Routes.Where{$_.Name -match "$appgwUDRName-default"}
+                  if (!$rtDefaultRouteInfo)
+                  {
+                  
+                        $rtDefaultRouteInfo = New-AzRouteConfig -Name "$appgwUDRName-default" `
+                        -AddressPrefix $appgwPublicIP -NextHopType VirtualAppliance `
+                        -NextHopIpAddress "$fwPrivateIP"
+                  
+                        $rtInfo.Routes.Add($rtDefaultRouteInfo)
+                  
+                  }
+            }
+      }
+      
+      $apiServerCommand = "kubectl get endpoints -n default -o json"
+      $apiServerInfo = Invoke-Expression -Command $apiServerCommand
+      $apiServerInfoJson = $apiServerInfo | ConvertFrom-Json
+      $apiServerIP = $apiServerInfoJson.items.Where{$_.metadata.name -match "kubernetes"}.subsets[0].addresses[0].ip
+      Write-Host $apiServerIP
+
+      $fwPostConfigCommand = "$securityFolderPath/$fwPostConfigFileName.ps1 -resourceGroup $fwResourceGroup -fwName $fwName -apiServerIP '$apiServerIP' -translatedIP '$translatedIP' -translatedPort '$translatedPort' -subscriptionId $subscriptionId"
+      Invoke-Expression -Command $fwPostConfigCommand
+
+}
 
 Write-Host "-----------Post-Config------------"
