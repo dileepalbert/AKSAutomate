@@ -175,67 +175,79 @@ $appgwPublicIP = $appgwPublicIPInfo.IpAddress
 if ($isUdrCluster -eq "true")
 {
 
+      $firewall = Get-AzFirewall -Name $fwName -ResourceGroupName $fwResourceGroup
+      if (!$firewall)
+      {
+
+            Write-Host "Error fetching Azure Firewall instance"
+            return;
+
+      }
+
       $aksVnet = Get-AzVirtualNetwork -Name $aksVNetName `
       -ResourceGroupName $resourceGroup
-      if ($aksVnet)
+      if (!$aksVnet)
       {
-      
-            $appgwSubnet = Get-AzVirtualNetworkSubnetConfig -Name $appgwSubnetName `
-            -VirtualNetwork $aksVnet
-            if ($appgwSubnet)
-            {
-                  
-                  $appgwRouteInfo = Get-AzRouteTable -Name $appgwUDRName `
-                  -ResourceGroupName $resourceGroup
-                  if (!$appgwRouteInfo)
-                  {
-                  
-                        $appgwRouteInfo = New-AzRouteTable -Name $appgwUDRName `
-                        -ResourceGroupName $resourceGroup -Location $location
-                  
-                  }
-                  $rtDefaultRouteInfo = $appgwRouteInfo.Routes.Where{$_.Name -match "$appgwUDRName-default"}
-                  if (!$rtDefaultRouteInfo)
-                  {
-                  
-                        $rtDefaultRouteInfo = New-AzRouteConfig -Name "$appgwUDRName-default" `
-                        -AddressPrefix "$appgwPublicIP/32" -NextHopType VirtualAppliance `
-                        -NextHopIpAddress "$fwPrivateIP"
-                  
-                        $appgwRouteInfo.Routes.Add($rtDefaultRouteInfo)
-                  
-                  }
+            
+            Write-Host "Error fetching Vnet info"
+            return;
 
-                  Set-AzRouteTable -RouteTable $appgwRouteInfo
-
-            }
       }
-      
+
+      $appgwSubnet = Get-AzVirtualNetworkSubnetConfig -Name $appgwSubnetName `
+      -VirtualNetwork $aksVnet
+      if (!$appgwSubnet)
+      {
+            
+            Write-Host "Error fetching AKS Subnet info"
+            return;
+
+      }
+
+      $fwPrivateIP = $firewall.IpConfigurations[0].PrivateIPAddress
       $apiServerCommand = "kubectl get endpoints -n default -o json"
       $apiServerInfo = Invoke-Expression -Command $apiServerCommand
       $apiServerInfoJson = $apiServerInfo | ConvertFrom-Json
       $apiServerIP = $apiServerInfoJson.items.Where{$_.metadata.name -match "kubernetes"}.subsets[0].addresses[0].ip
       
-      $firewall = Get-AzFirewall -Name $fwName -ResourceGroupName $fwResourceGroup
-      if ($firewall)
+      $apiServerRulesCollection = $firewall.GetNetworkRuleCollectionByName($apiServerRulesCollectionName)
+      if ($apiServerRulesCollection)
       {
-                  
-            $apiServerRulesCollection = $firewall.GetNetworkRuleCollectionByName($apiServerRulesCollectionName)
-            if ($apiServerRulesCollection)
-            {
-                  $apiServerRules = New-AzFirewallNetworkRule `
-                  -Name "allow-api-server" `
-                  -Description "allow api server" `
-                  -Protocol Any `
-                  -SourceAddress "*" `
-                  -DestinationAddress "$apiServerIP" `
-                  -DestinationPort "443"
-      
-                  $apiServerRulesCollection.AddRule($apiServerRules)
-                  Set-AzFirewall -AzureFirewall $firewall
-      
-            }            
+            $apiServerRules = New-AzFirewallNetworkRule `
+            -Name "allow-api-server" `
+            -Description "allow api server" `
+            -Protocol Any `
+            -SourceAddress "*" `
+            -DestinationAddress "$apiServerIP" `
+            -DestinationPort "443"
+
+            $apiServerRulesCollection.AddRule($apiServerRules)
+            Set-AzFirewall -AzureFirewall $firewall
+
       }
+
+      $appgwRouteInfo = Get-AzRouteTable -Name $appgwUDRName `
+      -ResourceGroupName $resourceGroup
+      if (!$appgwRouteInfo)
+      {
+      
+            $appgwRouteInfo = New-AzRouteTable -Name $appgwUDRName `
+            -ResourceGroupName $resourceGroup -Location $location
+      
+      }
+      $rtDefaultRouteInfo = $appgwRouteInfo.Routes.Where{$_.Name -match "$appgwUDRName-default"}
+      if (!$rtDefaultRouteInfo)
+      {
+      
+            $rtDefaultRouteInfo = New-AzRouteConfig -Name "$appgwUDRName-default" `
+            -AddressPrefix "$appgwPublicIP/32" -NextHopType VirtualAppliance `
+            -NextHopIpAddress "$fwPrivateIP"
+      
+            $appgwRouteInfo.Routes.Add($rtDefaultRouteInfo)
+      
+      }
+
+      Set-AzRouteTable -RouteTable $appgwRouteInfo
 
 }
 
