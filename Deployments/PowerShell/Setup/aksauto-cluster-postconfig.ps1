@@ -36,7 +36,7 @@ $ingControllerFileName = "internal-ingress"
 $ingControllerFilePath = "$setupFolderPath/Common/$ingControllerFileName.yaml"
 $masterVnetLinkName = "$masterVNetName-dns-plink"
 $aksVnetLinkName = "$aksVNetName-dns-plink"
-$appgwUDRName = $appgwName + "-udr"
+$appgwUDRName = $appgwSubnetName + "-rt"
 
 # Creating Private DNS Zone
 $privateDNSZone = Get-AzPrivateDnsZone -ResourceGroupName $masterResourceGroup `
