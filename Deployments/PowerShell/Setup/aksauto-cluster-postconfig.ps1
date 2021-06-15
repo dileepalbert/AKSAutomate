@@ -201,7 +201,7 @@ if ($isUdrCluster -eq "true")
                         -AddressPrefix $appgwPublicIP -NextHopType VirtualAppliance `
                         -NextHopIpAddress "$fwPrivateIP"
                   
-                        $rtInfo.Routes.Add($rtDefaultRouteInfo)
+                        $appgwRouteInfo.Routes.Add($rtDefaultRouteInfo)
                   
                   }
             }
