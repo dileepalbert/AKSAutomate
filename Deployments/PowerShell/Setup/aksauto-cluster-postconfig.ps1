@@ -36,6 +36,7 @@ $ingControllerFileName = "internal-ingress"
 $ingControllerFilePath = "$setupFolderPath/Common/$ingControllerFileName.yaml"
 $masterVnetLinkName = "$masterVNetName-dns-plink"
 $aksVnetLinkName = "$aksVNetName-dns-plink"
+$appgwUDRName = $appgwName + "-udr"
 
 # Creating Private DNS Zone
 $privateDNSZone = Get-AzPrivateDnsZone -ResourceGroupName $masterResourceGroup `
@@ -170,15 +171,6 @@ Invoke-Expression -Command $appgwDeployPath
 $appgwPublicIP = Get-AzPublicIpAddress -Name "$appgwName-pip" `
 -ResourceGroupName $resourceGroup
 
-$translatedIP = $ingressControllerIPAddress
-$translatedPort = "80"
-if ($e2eSSL -eq "true")
-{
-
-      $translatedPort = "443"
-
-}
-
 if ($isUdrCluster -eq "true")
 {
 
@@ -219,10 +211,27 @@ if ($isUdrCluster -eq "true")
       $apiServerInfo = Invoke-Expression -Command $apiServerCommand
       $apiServerInfoJson = $apiServerInfo | ConvertFrom-Json
       $apiServerIP = $apiServerInfoJson.items.Where{$_.metadata.name -match "kubernetes"}.subsets[0].addresses[0].ip
-      Write-Host $apiServerIP
-
-      $fwPostConfigCommand = "$securityFolderPath/$fwPostConfigFileName.ps1 -resourceGroup $fwResourceGroup -fwName $fwName -apiServerIP '$apiServerIP' -translatedIP '$translatedIP' -translatedPort '$translatedPort' -subscriptionId $subscriptionId"
-      Invoke-Expression -Command $fwPostConfigCommand
+      
+      $firewall = Get-AzFirewall -Name $fwName -ResourceGroupName $fwResourceGroup
+      if ($firewall)
+      {
+                  
+            $apiServerRulesCollection = $firewall.GetNetworkRuleCollectionByName($apiServerRulesCollectionName)
+            if ($apiServerRulesCollection)
+            {
+                  $apiServerRules = New-AzFirewallNetworkRule `
+                  -Name "allow-api-server" `
+                  -Description "allow api server" `
+                  -Protocol Any `
+                  -SourceAddress "*" `
+                  -DestinationAddress "$apiServerIP" `
+                  -DestinationPort "443"
+      
+                  $apiServerRulesCollection.AddRule($apiServerRules)
+                  Set-AzFirewall -AzureFirewall $firewall
+      
+            }            
+      }
 
 }
 
