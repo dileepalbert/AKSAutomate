@@ -198,7 +198,7 @@ if ($isUdrCluster -eq "true")
                   {
                   
                         $rtDefaultRouteInfo = New-AzRouteConfig -Name "$appgwUDRName-default" `
-                        -AddressPrefix $appgwPublicIP -NextHopType VirtualAppliance `
+                        -AddressPrefix "$appgwPublicIP/32" -NextHopType VirtualAppliance `
                         -NextHopIpAddress "$fwPrivateIP"
                   
                         $appgwRouteInfo.Routes.Add($rtDefaultRouteInfo)
@@ -206,7 +206,7 @@ if ($isUdrCluster -eq "true")
                   }
 
                   Set-AzRouteTable -RouteTable $appgwRouteInfo
-                  
+
             }
       }
       
