@@ -17,7 +17,8 @@ param([Parameter(Mandatory=$true)]  [string] $shouldRemoveAll = "false",
 
 $aksSPName = $clusterName + "-sp"
 $subscriptionCommand = "az account set -s $subscriptionId"
-$publicIpAddressName = "$appgwName-pip"
+$appgwPublicIpAddressName = "$appgwName-pip"
+$fwPublicIpAddressName = "$fwName-pip"
 $masterAKSPeeringName = "$masterVNetName-$aksVNetName-peering";
 $aksMasterPeeringName = "$aksVNetName-$masterVNetName-peering";
 $masterVnetLinkName = "$masterVNetName-dns-plink"
@@ -58,16 +59,17 @@ if (![string]::IsNullOrWhiteSpace($appGwName))
             Remove-AzApplicationGateway -Name $appGwName `
             -ResourceGroupName $resourceGroup -Force
 
-            $appgwPIP = Get-AzPublicIpAddress -Name $publicIpAddressName `
-            -ResourceGroupName $resourceGroup
-            if ($appgwPIP)
-            {
-
-                  Remove-AzPublicIpAddress -Name $publicIpAddressName `
-                  -ResourceGroupName $resourceGroup -Force
-
-            }
       }
+
+      # $appgwPIP = Get-AzPublicIpAddress -Name $appgwPublicIpAddressName `
+      # -ResourceGroupName $resourceGroup
+      # if ($appgwPIP)
+      # {
+
+      #       Remove-AzPublicIpAddress -Name $appgwPublicIpAddressName `
+      #       -ResourceGroupName $resourceGroup -Force
+
+      # }
 }
 
 if (![string]::IsNullOrWhiteSpace($masterVNetName))
@@ -220,6 +222,16 @@ if (![string]::IsNullOrWhiteSpace($fwName))
             -ResourceGroupName $fwResourceGroup -Force
 
       }
+
+      # $fwPIP = Get-AzPublicIpAddress -Name $fwPublicIpAddressName `
+      # -ResourceGroupName $fwResourceGroup
+      # if ($fwPIP)
+      # {
+
+      #       Remove-AzPublicIpAddress -Name $fwPublicIpAddressName `
+      #       -ResourceGroupName $fwResourceGroup -Force
+
+      # }
 }
 
 
