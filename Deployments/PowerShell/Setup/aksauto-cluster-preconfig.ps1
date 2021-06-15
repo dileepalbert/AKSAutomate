@@ -1,5 +1,5 @@
-param([Parameter(Mandatory=$true)]  [string] $isUdrCluster = "false",
-      [Parameter(Mandatory=$true)]  [string] $isPrivateCluster = "false",
+param([Parameter(Mandatory=$true)]  [string] $isUdrCluster,
+      [Parameter(Mandatory=$true)]  [string] $isPrivateCluster,
       [Parameter(Mandatory=$true)]  [string] $resourceGroup = "aks-workshop-rg",
       [Parameter(Mandatory=$true)]  [string] $lwResourceGroup = "monitoring-workshop-rg",
       [Parameter(Mandatory=$true)]  [string] $masterResourceGroup = "master-workshop-rg",
