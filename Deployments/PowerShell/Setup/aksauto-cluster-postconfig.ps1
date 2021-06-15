@@ -168,8 +168,9 @@ $appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup -
 $appgwDeployPath = $securityFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
 
-$appgwPublicIP = Get-AzPublicIpAddress -Name "$appgwName-pip" `
+$appgwPublicIPInfo = Get-AzPublicIpAddress -Name "$appgwName-pip" `
 -ResourceGroupName $resourceGroup
+$appgwPublicIP = $appgwPublicIPInfo.IpAddress
 
 if ($isUdrCluster -eq "true")
 {
