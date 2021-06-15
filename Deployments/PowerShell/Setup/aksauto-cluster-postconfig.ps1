@@ -204,6 +204,9 @@ if ($isUdrCluster -eq "true")
                         $appgwRouteInfo.Routes.Add($rtDefaultRouteInfo)
                   
                   }
+
+                  Set-AzRouteTable -RouteTable $appgwRouteInfo
+                  
             }
       }
       
