@@ -188,7 +188,7 @@ if ($isUdrCluster -eq "true")
       {
       
             $appgwSubnet = Get-AzVirtualNetworkSubnetConfig -Name $appgwSubnetName `
-            -VirtualNetwork $appgwVnet
+            -VirtualNetwork $aksVnet
             if ($appgwSubnet)
             {
                   
