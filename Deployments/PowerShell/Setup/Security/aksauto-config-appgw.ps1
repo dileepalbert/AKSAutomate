@@ -15,7 +15,6 @@ param([Parameter(Mandatory=$true)] [string] $e2eSSL,
       [Parameter(Mandatory=$true)] [string] $baseFolderPath)
 
 $templatesFolderPath = $baseFolderPath + "/PowerShell/Templates"
-$appgwUDRName = $appgwName + "-udr"
 
 $processedListeners = @()
 foreach ($listener in $httpsListeners)
