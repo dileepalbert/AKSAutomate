@@ -23,6 +23,7 @@ foreach ($listener in $httpsListeners)
 }
 $processedListeners = $processedListeners -join ","
 
+$appgwDeployFileName = $appgwTemplateFileName
 if ($e2eSSL -eq "true")
 {
 
