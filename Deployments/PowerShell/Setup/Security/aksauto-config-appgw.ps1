@@ -27,7 +27,7 @@ $appgwDeployFileName = $appgwTemplateFileName
 if ($e2eSSL -eq "true")
 {
 
-      $appgwDeployFileName = $appgwTemplateFileName + ".tls"
+      $appgwDeployFileName = $appgwDeployFileName + ".tls"
 
 }
 
