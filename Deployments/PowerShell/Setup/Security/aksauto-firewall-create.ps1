@@ -10,7 +10,8 @@ $globalRulesCollectionName = "globalrules"
 $aksRulesCollectionName = "aksrules"
 $osRulesCollectionName  = "osupdates"
 $serverRulesCollectionName = "serverrules"
-$ciRulesCollectionName = "containerimages"
+$ciRulesCollectionName = "containerrules"
+$policyRulesCollectionName = "policyrules"
 
 $subscription = Get-AzSubscription -SubscriptionId $subscriptionId
 if (!$subscription)
@@ -180,6 +181,22 @@ if (!$ciRulesCollection)
 
       $ciRulesCollection.AddRule($helmRules)
       $firewall.AddApplicationRuleCollection($ciRulesCollection)
+      Set-AzFirewall -AzureFirewall $firewall
+      
+}
+
+$policyRulesCollection = $firewall.GetApplicationRuleCollectionByName($policyRulesCollectionName)
+if (!$policyRulesCollection)
+{
+      $policyRules = New-AzFirewallApplicationRule -Name "allow-policy-rules" `
+      -Protocol @("https:443") -Description "allow policy rules" -SourceAddress "*" `
+      -TargetFqdn @("data.policy.core.windows.net", "store.policy.core.windows.net", "dc.services.visualstudio.com")
+
+      $policyRulesCollection = New-AzFirewallApplicationRuleCollection `
+      -Name $policyRulesCollectionName -Priority 105 -Rule $policyRules `
+      -ActionType "Allow"
+
+      $firewall.AddApplicationRuleCollection($policyRulesCollection)
       Set-AzFirewall -AzureFirewall $firewall
       
 }
