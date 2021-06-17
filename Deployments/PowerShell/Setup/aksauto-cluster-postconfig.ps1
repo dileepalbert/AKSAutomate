@@ -168,13 +168,13 @@ $appgwDeployCommand = "/$appgwConfigFileName.ps1 -resourceGroup $resourceGroup -
 $appgwDeployPath = $securityFolderPath + $appgwDeployCommand
 Invoke-Expression -Command $appgwDeployPath
 
-$appgwPublicIPInfo = Get-AzPublicIpAddress -Name "$appgwName-pip" `
--ResourceGroupName $resourceGroup
-$appgwPublicIP = $appgwPublicIPInfo.IpAddress
-
 if ($isUdrCluster -eq "true")
 {
 
+      $appgwPublicIPInfo = Get-AzPublicIpAddress -Name "$appgwName-pip" `
+      -ResourceGroupName $resourceGroup
+      $appgwPublicIP = $appgwPublicIPInfo.IpAddress
+            
       $firewall = Get-AzFirewall -Name $fwName -ResourceGroupName $fwResourceGroup
       if (!$firewall)
       {
