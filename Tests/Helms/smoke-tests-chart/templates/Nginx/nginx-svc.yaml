@@ -13,4 +13,4 @@ spec:
     port: {{ $port.port }}
     targetPort: {{ $port.targetPort }}
   {{ end }}
-  type: ClusterIP
+  type: {{ $service.type }}
