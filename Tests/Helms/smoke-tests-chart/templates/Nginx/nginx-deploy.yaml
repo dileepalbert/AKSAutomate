@@ -27,7 +27,7 @@ spec:
       {{ range $container := $deployment.containers }}
       - name: {{ $container.name }}
         image: {{ $container.image }}
-        imagePullPolicy: {{ $container.imagePullPolicy }}
+        imagePullPolicy: {{ $container.imagePullPolicy }}        
         resources:
           requests:
             memory: {{ $container.memoryRequest }}

@@ -1,4 +1,4 @@
-{{if not (lookup "rbac.authorization.k8s.io/v1" "ClusterRoleBinding" "" "tblz-cluster-admin-bindings") }}
+{{if not (lookup "rbac.authorization.k8s.io/v1" "ClusterRoleBinding" "" "aks-workshop-cluster-admin-bindings") }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
