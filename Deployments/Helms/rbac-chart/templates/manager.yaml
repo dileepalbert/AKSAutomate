@@ -21,7 +21,7 @@ roleRef:
   kind: Role
   name: {{ .Values.manager.roleName }}
 subjects:
-{{- range $subject := .Values.developer.subjects}}
+{{- range $subject := .Values.manager.subjects}}
 - apiGroup: rbac.authorization.k8s.io
   name: {{ $subject.name }}
   kind: {{ $subject.kind }}

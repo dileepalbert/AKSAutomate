@@ -1,0 +1,14 @@
+ingress:
+  name: aks-workshop-ingress
+  namespace: aks-workshop-qa
+  annotations:
+    ingressClass: nginx
+    proxyBodySize: "10m"
+    enableCors: "true"
+    rewriteTarget: /ratingsapi/v1/$1
+  hosts:
+  - name: qa.internal.wkshpdev.com
+    paths:
+    - path: /ratingsapi/v1/?(.*)
+      service: aks-workshop-apim-gateway
+      port: 80
