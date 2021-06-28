@@ -1,35 +1,15 @@
 param([Parameter(Mandatory=$true)] [string] $resourceGroup = "master-workshop-rg",
       [Parameter(Mandatory=$true)] [string] $fwName = "master-hub-workshop-fw",
-      [Parameter(Mandatory=$true)] [string] $apiServerIP = "<api_Server_IP>",      
-      [Parameter(Mandatory=$true)] [string] $translatedIP = "<translated_IP>",
-      [Parameter(Mandatory=$true)] [string] $translatedPort = "<translated_Port>",
-      [Parameter(Mandatory=$true)] [string] $subscriptionId = "<subscriptionId>")
+      [Parameter(Mandatory=$true)] [string] $apiServerIP = "<api_Server_IP>")
 
 $apiServerRulesCollectionName = "globalrules"
-$natRulesCollectionName = "wkshp-appgw-nat-rules"
-
-$subscription = Get-AzSubscription -SubscriptionId $subscriptionId
-if (!$subscription)
-{
-      Write-Host "Error fetching Subscription information"
-      return;
-}
-
-# PS Select Subscriotion 
-Select-AzSubscription -SubscriptionId $subscriptionId
-
-# CLI Select Subscriotion 
-$subscriptionCommand = "az account set -s $subscriptionId"
-Invoke-Expression -Command $subscriptionCommand
-
 $fwExtensionCommand = "az extension add --name azure-firewall"
 Invoke-Expression -Command $fwExtensionCommand
 
 $firewall = Get-AzFirewall -Name $fwName -ResourceGroupName $resourceGroup
 if ($firewall)
 {
-      
-      $fwPrivateIP = $firewall.IpConfigurations[0].PrivateIPAddress
+            
       $apiServerRulesCollection = $firewall.GetNetworkRuleCollectionByName($apiServerRulesCollectionName)
       if ($apiServerRulesCollection)
       {
@@ -46,25 +26,27 @@ if ($firewall)
 
       }
 
-      $natRulesCollection = $firewall.GetNetworkRuleCollectionByName($natRulesCollectionName)
-      if (!$natRulesCollection)
-      {
-            $natRule = New-AzFirewallNatRule `
-            -Name "translate-to-appgw" `
-            -Description "translate to appgw" `
-            -Protocol Any -SourceAddress "*" `
-            -DestinationAddress "$fwPrivateIP" `
-            -DestinationPort "443" `
-            -TranslatedAddress "$translatedIP" `
-            -TranslatedPort $translatedPort
+      # $natRulesCollectionName = "wkshp-appgw-nat-rules"
+      # $fwPrivateIP = $firewall.IpConfigurations[0].PrivateIPAddress
+      # $natRulesCollection = $firewall.GetNetworkRuleCollectionByName($natRulesCollectionName)
+      # if (!$natRulesCollection)
+      # {
+      #       $natRule = New-AzFirewallNatRule `
+      #       -Name "translate-to-appgw" `
+      #       -Description "translate to appgw" `
+      #       -Protocol Any -SourceAddress "*" `
+      #       -DestinationAddress "$fwPrivateIP" `
+      #       -DestinationPort "443" `
+      #       -TranslatedAddress "$translatedIP" `
+      #       -TranslatedPort $translatedPort
 
-            $natRulesCollection = New-AzFirewallNatRuleCollection `
-            -Name $natRulesCollectionName -Rule $natRule `
-            -Priority 100 
+      #       $natRulesCollection = New-AzFirewallNatRuleCollection `
+      #       -Name $natRulesCollectionName -Rule $natRule `
+      #       -Priority 100 
 
-            $firewall.AddNatRuleCollection($natRulesCollection)
-            Set-AzFirewall -AzureFirewall $firewall
+      #       $firewall.AddNatRuleCollection($natRulesCollection)
+      #       Set-AzFirewall -AzureFirewall $firewall
             
-      }
+      # }
 }
 
