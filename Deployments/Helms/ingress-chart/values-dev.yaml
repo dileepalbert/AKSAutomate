@@ -5,10 +5,10 @@ ingress:
     ingressClass: nginx
     proxyBodySize: "10m"
     enableCors: "true"
-    rewriteTarget: /ratingsapi/v1/$1
+    rewriteTarget: /$1
   hosts:
   - name: dev.internal.wkshpdev.com
-    paths:
-    - path: /ratingsapi/v1/?(.*)
+    paths:    
+    - path: /?(.*)
       service: aks-workshop-apim-gateway
-      port: 80
+      port: 80      
