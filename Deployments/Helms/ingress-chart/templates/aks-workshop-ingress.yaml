@@ -8,8 +8,14 @@ metadata:
     kubernetes.io/ingress.class: {{ $ingress.annotations.ingressClass }}
     nginx.ingress.kubernetes.io/rewrite-target: {{ $ingress.annotations.rewriteTarget }}
     nginx.ingress.kubernetes.io/enable-cors: {{ $ingress.annotations.enableCors | quote }}
-  {{ if $ingress.proxyBodySize }}
-    nginx.ingress.kubernetes.io/proxy-body-size: {{ $ingress.annotations.proxyBodySize | quote }}
+  {{ if $ingress.annotations.proxyBodySize }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ $ingress.annotations.proxyBodySize }}
+  {{ end }}
+  {{ if $ingress.annotations.backendProtocol }}
+    nginx.ingress.kubernetes.io/backend-protocol: {{ $ingress.annotations.backendProtocol }}
+  {{ end }}
+  {{ if $ingress.annotations.sslpassThrough }}
+    nginx.ingress.kubernetes.io/ssl-passthrough: {{ $ingress.annotations.sslpassThrough | quote }}
   {{ end }}
 spec:
   rules:
