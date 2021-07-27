@@ -3,6 +3,8 @@ controller:
   # podAnnotations:
   #   prometheus.io/scrape: "true"
   #   prometheus.io/port: "10254"
+  extraArgs:
+    enable-ssl-passthrough: "true"
   metrics:
     enabled: "true"
   service:

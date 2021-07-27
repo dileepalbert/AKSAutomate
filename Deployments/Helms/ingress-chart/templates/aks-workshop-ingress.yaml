@@ -6,7 +6,9 @@ metadata:
   namespace: {{ $ingress.namespace }}  
   annotations:
     kubernetes.io/ingress.class: {{ $ingress.annotations.ingressClass }}
+    {{ if $ingress.annotations.rewriteTarget }}
     nginx.ingress.kubernetes.io/rewrite-target: {{ $ingress.annotations.rewriteTarget }}
+    {{ end }}
     nginx.ingress.kubernetes.io/enable-cors: {{ $ingress.annotations.enableCors | quote }}
   {{ if $ingress.annotations.proxyBodySize }}
     nginx.ingress.kubernetes.io/proxy-body-size: {{ $ingress.annotations.proxyBodySize }}
@@ -16,7 +18,7 @@ metadata:
   {{ end }}
   {{ if $ingress.annotations.sslpassThrough }}
     nginx.ingress.kubernetes.io/ssl-passthrough: {{ $ingress.annotations.sslpassThrough | quote }}
-  {{ end }}
+  {{ end }}    
 spec:
   rules:
   {{- range $host := $ingress.hosts }}

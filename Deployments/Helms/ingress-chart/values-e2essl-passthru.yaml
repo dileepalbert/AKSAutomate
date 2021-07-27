@@ -1,0 +1,31 @@
+ingress:
+  name: aks-workshop-ssltest-ingress
+  namespace: ssltest
+  annotations:
+    ingressClass: nginx
+    proxyBodySize: "10m"
+    enableCors: "true"
+    sslpassThrough: "true"
+  hosts:
+  - name: proxy.internal.wkshpdev.com
+    paths:
+    - path: /
+      service: api-proxy-svc
+      port: 443
+    - path: /api/post
+      service: api-proxy-svc
+      port: 443
+    - path: /bkend
+      service: api-proxy-svc
+      port: 443
+    - path: /api/post/bkend
+      service: api-proxy-svc
+      port: 443
+  - name: bkend.internal.wkshpdev.com
+    paths:
+    - path: /
+      service: api-bkend-svc
+      port: 443
+    - path: /api/post
+      service: api-bkend-svc
+      port: 443    

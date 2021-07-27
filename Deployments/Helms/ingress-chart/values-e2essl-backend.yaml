@@ -7,14 +7,18 @@ ingress:
     enableCors: "true"
     rewriteTarget: /$1
     backendProtocol: "HTTPS"
-    # sslpassThrough: "true"
   tls:
   - hosts:
     - "*.internal.wkshpdev.com"
     secretName: aks-workshop-tls-secret
   hosts:
-  - name: ssltest.internal.wkshpdev.com
+  - name: proxy.internal.wkshpdev.com
+    paths:
+    - path: /?(.*)
+      service: api-proxy-svc
+      port: 443 
+  - name: bkend.internal.wkshpdev.com
     paths:
     - path: /?(.*)
       service: api-bkend-svc
-      port: 443
+      port: 443    
