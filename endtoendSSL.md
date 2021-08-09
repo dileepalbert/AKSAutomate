@@ -152,7 +152,61 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
 ## Action
 
-With All this info let us now get into the creation and configuration of Application Gateway resource
+- #### Create Application Gateway
+
+  - Ideally this should be done through ARM template; for this exercise we would assume that the resource would be created using Azure Portal
+
+- Configure **Backend Pool**
+
+  ![backendPool-1](./Assets/backendPool-1.png)
+
+  
+
+  ![backendPool-2](/Users/monojitd/Materials/Projects/AKSProjects/AKSWorkshop/AKSAutomate/Assets/backendPool-2.png)
+
+- Configure *Multi-site Listeners*
+
+  ![http-settings-1](./Assets/http-settings-1.png)
+
+  
+
+  ![http-settings-1](./Assets/http-settings-2.png)
+
+  
+
+  ![http-settings-1](./Assets/http-settings-3.png)
+
+  
+
+- Configure *Http Settings*
+
+  ![http-settings-1](./Assets/http-settings-1.png)
+
+  ![http-settings-1](./Assets/http-settings-2.png)
+
+  ![http-settings-1](./Assets/http-settings-3.png)
+
+  
+
+- Configure *Rules* mapping with Http Settings and Backend Pool
+
+  ![http-settings-1](./Assets/rules-1.png)
+
+  ![http-settings-1](./Assets/rules-2.png)
+
+  ![http-settings-1](./Assets/rules-3.png)
+
+  
+
+- Configure *Health Probes* for each Http Settings
+
+  ![http-settings-1](./Assets/health-probe-1.png)
+
+  ![http-settings-1](./Assets/health-probe-2.png)
+
+  ![http-settings-1](./Assets/health-probe-3.png)
+
+​		
 
 ## Summary
 
