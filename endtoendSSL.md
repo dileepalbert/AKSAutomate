@@ -137,20 +137,46 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
 - #### Action Plan
 
-  - **Application Gateway**
+  - ##### Application Gateway
+
     - Create *Application Gateway* resource
+
     - Configure *Backend Pool*
+
     - Configure *Multi-site Listeners* - supporting multiple tenants
+
     - Configure *Http Settings*
+
     - Configure *Health Probes* for each Http Settings
+
     - Configure *Rules* mapping with Http Settings and Backend Pool
-  - **AKS Cluster**
+
+      
+
+  - ##### AKS Cluster
+
     - Assuming an AKS cluster is created - *Public* or *Private*
+
     - Assuming an *Ingress Controller* is already deployed within above AKS cluster. The example in this exercise used Nginx as *Ingress Controller*
+
     - Configure Ingress object for below 3 SSL options
+
       - **SSL Offload**
+
       - **Backend Protocol - Https**
+
       - **SSL Pass-through**
+
+        
+
+  - ##### Private DNS Zone
+
+    - Resolve Private IP addresses on Azure
+    - Application Gateway Host headers mapped to multiple tenants are added as A Record Set
+    - All tenants are mapped onto the **Nginx Ingress** controller **Private** IP e.g.
+      - ***<u>tenant-A</u>.<private-dns-zone>.com*** **->** ***<private-ip-of-nginx-ingress>***
+      - ***<u>tenant-B</u>.<private-dns-zone>.com*** **->** ***<private-ip-of-nginx-ingress>***
+      - ***<u>tenant-C</u>.<private-dns-zone>.com*** **->** ***<private-ip-of-nginx-ingress>***
 
 ## Action
 
@@ -258,19 +284,27 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
     
 
-    -  PFX certificate is uploaded at the Https Listener; this includes Private key
+    -  **PFX** certificate is uploaded at the **Https Listener**; this includes **Private** key
 
-    - Application Gateway receives Https traffic; Decrypts incoming message using the Private key
+    - Application Gateway receives **Https** traffic; **Decrypts** incoming message using the **Private** key
 
-    - All subsequent communication is over Http only and reaches Nginx Ingress controller
+    - **Backend Pool** is configured with **Nginx Ingress** Controller **Private** IP
 
-    - Nginx Ingress controller is an Internal LoadBalancer with Private IP (*allocated from a dedicated VNET ideally - Azure CNI*)
+    - A **Private DNS Zone** is created with the **Private** IP and different **host-headers**
 
-    - The K8s Ingress object behind Ingress controller defines the routing to various K8s Services
+    - All subsequent communication is over **Http** only and reaches **Nginx Ingress** controller (**Backend Pool**)
 
-    - Ingress object has 3 different hosts defined with corresponding routing - ***tenant-A.<pvt-dns-zone>.com***
+    - **Nginx Ingress** controller is an Internal LoadBalancer with **Private** IP (*allocated from a dedicated VNET ideally - Azure CNI*)
 
-    - Request reaches the K8s services as Http Only
+    - The K8s **Ingress** object behind **Nginx Ingress** controller defines the routing to various K8s **Services**
+
+    - **Ingress** object has 3 different hosts defined with corresponding routing - ***tenant-A.<pvt-dns-zone>.com***
+
+    - Request reaches the K8s **Services** as **Http** Only
+
+    - All tenants are mapped onto the **Nginx Ingress** controller **Private** IP ([Private DNS Zone](#Private DNS Zone))
+
+      
 
       ```yaml
       apiVersion: networking.k8s.io/v1beta1
@@ -287,21 +321,21 @@ The other container deployment option is to use Container Groups or ACI (Azure C
         rules:  
         - host: tenant-A.<pvt-dns-zone>.com
           http:
-           paths:      
+           paths:
             - path: /?(.*)
               backend:
                 serviceName: <service-A-name>
                 servicePort: 80
         - host: tenant-B.<pvt-dns-zone>.com
           http:
-           paths:      
+           paths:
             - path: /?(.*)
               backend:
                 serviceName: <service-B-name>
                 servicePort: 80
         - host: tenant-C.<pvt-dns-zone>.com
           http:
-           paths:      
+           paths:
             - path: /?(.*)
               backend:
                 serviceName: <service-C-name>
@@ -316,7 +350,222 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
     
 
-    - 
+    - **PFX** certificate is uploaded at the **Https Listener**; this includes **Private** key
+
+    - **CER** certificate - ***Trusted Root Certificate*** of the **Backend Server** is uploaded at the **Https Listener**; this includes **Public** key
+
+    - Application Gateway receives **Https** traffic; Decrypts incoming message using the **Private** key (***SSL Offloading @Application Gateway***)
+
+    - **Backend Pool** is configured with **Nginx Ingress** Controller **Private** IP
+
+    - Application Gateway **Re-Encrypts** the request again to be sent using the **Public** IP of the **CER** certificate
+
+    - All subsequent communication is over **Https** only and reaches **Nginx Ingress** controller (**Backend Pool**)
+
+    - **Nginx Ingress** controller is an Internal LoadBalancer with **Private** IP (*allocated from a dedicated VNET ideally - Azure CNI*)
+
+    - The K8s **Ingress** object behind **Nginx Ingress** controller has **TLS K8s Secret** created and mapped
+
+      ```yaml
+      spec:
+        rules:
+        tls:
+        - hosts:
+          - "*.<pvt-dns-zone>.com"
+          secretName: aks-workshop-tls-secret
+          .............
+          .............
+      ```
+
+      
+
+    - The **TLS Secret** is the **Private** key of the **PEM** certificate provided by the **Backend Server**
+
+      ```bash
+      kubectl create secret tls aks-workshop-tls-secret -n aks-workshop-dev --cert="<cert-file-name>.pem" --key="<cert-file-name>.key"
+      ```
+
+    - The K8s **Ingress** object behind **Nginx Ingress** controller defines the routing to various K8s **Services**
+
+    - Request reaches the K8s **Services** as **Http** Only
+
+    - All tenants are mapped onto the **Nginx Ingress** controller **Private** IP ([Private DNS Zone](#Private DNS Zone))
+
+      ```yaml
+      apiVersion: networking.k8s.io/v1beta1
+      kind: Ingress
+      metadata:
+        name: aks-workshop-ingress
+        namespace: aks-workshop-dev
+        annotations:
+          kubernetes.io/ingress.class: nginx    
+          nginx.ingress.kubernetes.io/rewrite-target: /$1
+          nginx.ingress.kubernetes.io/enable-cors: "true"
+          nginx.ingress.kubernetes.io/proxy-body-size: "10m"    
+      spec:
+        rules:
+        tls:
+        - hosts:
+          - "*.<pvt-dns-zone>.com"
+          secretName: aks-workshop-tls-secret
+        - host: tenant-A.<pvt-dns-zone>.com
+          http:
+           paths:
+            - path: /?(.*)
+              backend:
+                serviceName: <service-A-name>
+                servicePort: 80
+        - host: tenant-B.<pvt-dns-zone>.com
+          http:
+           paths:
+            - path: /?(.*)
+              backend:
+                serviceName: <service-B-name>
+                servicePort: 80
+        - host: tenant-C.<pvt-dns-zone>.com
+          http:
+           paths:
+            - path: /?(.*)
+              backend:
+                serviceName: <service-C-name>
+                servicePort: 80
+      ```
+
+    
+
+  - ##### Backend Protocol - HTTPS
+
+    ![backend-protocol-https](./Assets/backend-protocol-https.png)
+
+    
+
+    - **PFX** certificate is uploaded at the **Https Listener**; this includes **Private** key
+
+    - **CER** certificate - ***Trusted Root Certificate*** of the **Backend Server** is uploaded at the **Https Listener**; this includes **Public** key
+
+    - Application Gateway receives **Https** traffic; Decrypts incoming message using the **Private** key (***SSL Offloading @Application Gateway***)
+
+    - **Backend Pool** is configured with **Nginx Ingress** Controller **Private** IP
+
+    - Application Gateway **Re-Encrypts** the request again to be sent using the **Public** IP of the **CER** certificate
+
+    - All subsequent communication is over **Https** only and reaches **Nginx Ingress** controller (**Backend Pool**)
+
+    - **Nginx Ingress** controller is an Internal LoadBalancer with **Private** IP (*allocated from a dedicated VNET ideally - Azure CNI*)
+
+    - The K8s **Ingress** object behind **Nginx Ingress** controller has **TLS K8s Secret** created and mapped
+
+      ```yaml
+      spec:
+        rules:
+        tls:
+        - hosts:
+          - "*.<pvt-dns-zone>.com"
+          secretName: aks-workshop-tls-secret
+          .............
+          .............
+      ```
+
+      
+
+    - The **TLS Secret** is the **Private** key of the **PEM** certificate provided by the **Backend Server**
+
+      ```bash
+      kubectl create secret tls aks-workshop-tls-secret -n aks-workshop-dev --cert="<cert-file-name>.pem" --key="<cert-file-name>.key"
+      ```
+
+    - **Nginx Ingress** controller annotation is used to specify the **backend-protocol**
+
+      ```yaml
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      ```
+
+      
+
+    - The K8s **Ingress** object behind **Nginx Ingress** controller defines the routing to various K8s **Services**
+
+    - Request reaches the K8s **Services** as **Http** Only
+
+    - All tenants are mapped onto the **Nginx Ingress** controller **Private** IP ([Private DNS Zone](#Private DNS Zone))
+
+      ```yaml
+      apiVersion: networking.k8s.io/v1beta1
+      kind: Ingress
+      metadata:
+        name: aks-workshop-ingress
+        namespace: aks-workshop-dev
+        annotations:
+          kubernetes.io/ingress.class: nginx    
+          nginx.ingress.kubernetes.io/rewrite-target: /$1
+          nginx.ingress.kubernetes.io/enable-cors: "true"
+          nginx.ingress.kubernetes.io/proxy-body-size: "10m"  
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"  
+      spec:
+        rules:
+        tls:
+        - hosts:
+          - "*.<pvt-dns-zone>.com"
+          secretName: aks-workshop-tls-secret
+        - host: tenant-A.<pvt-dns-zone>.com
+          http:
+           paths:
+            - path: /?(.*)
+              backend:
+                serviceName: <service-A-name>
+                servicePort: 80
+        - host: tenant-B.<pvt-dns-zone>.com
+          http:
+           paths:
+            - path: /?(.*)
+              backend:
+                serviceName: <service-B-name>
+                servicePort: 80
+        - host: tenant-C.<pvt-dns-zone>.com
+          http:
+           paths:
+            - path: /?(.*)
+              backend:
+                serviceName: <service-C-name>
+                servicePort: 80
+      ```
+
+      
+
+  - ##### SSL Passthrough
+
+    ![ssl-passthru](./Assets/ssl-passthru.png)
+
+    
+
+  - **PFX** certificate is uploaded at the **Https Listener**; this includes **Private** key
+
+  - **CER** certificate - ***Trusted Root Certificate*** of the **Backend Server** is uploaded at the **Https Listener**; this includes **Public** key
+
+  - Application Gateway receives **Https** traffic; Decrypts incoming message using the **Private** key (***SSL Offloading @Application Gateway***)
+
+  - **Backend Pool** is configured with **Nginx Ingress** Controller **Private** IP
+
+  - Application Gateway **Re-Encrypts** the request again to be sent using the **Public** IP of the **CER** certificate
+
+  - All subsequent communication is over **Https** only and reaches **Nginx Ingress** controller (**Backend Pool**)
+
+  - **Nginx Ingress** controller is an Internal LoadBalancer with **Private** IP (*allocated from a dedicated VNET ideally - Azure CNI*)
+
+  - No Decryption at the Nginx Ingress end; SSl flows through till the backend PODs
+
+  - **Nginx Ingress** controller annotation is used to specify the **backend-protocol**
+
+    ```yaml
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    ```
+
+  - The K8s **Ingress** object behind **Nginx Ingress** controller defines the routing to various K8s **Services**
+
+  - Request reaches the K8s **Services** as **Http** Only
+
+  - All tenants are mapped onto the **Nginx Ingress** controller **Private** IP ([Private DNS Zone](#Private DNS Zone))
+
+  
 
 
 
