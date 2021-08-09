@@ -1,6 +1,6 @@
 # Secure APIs on Azure with AKS and Application Gateway
 
-
+![appgw-internals](./Assets/appgw-internals.png)
 
 ## Introduction
 
@@ -19,12 +19,12 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 - Describe *SSL* options involved in end to end communication
 - What *Configurations* are needed for each *SSL option* at the Ingress end of AKS cluster
 - End to End example - *Access APIs securely through Application Gateway* to *Ingress of AKS cluster* and finally to the *APIs inside the cluster*
-- Although entire discussion is around AKS cluster as backend but is absolutely similar for UnManaged clusters on Azure like CAPZ(link)
+- Although entire discussion is around AKS cluster as backend but is absolutely similar for UnManaged clusters on Azure like [CAPZ](https://capz.sigs.k8s.io/)
 
 ### What the Document does NOT
 
-- Deep-dive into AKS and its associated components
-- Deep-dive into SSL/TLS technology
+- Deep-dive into *AKS* and its associated components
+- Deep-dive into *SSL/TLS* technology
 - Introduction of *Firewall* into this architecture - *<u>this would be addressed in a separate article with deep insights of Azure Firewall and how that integrates with this architecture</u>*
 - Deployment automation of Application Gateway - *Although this is of utmost importance as can be seen later - with the complexities of Application Gateway components - having an automated, repetitive deployment process is very much necessary. This will be covered in a separate article in details*
 
@@ -48,15 +48,26 @@ The other container deployment option is to use Container Groups or ACI (Azure C
   
 
   - Communication can be between  - a *Client* process and a *Server* process Or a *Server* process and another *Server* process
+
   - Client always initiates the connection requesting a validation of the Server
-  - Server responds with its *SSL Certificate*, which also contains the Public key. *Private* key is kept with the Server
+
+  - Server responds with its *SSL Certificate*, which also contains the *Public* key. *Private* key is kept with the Server
+
   - *Client extracts the Public* key from the Certificate
+
   - Client then creates a *Master-Secret* known as *Pre-Master* key
+
   - Client *Encrypts* this newly created *Master-Secret* key
+
   - Client then sends this key back to Server
+
   - Server now *Decrypts* the *Master-Secret* key by using the *Private* key that it holds
+
   - Server Send a **<u>DONE</u>** acknowledgement message back to Client - ending the *SSL Handshake* process
+
   - The *Master-Secret* key is used as a *Symmetric* Key for all subsequent *Encryption/Decryption* - during communication on both directions i.e. *Client -> Server* OR *Server -> Client*
+
+    
 
 - #### Overview of Application Gateway components
 
@@ -64,11 +75,13 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
   **<u>Application Gateway Overview</u>**
 
+  
+
   - Application Gateway acts as a *reverse-proxy* and works at L7 protocol stack
   - Exposes *Public* IP and/or *Private* IP
   - **Backend Pool** - *Set of IP Addresses/FQDNs*, *Virtual Machine/VMSS*, *App Services*. This is the pool where Application Gateway can forward the Client request
   - For this exercise, we would use the **Ingress Controller** of *AKS* cluster as the Backend Pool. We will discuss in details below! So, the Private IP of the Ingress Controller would be our only entry in the Backend Pool
-  - Provides *Web Application Firewall* (**WAF**) as one if its Tier; allowing protection from common vulnerabilities and is based on the **OWASP** rules(*link*)
+  - Provides *Web Application Firewall* (**WAF**) as one if its Tier; allowing protection from common vulnerabilities and is based on the **[OWASP](https://owasp.org/)** rules
 
   - **Http/s Listeners**
 
@@ -86,17 +99,25 @@ The other container deployment option is to use Container Groups or ACI (Azure C
   - **Http Rules**
 
     - **Basic**
+
       - *Single* backend host for the *Associated Listener*
       - *Routing* is handled the backend only (i.e. *in this case inside AKS cluster*); nothing to be decided at the Application Gateway level
+
     - **Path-Based**
+
       - *Route* to appropriate backend based on *Path* parameters
+
       - Same backend host but different internal paths - */backend/path1, /backend/path2* etc.
+
+        
 
   - **Http Settings**
 
     ![appgw-host-headers](./Assets/appgw-host-headers.png)
 
     **<u>Application Gateway - Host Headers</u>**
+
+    
 
     - Defines Backend Http/S settings
 
@@ -122,11 +143,15 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
         
 
+        
+
 - #### Quick Run through of the AKS components
 
   ![aks-short-view](./Assets/aks-short-view.png)
 
   ​																**<u>AKS- short-view</u>**
+
+  
 
   - **AKS Cluster**
     - *Managed* K8s cluster
@@ -172,11 +197,18 @@ The other container deployment option is to use Container Groups or ACI (Azure C
   - ##### Private DNS Zone
 
     - Resolve Private IP addresses on Azure
+
     - Application Gateway Host headers mapped to multiple tenants are added as A Record Set
+
     - All tenants are mapped onto the **Nginx Ingress** controller **Private** IP e.g.
+
       - ***<u>tenant-A</u>.<private-dns-zone>.com*** **->** ***<private-ip-of-nginx-ingress>***
+
       - ***<u>tenant-B</u>.<private-dns-zone>.com*** **->** ***<private-ip-of-nginx-ingress>***
+
       - ***<u>tenant-C</u>.<private-dns-zone>.com*** **->** ***<private-ip-of-nginx-ingress>***
+
+        
 
 ## Action
 
@@ -617,14 +649,20 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
     
 
-  
+## Future Enhancements
 
-
-
-
-
-## Summary
-
-
+- InBound as well as OutBound Security with **Azure Firewall**
+- **Azure APIM** for Securing backend APIs with *OAuth Authentication* and *API Policies*
 
 ## References
+
+- Application gateway - https://docs.microsoft.com/en-us/azure/application-gateway/
+- Features - https://docs.microsoft.com/en-us/azure/application-gateway/features
+- Components - https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-components
+- Listeners - https://docs.microsoft.com/en-us/azure/application-gateway/configuration-listeners
+- Http Settings - https://docs.microsoft.com/en-us/azure/application-gateway/configuration-http-settings
+- Request Routing Rules - https://docs.microsoft.com/en-us/azure/application-gateway/configuration-request-routing-rules
+- SSL Termination - https://docs.microsoft.com/en-us/azure/application-gateway/ssl-overview
+- Health Probe - https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-probe-overview
+- Multi-Site Hosting - https://docs.microsoft.com/en-us/azure/application-gateway/multiple-site-overview
+
