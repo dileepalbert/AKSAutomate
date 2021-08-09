@@ -154,85 +154,173 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
 ## Action
 
-- #### Create Application Gateway
+- #### Application Gateway
 
-  - Ideally this should be done through ARM template; for this exercise we would assume that the resource would be created using Azure Portal
+  - Create **Application Gateway**
 
-- Configure **Backend Pool**
+    - Ideally this should be done through ARM template; for this exercise we would assume that the resource would be created using Azure Portal
 
-  ![backendPool-1](./Assets/backendPool-1.png)
+  - Configure **Backend Pool**
 
-  **<u>Backend Pool-View</u>**
+    ![backendPool-1](./Assets/backendPool-1.png)
 
-  ![backendPool-2](/Users/monojitd/Materials/Projects/AKSProjects/AKSWorkshop/AKSAutomate/Assets/backendPool-2.png)
+    **<u>Backend Pool-View</u>**
 
-  <u>**Backend Pool-Edit**</u>
+    ![backendPool-2](/Users/monojitd/Materials/Projects/AKSProjects/AKSWorkshop/AKSAutomate/Assets/backendPool-2.png)
 
-- Configure **Multi-site Listeners**
+    <u>**Backend Pool-Edit**</u>
 
-  ![http-settings-1](./Assets/listeners-1.png)
+  - Configure **Multi-site Listeners**
 
-  **<u>Multi-site Listeners-View</u>**
+    ![http-settings-1](./Assets/listeners-1.png)
 
-  ![http-settings-1](./Assets/listeners-2.png)
+    **<u>Multi-site Listeners-View</u>**
 
-  **Multi-site Listeners-Edit**
+    ![http-settings-1](./Assets/listeners-2.png)
+
+    **Multi-site Listeners-Edit**
+
+    
+
+  - Configure **Http Settings**
+
+    ![http-settings-1](./Assets/http-settings-1.png)
+
+    **Http Settings-View**
+
+    ![http-settings-1](./Assets/http-settings-2.png)
+
+    **Http Settings-Edit**
+
+    ![http-settings-1](./Assets/http-settings-3.png)
+
+    **Http Settings-Edit2**
+
+    
+
+  - Configure **Rules** mapping with *Http Settings* and *Backend Pool*
+
+    ![http-settings-1](./Assets/rules-1.png)
+
+    **Rules-View**
+
+    
+
+    ![http-settings-1](./Assets/rules-2.png)
+
+    **Rules-Edit**
+
+    ![http-settings-1](./Assets/rules-3.png)
+
+    **Rules-Edit2**
+
+    
+
+  - Configure **Health Probes** for each *Http Settings*
+
+    ![http-settings-1](./Assets/health-probe-1.png)
+
+    **Health Probe-View**
+
+    
+
+    ![http-settings-1](./Assets/health-probe-2.png)
+
+    **Health Probe-Edit**
+
+    
+
+    ![http-settings-1](./Assets/health-probe-3.png)
+
+    **Health Probe-Edit2**
+
+    
+
+- #### AKS and Ingress
+
+  - Create AKS cluster by any of the preferred ways - Azure CLI or ARM template or tools like Terraform
+
+  - The preferred network plugin is Azure CNI as this example has been tested with this configuration
+
+  - Install any preferred Ingress controller - this exercise uses Nginx as an option
+
+    
+
+- #### Final Bit
+
+  ![appgw-internals](./Assets/appgw-internals.png)
 
   
 
-- Configure **Http Settings**
+  - ##### SSL Offload
 
-  ![http-settings-1](./Assets/http-settings-1.png)
+    ![ssl-offload](./Assets/ssl-offload.png)
 
-  **Http Settings-View**
+    
 
-  ![http-settings-1](./Assets/http-settings-2.png)
+    -  PFX certificate is uploaded at the Https Listener; this includes Private key
 
-  **Http Settings-Edit**
+    - Application Gateway receives Https traffic; Decrypts incoming message using the Private key
 
-  ![http-settings-1](./Assets/http-settings-3.png)
+    - All subsequent communication is over Http only and reaches Nginx Ingress controller
 
-  **Http Settings-Edit2**
+    - Nginx Ingress controller is an Internal LoadBalancer with Private IP (*allocated from a dedicated VNET ideally - Azure CNI*)
 
-  
+    - The K8s Ingress object behind Ingress controller defines the routing to various K8s Services
 
-- Configure **Rules** mapping with *Http Settings* and *Backend Pool*
+    - Ingress object has 3 different hosts defined with corresponding routing - ***tenant-A.<pvt-dns-zone>.com***
 
-  ![http-settings-1](./Assets/rules-1.png)
+    - Request reaches the K8s services as Http Only
 
-  **Rules-View**
+      ```yaml
+      apiVersion: networking.k8s.io/v1beta1
+      kind: Ingress
+      metadata:
+        name: aks-workshop-ingress
+        namespace: aks-workshop-dev
+        annotations:
+          kubernetes.io/ingress.class: nginx    
+          nginx.ingress.kubernetes.io/rewrite-target: /$1
+          nginx.ingress.kubernetes.io/enable-cors: "true"
+          nginx.ingress.kubernetes.io/proxy-body-size: "10m"    
+      spec:
+        rules:  
+        - host: tenant-A.<pvt-dns-zone>.com
+          http:
+           paths:      
+            - path: /?(.*)
+              backend:
+                serviceName: <service-A-name>
+                servicePort: 80
+        - host: tenant-B.<pvt-dns-zone>.com
+          http:
+           paths:      
+            - path: /?(.*)
+              backend:
+                serviceName: <service-B-name>
+                servicePort: 80
+        - host: tenant-C.<pvt-dns-zone>.com
+          http:
+           paths:      
+            - path: /?(.*)
+              backend:
+                serviceName: <service-C-name>
+                servicePort: 80
+      ```
 
-  
+      
 
-  ![http-settings-1](./Assets/rules-2.png)
+  - ##### SSL Offload @Ingress
 
-  **Rules-Edit**
+    ![ssl-offload-ingress](./Assets/ssl-offload-ingress.png)
 
-  ![http-settings-1](./Assets/rules-3.png)
+    
 
-  **Rules-Edit2**
+    - 
 
-  
 
-- Configure **Health Probes** for each *Http Settings*
 
-  ![http-settings-1](./Assets/health-probe-1.png)
 
-  **Health Probe-View**
-
-  
-
-  ![http-settings-1](./Assets/health-probe-2.png)
-
-  **Health Probe-Edit**
-
-  
-
-  ![http-settings-1](./Assets/health-probe-3.png)
-
-  **Health Probe-Edit2**
-
-​		
 
 ## Summary
 
