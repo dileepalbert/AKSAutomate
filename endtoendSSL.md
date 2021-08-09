@@ -19,12 +19,14 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 - Describe *SSL* options involved in end to end communication
 - What *Configurations* are needed for each *SSL option* at the Ingress end of AKS cluster
 - End to End example - *Access APIs securely through Application Gateway* to *Ingress of AKS cluster* and finally to the *APIs inside the cluster*
+- Although entire discussion is around AKS cluster as backend but is absolutely similar for UnManaged clusters on Azure like CAPZ(link)
 
 ### What the Document does NOT
 
 - Deep-dive into AKS and its associated components
 - Deep-dive into SSL/TLS technology
 - Introduction of *Firewall* into this architecture - *<u>this would be addressed in a separate article with deep insights of Azure Firewall and how that integrates with this architecture</u>*
+- Deployment automation of Application Gateway - *Although this is of utmost importance as can be seen later - with the complexities of Application Gateway components - having an automated, repetitive deployment process is very much necessary. This will be covered in a separate article in details*
 
 ### Pre-requisites, Assumptions
 
@@ -37,11 +39,120 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
 ## Plan
 
+- #### Overview of SSL Handshake flow
 
+  ![SSL-Overview](./Assets/SSL-Overview.png)
+
+  ​					***<u>SSL Handshake</u>***
+
+  
+
+  - Communication can be between  - a *Client* process and a *Server* process Or a *Server* process and another *Server* process
+  - Client always initiates the connection requesting a validation of the Server
+  - Server responds with its *SSL Certificate*, which also contains the Public key. *Private* key is kept with the Server
+  - *Client extracts the Public* key from the Certificate
+  - Client then creates a *Master-Secret* known as *Pre-Master* key
+  - Client *Encrypts* this newly created *Master-Secret* key
+  - Client then sends this key back to Server
+  - Server now *Decrypts* the *Master-Secret* key by using the *Private* key that it holds
+  - Server Send a **<u>DONE</u>** acknowledgement message back to Client - ending the *SSL Handshake* process
+  - The *Master-Secret* key is used as a *Symmetric* Key for all subsequent *Encryption/Decryption* - during communication on both directions i.e. *Client -> Server* OR *Server -> Client*
+
+- #### Overview of Application Gateway components
+
+  ![appgw-overview](./Assets/appgw-overview.png)
+
+  ***<u>Application Gateway Overview</u>***
+
+  - Application Gateway acts as a *reverse-proxy* and works at L7 protocol stack
+  - Exposes *Public* IP and/or *Private* IP
+  - **Backend Pool** - *Set of IP Addresses/FQDNs*, *Virtual Machine/VMSS*, *App Services*. This is the pool where Application Gateway can forward the Client request
+  - For this exercise, we would use the **Ingress Controller** of *AKS* cluster as the Backend Pool. We will discuss in details below! So, the Private IP of the Ingress Controller would be our only entry in the Backend Pool
+  - Provides *Web Application Firewall* (**WAF**) as one if its Tier; allowing protection from common vulnerabilities and is based on the **OWASP** rules(*link*)
+
+  - **Http/s Listeners**
+
+    - Listens for all incoming traffics
+    - Supports both Http and Https clients
+    - Clients that want to connect over Https, should upload the PFX Certificate (*containing the Private Key*) of their DNS server; during the Creation or Initial Configuration of Application Gateway
+    - Application Gateway acts as a server for the Client that wants to connect. For Https, it uses the Private Key of PFX certificate to Decrypt message from Clients
+    - **Basic**
+      - *Single Tenant*
+      - Client wants to connect to only single Backend Pool
+    - **Multi-Site**
+      - *Multi Tenant*
+      - Same Client wants to connect to multiple backends based on **host-header** or *host-name*
+
+  - **Http Rules**
+
+    - **Basic**
+      - *Single* backend host for the *Associated Listener*
+      - *Routing* is handled the backend only (i.e. *in this case inside AKS cluster*); nothing to be decided at the Application Gateway level
+    - **Path-Based**
+      - *Route* to appropriate backend based on *Path* parameters
+      - Same backend host but different internal paths - */backend/path1, /backend/path2* etc.
+
+  - **Http Settings**
+
+    ![appgw-host-headers](./Assets/appgw-host-headers.png)
+
+    ***<u>Application Gateway - Host Headers</u>***
+
+    - Defines Backend Http/S settings
+
+    - **Http**
+
+      - Client does not want SSL to flow through then it is offloaded at Application Gateway and subsequent communication is *Http*
+
+    - **Https**
+
+      - SSL to continue till *Backend host*
+      - Need to upload **Trusted Toot Certificate** of the *Backend Server*
+      - Here Application Gateway acts as the Client and *backend host* acts as the Server
+
+    - **Health Probe**
+
+      - *Monitors* the health pdf Backend Pool
+
+      - Removes *Unhealthy* resources from Pool automatically and Puts them back when they are *healthy*
+
+      - Consults with *Http Settings* and based on the configuration calls defined health probe route periodically
+
+      - For backend systems like *AKS* or *APIM*, this is imperative that a custom health probe is specified while creating or configuring the Application Gateway
+
+        
+
+- #### Quick Run through of the AKS components
+
+  ![aks-short-view](./Assets/aks-short-view.png)
+
+  - **AKS Cluster**
+    - *Managed* K8s cluster
+    - Sits within a *Azure Virtual Network* (dedicated *Subnet*)
+    - **Ingress Controller** - The *Internal LoadBalancer* within AKS cluster with a Private IP address
+    - **K8s Service** - Exposes Application PODs through the Ingress Controller
+    - **K8s PODs** - Contains the Application code containerised
+
+- #### Action Plan
+
+  - **Application Gateway**
+    - Create *Application Gateway* resource
+    - Configure *Backend Pool*
+    - Configure *Multi-site Listeners* - supporting multiple tenants
+    - Configure *Http Settings*
+    - Configure *Health Probes* for each Http Settings
+    - Configure *Rules* mapping with Http Settings and Backend Pool
+  - **AKS Cluster**
+    - Assuming an AKS cluster is created - *Public* or *Private*
+    - Assuming an *Ingress Controller* is already deployed within above AKS cluster. The example in this exercise used Nginx as *Ingress Controller*
+    - Configure Ingress object for below 3 SSL options
+      - **SSL Offload**
+      - **Backend Protocol - Https**
+      - **SSL Pass-through**
 
 ## Action
 
-
+With All this info let us now get into the creation and configuration of Application Gateway resource
 
 ## Summary
 
