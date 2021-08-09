@@ -43,7 +43,7 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
   ![SSL-Overview](./Assets/SSL-Overview.png)
 
-  ​					***<u>SSL Handshake</u>***
+  ​					**<u>SSL Handshake</u>**
 
   
 
@@ -62,7 +62,7 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
   ![appgw-overview](./Assets/appgw-overview.png)
 
-  ***<u>Application Gateway Overview</u>***
+  **<u>Application Gateway Overview</u>**
 
   - Application Gateway acts as a *reverse-proxy* and works at L7 protocol stack
   - Exposes *Public* IP and/or *Private* IP
@@ -96,7 +96,7 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
     ![appgw-host-headers](./Assets/appgw-host-headers.png)
 
-    ***<u>Application Gateway - Host Headers</u>***
+    **<u>Application Gateway - Host Headers</u>**
 
     - Defines Backend Http/S settings
 
@@ -125,6 +125,8 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 - #### Quick Run through of the AKS components
 
   ![aks-short-view](./Assets/aks-short-view.png)
+
+  ​																**<u>AKS- short-view</u>**
 
   - **AKS Cluster**
     - *Managed* K8s cluster
@@ -160,51 +162,75 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
   ![backendPool-1](./Assets/backendPool-1.png)
 
-  
+  **<u>Backend Pool-View</u>**
 
   ![backendPool-2](/Users/monojitd/Materials/Projects/AKSProjects/AKSWorkshop/AKSAutomate/Assets/backendPool-2.png)
 
-- Configure *Multi-site Listeners*
+  <u>**Backend Pool-Edit**</u>
+
+- Configure **Multi-site Listeners**
+
+  ![http-settings-1](./Assets/listeners-1.png)
+
+  **<u>Multi-site Listeners-View</u>**
+
+  ![http-settings-1](./Assets/listeners-2.png)
+
+  **Multi-site Listeners-Edit**
+
+  
+
+- Configure **Http Settings**
 
   ![http-settings-1](./Assets/http-settings-1.png)
 
-  
+  **Http Settings-View**
 
   ![http-settings-1](./Assets/http-settings-2.png)
 
-  
+  **Http Settings-Edit**
 
   ![http-settings-1](./Assets/http-settings-3.png)
 
-  
-
-- Configure *Http Settings*
-
-  ![http-settings-1](./Assets/http-settings-1.png)
-
-  ![http-settings-1](./Assets/http-settings-2.png)
-
-  ![http-settings-1](./Assets/http-settings-3.png)
+  **Http Settings-Edit2**
 
   
 
-- Configure *Rules* mapping with Http Settings and Backend Pool
+- Configure **Rules** mapping with *Http Settings* and *Backend Pool*
 
   ![http-settings-1](./Assets/rules-1.png)
 
-  ![http-settings-1](./Assets/rules-2.png)
-
-  ![http-settings-1](./Assets/rules-3.png)
+  **Rules-View**
 
   
 
-- Configure *Health Probes* for each Http Settings
+  ![http-settings-1](./Assets/rules-2.png)
+
+  **Rules-Edit**
+
+  ![http-settings-1](./Assets/rules-3.png)
+
+  **Rules-Edit2**
+
+  
+
+- Configure **Health Probes** for each *Http Settings*
 
   ![http-settings-1](./Assets/health-probe-1.png)
 
+  **Health Probe-View**
+
+  
+
   ![http-settings-1](./Assets/health-probe-2.png)
 
+  **Health Probe-Edit**
+
+  
+
   ![http-settings-1](./Assets/health-probe-3.png)
+
+  **Health Probe-Edit2**
 
 ​		
 
