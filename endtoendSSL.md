@@ -551,12 +551,18 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
   - **Nginx Ingress** controller is an Internal LoadBalancer with **Private** IP (*allocated from a dedicated VNET ideally - Azure CNI*)
 
-  - No Decryption at the Nginx Ingress end; SSl flows through till the backend PODs
+  - No **Decryption** at the **Nginx Ingress** end; SSL flows through till the backend **PODs**
 
-  - **Nginx Ingress** controller annotation is used to specify the **backend-protocol**
+  - **SSL Passthrough** works **Layer 4**
+
+  - **<u>All L7 annotations stops working</u>**
+
+  - Annotations like **rewrite-target** will not work; no **regular expressions** in the subsequent path routing
+
+  - **Nginx Ingress** controller annotation is used to specify the **ssl passthrough**
 
     ```yaml
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     ```
 
   - The K8s **Ingress** object behind **Nginx Ingress** controller defines the routing to various K8s **Services**
@@ -564,6 +570,52 @@ The other container deployment option is to use Container Groups or ACI (Azure C
   - Request reaches the K8s **Services** as **Http** Only
 
   - All tenants are mapped onto the **Nginx Ingress** controller **Private** IP ([Private DNS Zone](#Private DNS Zone))
+
+    ```yaml
+    apiVersion: networking.k8s.io/v1beta1
+    kind: Ingress
+    metadata:
+      name: aks-workshop-ingress
+      namespace: aks-workshop-dev
+      annotations:
+        kubernetes.io/ingress.class: nginx        
+        nginx.ingress.kubernetes.io/enable-cors: "true"
+        nginx.ingress.kubernetes.io/proxy-body-size: "10m"  
+        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    spec:
+      rules:  
+      - host: tenant-A.<pvt-dns-zone>.com
+        http:
+         paths:
+          - path: /
+            backend:
+              serviceName: <service-A-name>
+              servicePort: 80
+          - path: /api/post
+            backend:
+              serviceName: <service-A2-name>
+              servicePort: 80
+      - host: tenant-B.<pvt-dns-zone>.com
+        http:
+         paths:
+          - path: /api/another/post
+            backend:
+              serviceName: <service-B-name>
+              servicePort: 80
+      - host: tenant-C.<pvt-dns-zone>.com
+        http:
+         paths:
+          - path: /
+            backend:
+              serviceName: <service-C-name>
+              servicePort: 80
+          - path: /api/yet/another/post
+            backend:
+              serviceName: <service-C2-name>
+              servicePort: 80
+    ```
+
+    
 
   
 
