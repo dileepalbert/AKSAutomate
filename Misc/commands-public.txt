@@ -1,0 +1,321 @@
+Public Cluster
+=============================================
+tenantId=""
+subscriptionId=""
+clusterName="aks-workshop-cluster"
+resourceGroup="aks-workshop-rg"
+aadAdminGroupIDs=@("")
+aadTenantID=""
+objectId=""
+baseFolderPath=""
+ingressHostName=""
+listenerHostName=""
+healthProbeHostName=""
+aksPrivateDNSHostName=""
+pfxCertFileName=""
+
+Pre-Config
+==========
+
+./aksauto-cluster-preconfig.ps1 `
+-resourceGroup $resourceGroup -lwResourceGroup "monitoring-workshop-rg" `
+-masterResourceGroup "master-workshop-rg" -location "eastus" `
+-clusterName $clusterName -acrName "akswkshpacr" `
+-keyVaultName "aks-workshop-kv" `
+-logworkspaceName "aks-workshop-lw" `
+-appgwName "aks-workshop-appgw" `
+-masterVNetName "master-workshop-vnet" `
+-aksVNetName "aks-workshop-vnet" `
+-aksVNetPrefix "12.0.0.0/16" `
+-aksSubnetName "aks-workshop-subnet" `
+-aksSubNetPrefix "12.0.0.0/22" `
+-appgwSubnetName "aks-workshop-appgw-subnet" `
+-appgwSubnetPrefix "12.0.4.0/27" `
+-ingressSubnetName "aks-workshop-ing-subnet" `
+-ingressSubnetPrefix "12.0.5.0/24" `
+-vrnSubnetName "vrn-workshop-subnet" `
+-vrnSubnetPrefix "12.0.7.0/24" `
+-aksPrivateDNSHostName $aksPrivateDNSHostName `
+-networkTemplateFileName "aksauto-network-deploy" `
+-acrTemplateFileName "aksauto-acr-deploy" `
+-kvTemplateFileName "aksauto-keyvault-deploy" `
+-pfxCertFileName $pfxCertFileName `
+-subscriptionId $subscriptionId `
+-aadAdminGroupIDs $aadAdminGroupIDs `
+-aadTenantID $aadTenantID `
+-objectId $objectId `
+-baseFolderPath $baseFolderPath
+
+Setup
+==========
+
+./aksauto-cluster-setup.ps1 `
+-isPrivateCluster "false" `
+-resourceGroup $resourceGroup `
+-masterResourceGroup "master-workshop-rg" `
+-lwResourceGroup "monitoring-workshop-rg" `
+-location "eastus" `
+-clusterName $clusterName `
+-acrName "akswkshpacr" `
+-keyVaultName "aks-workshop-kv" `
+-logworkspaceName "aks-workshop-lw" `
+-aksVNetName "aks-workshop-vnet" `
+-aksSubnetName "aks-workshop-subnet" `
+-version "1.18.17" -addons "monitoring" `
+-nodeCount 3 -maxPods 40 `
+-vmSetType "VirtualMachineScaleSets" `
+-nodeVMSize "Standard_DS3_v2" `
+-aksServicePrefix "12.0.6.0/24" `
+-aksDNSServiceIP "12.0.6.10" `
+-networkPlugin "azure" `
+-networkPolicy "azure" `
+-nodePoolName "akssyspool" `
+-aadAdminGroupIDs $aadAdminGroupIDs `
+-aadTenantID $aadTenantID
+
+Virtual Node
+=============
+./aksauto-cluster-setup.ps1 `
+-resourceGroup $resourceGroup `
+-clusterName $clusterName `
+-keyVaultName "aks-workshop-kv" `
+-vrnSubnetName "vrn-workshop-subnet"
+
+Create API Nodepool
+===================
+./aksauto-nodepool-config `
+-nodePoolName "aksapipool" `
+-resourceGroup $resourceGroup `
+-clusterName $clusterName `
+-version "1.18.17" `
+-nodeCount 3 `
+-minNodeCount $nodeCount `
+-maxNodeCount 20 `
+-maxPods 40 `
+-nodePoolVMSize "Standard_DS3_V2" `
+-osType "Linux" `
+-nodepoolMode "User"
+
+Create Devops Nodepool
+=======================
+./aksauto-nodepool-config `
+-nodePoolName "aksdvopspool" `
+-resourceGroup $resourceGroup `
+-clusterName $clusterName `
+-version "1.18.17" `
+-nodeCount 3 `
+-minNodeCount $nodeCount `
+-maxNodeCount 20 `
+-maxPods 40 `
+-nodePoolVMSize "Standard_DS3_V2" `
+-osType "Linux" `
+-nodepoolMode "User"
+
+Scale API Nodepool
+===================
+./aksauto-nodepool-config `
+-nodePoolName "aksapipool" `
+-resourceGroup $resourceGroup `
+-clusterName $clusterName `
+-minNodeCount 3 `
+-maxNodeCount 20
+
+Scale Devops Nodepool
+===================
+./aksauto-nodepool-config `
+-nodePoolName "aksdvopspool" `
+-resourceGroup $resourceGroup `
+-clusterName $clusterName `
+-minNodeCount 3 `
+-maxNodeCount 20
+
+Scale system Nodepool
+===================
+./aksauto-nodepool-config `
+-nodePoolName "akssyspool" `
+-resourceGroup $resourceGroup `
+-clusterName $clusterName `
+-minNodeCount 3 `
+-maxNodeCount 20
+
+Post-Config
+==========
+./aksauto-cluster-postconfig.ps1 `
+-resourceGroup $resourceGroup `
+-masterResourceGroup "master-workshop-rg" `
+-location "eastus" `
+-httpsListeners @("dev", "qa", "smoke") `
+-httpListeners @("dev", "qa") `
+-namespaces @("aks-workshop-dev", "aks-workshop-qa", "smoke") `
+-clusterName $clusterName `
+-acrName "akswkshpacr" `
+-keyVaultName "aks-workshop-kv" `
+-masterVNetName "master-workshop-vnet" `
+-aksVNetName "aks-workshop-vnet" `
+-ingressSubnetName "aks-workshop-ing-subnet" `
+-ingressNodePoolName "akssyspool" `
+-appgwName "aks-workshop-appgw" `
+-appgwSubnetName "aks-workshop-appgw-subnet" `
+-appgwTemplateFileName "aksauto-appgw-deploy" `
+-appgwConfigFileName "aksauto-config-appgw" `
+-ingressControllerIPAddress "12.0.5.100" `
+-ingressHostName $ingressHostName `
+-listenerHostName $listenerHostName `
+-healthProbeHostName $healthProbeHostName `
+-healthProbePath "/nginx" `
+-subscriptionId $subscriptionId `
+-baseFolderPath $baseFolderPath
+
+
+Remove
+==========
+./aksauto-cluster-remove.ps1 `
+-resourceGroup $resourceGroup `
+-lwResourceGroup "monitoring-workshop-rg" `
+-masterResourceGroup "master-workshop-rg" `
+-clusterName $clusterName `
+-acrName "akswkshpacr" `
+-keyVaultName "aks-workshop-kv" `
+-appGwName "aks-workshop-appgw" `
+-logworkspaceName "aks-workshop-lw" `
+-masterVNetName "master-workshop-vnet" `
+-aksVNetName "aks-workshop-vnet" `
+-ingressHostName $ingressHostName `
+-subscriptionId $subscriptionId
+
+Connect to Public Cluster
+===========================
+az aks get-credentials -g $resourceGroup -n $clusterName
+
+=================================================================================
+
+kubectl config set-context --current --namespace=aks-workshop-dev
+kubectl config set-context --current --namespace=aks-workshop-qa
+kubectl config set-context --current --namespace=smoke
+
+Helms
+=====
+RBAC
+=====
+helm create rbac-chart
+
+helm install rbac-chart -n aks-workshop-dev ./rbac-chart/ -f ./rbac-chart/values-dev.yaml
+helm upgrade rbac-chart -n aks-workshop-dev ./rbac-chart/ -f ./rbac-chart/values-dev.yaml
+
+helm install rbac-chart -n aks-workshop-qa ./rbac-chart/ -f ./rbac-chart/values-qa.yaml
+helm upgrade rbac-chart -n aks-workshop-qa ./rbac-chart/ -f ./rbac-chart/values-qa.yaml
+
+helm uninstall rbac-chart
+
+INGRESS
+=====
+
+helm create ingress-chart
+
+helm install  ingress-chart -n aks-workshop-dev ./ingress-chart/ -f ./ingress-chart/values-dev.yaml
+helm upgrade  ingress-chart -n aks-workshop-dev ./ingress-chart/ -f ./ingress-chart/values-dev.yaml
+
+helm install  ingress-chart-api -n aks-workshop-dev ./ingress-chart/ -f ./ingress-chart/values-api-dev.yaml
+helm upgrade  ingress-chart-api -n aks-workshop-dev ./ingress-chart/ -f ./ingress-chart/values-api-dev.yaml
+
+helm install  ingress-chart -n aks-workshop-qa ./ingress-chart/ -f ./ingress-chart/values-qa.yaml
+helm upgrade  ingress-chart -n aks-workshop-qa ./ingress-chart/ -f ./ingress-chart/values-qa.yaml
+
+helm uninstall ingress-chart
+helm uninstall ingress-chart-api
+
+helm create smoke-ingress-chart
+
+helm install  smoke-ingress-chart -n smoke ./ingress-chart/ -f ./ingress-chart/values-smoke.yaml
+helm upgrade  smoke-ingress-chart -n smoke ./ingress-chart/ -f ./ingress-chart/values-smoke.yaml
+
+helm uninstall smoke-ingress-chart
+
+TESTS
+======
+az acr import -n akswkshpacr --source docker.io/library/nginx:alpine -t nginx:alpine (Public)
+az acr import -n akswkshpprvacr --source docker.io/library/nginx:alpine -t nginx:alpine (Private)
+
+helm create smoke-tests-chart
+
+helm install smoke-tests-chart -n aks-workshop-dev ./smoke-tests-chart/ -f ./smoke-tests-chart/values-smoke.yaml
+helm upgrade smoke-tests-chart -n aks-workshop-dev ./smoke-tests-chart/ -f ./smoke-tests-chart/values-smoke.yaml
+
+helm uninstall smoke-tests-chart
+
+APIs
+=====
+az acr import -n akswkshpacr --source aksltacr.azurecr.io/ratings-api:v1.0.0 -t ratings-api:v1.0.0 (Public)
+az acr import -n akswkshpacr --source aksltacr.azurecr.io/ratings-web:v1.0.0 -t ratings-web:v1.0.0 (Public)
+
+az acr import -n akswkshpacr --source aksltacr.azurecr.io/ratings-api:v1.0.0 -t ratings-api:v1.0.0 (Private)
+az acr import -n akswkshpacr --source aksltacr.azurecr.io/ratings-web:v1.0.0 -t ratings-web:v1.0.0 (Private)
+
+APIM gateway
+=============
+
+k create secret generic aks-workshop-apim-gateway-token -n aks-workshop-dev --from-literal=value="GatewayKey aks-workshop-apim-gateway&202107051532&1CfKtrJgWNXhHtoRaftMjs7MXIacyDPT6J8KIk1wSPSq8suERa0t6zi70mhav46yqUSXE3MbpsP4sEPnubeKAQ=="  --type=Opaque
+k apply -f aks-workshop-apim-gateway.yaml
+
+k delete secrets/aks-workshop-apim-gateway-token -n aks-workshop-dev
+k delete -f aks-workshop-apim-gateway.yaml
+
+OAuth2
+=======
+
+https://hybrid-workshop-apim.developer.azure-api.net/signin-oauth/code/callback/aksapioauth2
+https://hybrid-workshop-apim.developer.azure-api.net/signin-oauth/implicit/callback
+
+<validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized. Access token is missing or invalid.">
+    <openid-config url="https://login.microsoftonline.com/$aadTenantID/.well-known/openid-configuration" />
+    <required-claims>
+        <claim name="aud">
+            <value><appId></value>
+        </claim>
+    </required-claims>
+</validate-jwt>
+
+Linkerd
+=======
+
+brew install step
+
+step certificate create root.linkerd.cluster.local root.crt root.key \
+  --profile root-ca --no-password --insecure
+
+step certificate create identity.linkerd.cluster.local issuer.crt issuer.key \
+  --profile intermediate-ca --not-after 8760h --no-password --insecure \
+  --ca root.crt --ca-key root.key
+
+curl -sL https://run.linkerd.io/install | sh
+linkerd check --pre
+
+linkerd install | kubectl apply -f -
+OR
+linkerd install \
+  --identity-trust-anchors-file root.crt \
+  --identity-issuer-certificate-file issuer.crt \
+  --identity-issuer-key-file issuer.key \
+  | tee \
+    >(kubectl --context=aks-workshop-cluster apply -f -)
+
+linkerd check
+linkerd version
+k get deploy nginx-deploy -n smoke -o yaml | linkerd inject - | k apply -f -
+k get deploy nginx-deploy -n smoke -o yaml | linkerd uninject - | k apply -f -
+
+
+linkerd uninstall | kubectl delete -f -
+
+helm repo add linkerd https://helm.linkerd.io/stable
+exp=$(date -v+8760H +"%Y-%m-%dT%H:%M:%SZ")
+
+helm install linkerd2 \
+  --set-file identityTrustAnchorsPEM=root.crt \
+  --set-file identity.issuer.tls.crtPEM=issuer.crt \
+  --set-file identity.issuer.tls.keyPEM=issuer.key \
+  --set identity.issuer.crtExpiry=$exp \
+  linkerd/linkerd2
+
+
+================================================================================
