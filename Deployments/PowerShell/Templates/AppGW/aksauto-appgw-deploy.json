@@ -145,7 +145,7 @@
          "dependsOn":[
             "[variables('appGwPublicIPRef')]"
          ],
-         "properties":{
+         "properties":{            
             "copy":[
             {
                "name": "backendHttpSettingsCollection",
