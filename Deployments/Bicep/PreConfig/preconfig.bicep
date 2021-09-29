@@ -1,12 +1,16 @@
 // Virtual Network Params
 param vnetName string
 param vnetPrefix string
-param aksSubnetName string
-param aksSubnetPrefix string
-param ingressSubnetName string
-param ingressSubnetPrefix string
-param appgwSubnetName string
-param appgwSubnetPrefix string
+param subnetsList array = []
+param logWorkspaceInfo object = {
+  lwRGName: ''
+  location:''
+  lwName: ''
+  lwSku: ''
+  lwRetention: 0
+  dailyQuotaGb: 0
+
+}
 
 // ACR Params
 param acrName string
@@ -17,32 +21,28 @@ param keyVaultName string
 // General Params
 param objectId string
 
-module spokeNetworkModule './Network/network-deploy.bicep' = {
-
-  name: 'networkDeploy'
+module logWorkspaceModule '../Modules/LogWorkspace/logworkspace-deploy.bicep' = {
+  name: 'logWorkspaceDeploy'
+  scope: resourceGroup(logWorkspaceInfo.lwRGName)
   params:{
+    logWorkspaceInfo: logWorkspaceInfo
+  }
+}
 
+module spokeNetworkModule '../Modules/Network/network-deploy.bicep' = {
+  name: 'spokeNetworkDeploy'
+  params:{
     vnetName: vnetName
     vnetPrefix: vnetPrefix
-    aksSubnetName: aksSubnetName
-    aksSubnetPrefix: aksSubnetPrefix
-    ingressSubnetName: ingressSubnetName
-    ingressSubnetPrefix: ingressSubnetPrefix
-    appgwSubnetName: appgwSubnetName
-    appgwSubnetPrefix: appgwSubnetPrefix
-
+    subnetsList: subnetsList
   }
 }
 
 output vnetId string = spokeNetworkModule.outputs.vnetId
-output subnetId string = spokeNetworkModule.outputs.aksSubnetId
-output apgwSubnetId string = spokeNetworkModule.outputs.apgwSubnetId
 
-module acrModule './ACR/acr-deploy.bicep' = {
-
+module acrModule '../Modules/ACR/acr-deploy.bicep' = {
   name: 'acrDeploy'
   params:{
-
     acrName: acrName
   }
 }
@@ -50,12 +50,9 @@ module acrModule './ACR/acr-deploy.bicep' = {
 output acrId string = acrModule.outputs.acrId
 output acrLogInServer string = acrModule.outputs.acrLoginServer
 
-
-module keyVaultModule './KeyVault/Keyvault-deploy.bicep' = {
-
+module keyVaultModule '../Modules/KeyVault/Keyvault-deploy.bicep' = {
   name: 'keyVaultDeploy'
   params:{
-
     keyVaultName: keyVaultName
     objectId: objectId
   }

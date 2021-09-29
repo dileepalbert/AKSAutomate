@@ -10,5 +10,5 @@ ingress:
   - name: dev.internal.wkshpdev.com
     paths:    
     - path: /?(.*)
-      service: aks-workshop-apim-gateway
-      port: 80      
+      service: ratingsweb-service
+      port: 80    

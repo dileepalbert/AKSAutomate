@@ -15,6 +15,8 @@ param serviceCidr string
 param dnsServiceIP string
 param clientId string
 param clientSecret string
+param privateDNSZoneId string
+param loadBalancerType string = 'loadBalancer'
 param aadTenantId string
 param adminGroupObjectIDs array
 param sysNodeCount int
@@ -25,18 +27,15 @@ param enableAutoScaling bool
 param enablePrivateCluster bool
 
 resource spokeVnetModule 'Microsoft.Network/virtualNetworks@2021-02-01' existing = {
-
   name: vnetName  
 }
 
 resource spokeAKSSubnetModule 'Microsoft.Network/virtualNetworks/subnets@2021-02-01' existing = {
-
   parent: spokeVnetModule
   name: aksSubnetName
 }
 
 resource aksk8sClusterModule 'Microsoft.ContainerService/managedClusters@2021-05-01' = {
-
   name: clusterName
   location: location  
   properties: {
@@ -69,8 +68,7 @@ resource aksk8sClusterModule 'Microsoft.ContainerService/managedClusters@2021-05
           logAnalyticsWorkspaceResourceID: logWorkspaceId
         }
       }
-
-    }  
+    }
     nodeResourceGroup: nodeResourceGroup
     enableRBAC: true    
     networkProfile: {
@@ -78,7 +76,7 @@ resource aksk8sClusterModule 'Microsoft.ContainerService/managedClusters@2021-05
       networkPolicy: 'azure'            
       serviceCidr: serviceCidr
       dnsServiceIP: dnsServiceIP      
-      outboundType: 'loadBalancer'   
+      outboundType: loadBalancerType   
     }    
     aadProfile: {
       managed: true
@@ -88,6 +86,7 @@ resource aksk8sClusterModule 'Microsoft.ContainerService/managedClusters@2021-05
     }
     apiServerAccessProfile:{    
       enablePrivateCluster: enablePrivateCluster
+      privateDNSZone: privateDNSZoneId
     }    
   }    
 }

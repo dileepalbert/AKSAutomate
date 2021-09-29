@@ -5,99 +5,83 @@ Login
 =======
 $tenantId=""
 $subscriptionId=""
-$clusterName=""
-$resourceGroup="aks-wkshpprv-rg"
-$masterResourceGroup="master-workshop-rg"
-$lwResourceGroup="monitoring-workshop-rg"
+$clusterName="arm-wkshpprv-cluster"
+$resourceGroup="arm-wkshpprv-rg"
+$lwResourceGroup="arm-wkshpprv-rg"
+$logworkspaceName="arm-wkshpprv-lw"
 $location="eastus"
-aadAdminGroupIDs=@("")
-aadTenantID=""
-objectId=""
-baseFolderPath=""
-ingressHostName=""
-listenerHostName=""
-healthProbeHostName=""
-aksPrivateDNSHostName=""
-pfxCertFileName=""
-rootCertFileName=""
+$masterResourceGroup="master-workshop-rg"
+$acrName="armk8sacr"
+$keyVaultName="arm-wkshpprv-kv"
+$appgwName="arm-wkshpprv-appgw"
+$masterVNetName="master-workshop-vnet"
+$aksVNetName="arm-wkshpprv-vnet"
+$aksSubnetName="arm-wkshpprv-subnet"
+$spDisplayName="http://arm-wkshpprv-cluster-sp"
+$aadAdminGroupIDs=@("")
+$aadTenantID=""
+$objectId=""
+$baseFolderPath=""
+$ingressHostName=""
+$listenerHostName=""
+$healthProbeHostName=""
+$aksPrivateDNSHostName=""
+$fwName="master-hub-workshop-fw"
+$fwConfigFileName="aksauto-firewall-create"
+$fwRouteConfigFileName="aksauto-firewall-route-config"
+$pfxCertFileName=""
+$aksPrivateDNSHostName=""
+$rootCertFileName=""
 
 az login --tenant $tenantId
 Connect-AzAccount -TenantId $tenantId
 
 Pre-Config(UDR)
 ================
-./aksauto-cluster-preconfig.ps1 `
+./preconfig.ps1 `
 -isUdrCluster "true" `
 -isPrivateCluster "true" `
 -resourceGroup $resourceGroup `
--lwResourceGroup $lwResourceGroup `
 -masterResourceGroup $masterResourceGroup `
 -fwResourceGroup $masterResourceGroup `
--location $location `
+-location "eastus" `
 -clusterName $clusterName `
--acrName "akswkshpprvacr" `
--keyVaultName "aks-wkshpprv-kv" `
--logworkspaceName "aks-wkshpprv-lw" `
--appgwName "aks-wkshpprv-appgw" `
--fwName "master-hub-workshop-fw" `
--masterVNetName "master-workshop-vnet" `
--aksVNetName "aks-wkshpprv-vnet" `
--aksVNetPrefix "14.0.0.0/16" `
--aksSubnetName "aks-wkshpprv-subnet" `
--aksSubNetPrefix "14.0.0.0/22" `
--appgwSubnetName "aks-wkshpprv-appgw-subnet" `
--appgwSubnetPrefix "14.0.4.0/27" `
--ingressSubnetName "aks-wkshpprv-ing-subnet" `
--ingressSubnetPrefix "14.0.5.0/24" `
--vrnSubnetName "vrn-workshop-subnet" `
--vrnSubnetPrefix "14.0.7.0/24" `
--aksPrivateDNSHostName $aksPrivateDNSHostName  `
--networkTemplateFileName "aksauto-network-deploy" `
--acrTemplateFileName "aksauto-acr-deploy" `
--kvTemplateFileName "aksauto-keyvault-deploy" `
--fwConfigFileName "aksauto-firewall-create" `
--fwRouteConfigFileName "aksauto-firewall-route-config" `
+-acrName $acrName `
+-keyVaultName $keyVaultName `
+-appgwName $appgwName `
+-fwName $fwName `
+-masterVNetName $masterVNetName `
+-aksVNetName $aksVNetName `
+-aksPrivateDNSHostName $aksPrivateDNSHostName `
+-fwConfigFileName $fwConfigFileName `
+-fwRouteConfigFileName $fwRouteConfigFileName `
 -pfxCertFileName $pfxCertFileName `
--rootCertFileName $rootCertFileName  `
+-spDisplayName $spDisplayName `
 -subscriptionId $subscriptionId `
--aadAdminGroupIDs $aadAdminGroupIDs  `
+-aadAdminGroupIDs $aadAdminGroupIDs `
 -aadTenantID $aadTenantID `
 -objectId $objectId `
--baseFolderPath $baseFolderPath 
+-baseFolderPath $baseFolderPath
 
 Pre-Config(NON-UDR)
 ===================
-./aksauto-cluster-preconfig.ps1 `
+./preconfig.ps1 `
 -isUdrCluster "false" `
 -isPrivateCluster "true" `
 -resourceGroup $resourceGroup `
--lwResourceGroup $lwResourceGroup `
 -masterResourceGroup $masterResourceGroup `
--location $location `
+-location "eastus" `
 -clusterName $clusterName `
--acrName "akswkshpprvacr" `
--keyVaultName "aks-wkshpprv-kv" `
--logworkspaceName "aks-wkshpprv-lw" `
--appgwName "aks-wkshpprv-appgw" `
--masterVNetName "master-workshop-vnet" `
--aksVNetName "aks-wkshpprv-vnet" `
--aksVNetPrefix "14.0.0.0/16" `
--aksSubnetName "aks-wkshpprv-subnet" `
--aksSubNetPrefix "14.0.0.0/22" `
--appgwSubnetName "aks-wkshpprv-appgw-subnet" `
--appgwSubnetPrefix "14.0.4.0/27" `
--ingressSubnetName "aks-wkshpprv-ing-subnet" `
--ingressSubnetPrefix "14.0.5.0/24" `
--vrnSubnetName "vrn-workshop-subnet" `
--vrnSubnetPrefix "14.0.7.0/24" `
+-acrName $acrName `
+-keyVaultName $keyVaultName `
+-appgwName $appgwName `
+-masterVNetName $masterVNetName `
+-aksVNetName $aksVNetName `
 -aksPrivateDNSHostName $aksPrivateDNSHostName `
--networkTemplateFileName "aksauto-network-deploy" `
--acrTemplateFileName "aksauto-acr-deploy" `
--kvTemplateFileName "aksauto-keyvault-deploy" `
 -pfxCertFileName $pfxCertFileName `
--rootCertFileName $rootCertFileName  `
+-spDisplayName $spDisplayName `
 -subscriptionId $subscriptionId `
--aadAdminGroupIDs $aadAdminGroupIDs  `
+-aadAdminGroupIDs $aadAdminGroupIDs `
 -aadTenantID $aadTenantID `
 -objectId $objectId `
 -baseFolderPath $baseFolderPath
@@ -117,21 +101,21 @@ Setup
 -logworkspaceName "aks-wkshpprv-lw" `
 -aksVNetName "aks-wkshpprv-vnet" `
 -aksSubnetName "aks-wkshpprv-subnet" `
--version "1.18.17" -addons "monitoring" `
+-version "1.19.13" -addons "monitoring" `
 -nodeCount 3 -maxPods 40 `
 -vmSetType "VirtualMachineScaleSets" `
--nodeVMSize "Standard_DS3_v2" `
--aksServicePrefix "14.0.6.0/24" `
--aksDNSServiceIP "14.0.6.10" `
+-nodeVMSize "Standard_DS2_v2" `
+-aksServicePrefix "26.0.6.0/24" `
+-aksDNSServiceIP "26.0.6.10" `
 -networkPlugin "azure" `
 -networkPolicy "azure" `
 -nodePoolName "akssyspool" `
--aadAdminGroupIDs $subscriptionId `
+-aadAdminGroupIDs $aadAdminGroupIDs `
 -aadTenantID $aadTenantID
 
 Virtual Node
 =============
-./aksauto-cluster-setup.ps1 `
+./setup.ps1 `
 -resourceGroup $resourceGroup `
 -clusterName $clusterName `
 -keyVaultName "aks-wkshpprv-kv" `
@@ -139,7 +123,7 @@ Virtual Node
 
 Scale system Nodepool
 =======================
-./aksauto-nodepool-config `
+./nodepool.ps1 `
 -nodePoolName "akssyspool" `
 -resourceGroup $resourceGroup `
 -clusterName $clusterName `
@@ -148,22 +132,22 @@ Scale system Nodepool
 
 Create Nodepool
 ===============
-./aksauto-nodepool-config `
+./nodepool.ps1 `
 -nodePoolName "aksapipool" `
 -resourceGroup $resourceGroup `
 -clusterName $clusterName `
--version "1.18.17" `
+-version "1.19.13" `
 -nodeCount 3 `
 -minNodeCount $nodeCount `
 -maxNodeCount 20 `
 -maxPods 40 `
--nodePoolVMSize "Standard_DS3_V2" `
+-nodePoolVMSize "Standard_DS2_V2" `
 -osType "Linux" `
 -nodepoolMode "User"
 
 Scale API Nodepool
 ===================
-./aksauto-nodepool-config `
+./nodepool.ps1 `
 -nodePoolName "aksapipool" `
 -resourceGroup $resourceGroup `
 -clusterName $clusterName `
@@ -172,98 +156,86 @@ Scale API Nodepool
 
 Post-Config(UDR)
 ================
-./aksauto-cluster-postconfig.ps1 `
+./postconfig.ps1 `
 -isUdrCluster "true" `
 -resourceGroup $resourceGroup `
 -masterResourceGroup $masterResourceGroup `
 -fwResourceGroup $masterResourceGroup `
--fwName "master-hub-workshop-fw" `
+-fwName $fwName `
 -location $location `
--httpsListeners @("dev-prv", "qa-prv", "smoke-prv") `
--httpListeners @("dev-prv", "qa-prv") `
--namespaces @("aks-workshop-dev", "aks-workshop-qa", "smoke") `
+-namespaces @("arm-wkshpprv-dev", "arm-wkshpprv-qa", "smoke") `
 -clusterName $clusterName `
--acrName "akswkshpprvacr" `
--keyVaultName "aks-wkshpprv-kv" `
--masterVNetName "master-workshop-vnet" `
--aksVNetName "aks-wkshpprv-vnet" `
--ingressSubnetName "aks-wkshpprv-ing-subnet" `
--ingressNodePoolName "akssyspool" `
--appgwName "aks-wkshpprv-appgw" `
--appgwSubnetName "aks-wkshpprv-appgw-subnet" `
--appgwTemplateFileName "aksauto-appgw-deploy" `
--appgwConfigFileName "aksauto-config-appgw" `
--fwPostConfigFileName "aksauto-firewall-post-config" `
--ingressControllerIPAddress "14.0.5.100" `
--ingressHostName $ingressHostName `
--listenerHostName $listenerHostName `
--healthProbeHostName $healthProbeHostName `
--healthProbePath "/nginx" `
+-acrName $acrName `
+-keyVaultName $keyVaultName `
+-masterVNetName $masterVNetName `
+-aksVNetName $aksVNetName `
+-ingressSubnetName $ingressSubnetName `
+-ingressNodePoolName $ingressNodePoolName `
+-appgwName $appgwName `
+-appgwSubnetName $appgwSubnetName `
+-appgwTemplateFileName $appgwTemplateFileName `
+-appgwConfigFileName $appgwConfigFileName `
+-ingressControllerIPAddress "26.0.5.100" `
 -subscriptionId $subscriptionId `
 -baseFolderPath $baseFolderPath
 
 Post-Config(Non-UDR)
 ====================
-./aksauto-cluster-postconfig.ps1 `
--isUdrCluster "false" `
+./postconfig.ps1 `
+-isUdrCluster "true" `
 -resourceGroup $resourceGroup `
 -masterResourceGroup $masterResourceGroup `
 -location $location `
--httpsListeners @("dev-prv", "qa-prv", "smoke-prv") `
--httpListeners @("dev-prv", "qa-prv") `
--namespaces @("aks-workshop-dev", "aks-workshop-qa", "smoke") `
+-namespaces @("arm-wkshpprv-dev", "arm-wkshpprv-qa", "smoke") `
 -clusterName $clusterName `
--acrName "akswkshpprvacr" `
--keyVaultName "aks-wkshpprv-kv" `
--masterVNetName "master-workshop-vnet" `
--aksVNetName "aks-wkshpprv-vnet" `
--ingressSubnetName "aks-wkshpprv-ing-subnet" `
--ingressNodePoolName "akssyspool" `
--appgwName "aks-wkshpprv-appgw" `
--appgwSubnetName "aks-wkshpprv-appgw-subnet" `
--appgwTemplateFileName "aksauto-appgw-deploy" `
--appgwConfigFileName "aksauto-config-appgw" `
--ingressControllerIPAddress "14.0.5.100" `
--ingressHostName $ingressHostName `
--listenerHostName $listenerHostName `
--healthProbeHostName $healthProbeHostName `
--healthProbePath "/nginx" `
+-acrName $acrName `
+-keyVaultName $keyVaultName `
+-masterVNetName $masterVNetName `
+-aksVNetName $aksVNetName `
+-ingressSubnetName $ingressSubnetName `
+-ingressNodePoolName $ingressNodePoolName `
+-appgwName $appgwName `
+-appgwSubnetName $appgwSubnetName `
+-appgwTemplateFileName $appgwTemplateFileName `
+-appgwConfigFileName $appgwConfigFileName ` `
+-ingressControllerIPAddress "26.0.5.100" `
 -subscriptionId $subscriptionId `
 -baseFolderPath $baseFolderPath
 
 
 Remove(UDR)
 ============
-./aksauto-cluster-remove.ps1 `
+./remove.ps1 `
 -resourceGroup $resourceGroup `
 -lwResourceGroup $lwResourceGroup `
 -masterResourceGroup $masterResourceGroup `
 -fwResourceGroup $masterResourceGroup `
 -clusterName $clusterName `
--acrName "akswkshpprvacr" `
--keyVaultName "aks-wkshpprv-kv" `
--appGwName "aks-wkshpprv-appgw" `
--fwName "master-hub-workshop-fw" `
--httpsListeners @("dev-prv", "qa-prv", "smoke-prv") `
--logworkspaceName "aks-wkshpprv-lw" `
--masterVNetName "master-workshop-vnet" `
--aksVNetName "aks-wkshpprv-vnet" `
--ingressHostName "internal.wkshpdev.com" `
--subscriptionId "6bdcc705-8db6-4029-953a-e749070e6db6"
+-acrName $acrName `
+-keyVaultName $keyVaultName `
+-appGwName $appGwName `
+-fwName $fwName `
+-httpsListeners $httpsListeners `
+-logworkspaceName $logworkspaceName `
+-masterVNetName $masterVNetName `
+-aksVNetName $aksVNetName `
+-ingressHostName $ingressHostName `
+-subscriptionId $subscriptionId
 
 Remove(Non-UDR)
 ===============
-./aksauto-cluster-remove.ps1 `
+./remove.ps1 `
 -resourceGroup $resourceGroup `
 -lwResourceGroup $lwResourceGroup `
 -masterResourceGroup $masterResourceGroup `
 -clusterName $clusterName `
--acrName "akswkshpprvacr" `
--keyVaultName "aks-wkshpprv-kv" `
--appGwName "aks-wkshpprv-appgw" `
--logworkspaceName "aks-wkshpprv-lw" `
--masterVNetName "master-workshop-vnet" `
--aksVNetName "aks-wkshpprv-vnet" `
+-acrName $acrName `
+-keyVaultName $keyVaultName `
+-appGwName $appGwName `
+-httpsListeners $httpsListeners `
+-logworkspaceName $logworkspaceName `
+-masterVNetName $masterVNetName `
+-aksVNetName $aksVNetName `
 -ingressHostName $ingressHostName `
 -subscriptionId $subscriptionId
 

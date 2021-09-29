@@ -1,6 +1,6 @@
 tenantId=""
 subscriptionId=""
-resourceGroup=""
+resourceGroup="arm-workshop-rg"
 objectId=""
 
 az login --tenant $tenantId
@@ -11,26 +11,24 @@ az bicep decompile -f <file_name>
 
 PreConfig
 =========
-vnetName="aks-k8s-vnet"
+vnetName="arm-workshop-vnet"
 vnetPrefix="25.0.0.0/21"
-aksSubnetName="aks-k8s-subnet"
-aksSubnetPrefix="25.0.0.0/24"
-ingressSubnetName="aks-k8s-ingress-subnet"
-ingressSubnetPrefix="25.0.1.0/24"
-appgwSubnetName="appgw-subnet"
-appgwSubnetPrefix="25.0.2.0/27"
-masterVnetName="master-workshop-vnet"
-masterResourceGroup="master-workshop-rg"
-
+subnetsList='({"name":"arm-aks-subnet","prefix":"25.0.0.0/22"},{"name":"arm-aks-appgw-subnet","prefix":"25.0.4.0/27"},{"name":"arm-aks-ingress-subnet","prefix":"25.0.5.0/24"})'
 acrName="aksk8sacr"
-keyVaultName="aks-k8s-kv"
+keyVaultName="arm-workshop-kv"
+logWorkspaceInfo='{"lwRGName":"arm-workshop-rg","location":"eastus","lwName":"arm-workshop-lw","lwSku":"PerGB2018","lwRetention":60,"dailyQuotaGb":1}'
+
+az deployment group validate -f ./preconfig.bicep -g $resourceGroup \
+--parameters vnetName=$vnetName vnetPrefix=$vnetPrefix \
+subnetsList=$subnetsList acrName=$acrName \
+keyVaultName=$keyVaultName objectId=$objectId \
+logWorkspaceInfo=$logWorkspaceInfo
 
 az deployment group create -f ./preconfig.bicep -g $resourceGroup \
 --parameters vnetName=$vnetName vnetPrefix=$vnetPrefix \
-aksSubnetName=$aksSubnetName aksSubnetPrefix=$aksSubnetPrefix \
-ingressSubnetName=$ingressSubnetName ingressSubnetPrefix=$ingressSubnetPrefix \
-appgwSubnetName=$appgwSubnetName appgwSubnetPrefix=$appgwSubnetPrefix \
-acrName=$acrName keyVaultName=$keyVaultName objectId=$objectId
+subnetsList=$subnetsList acrName=$acrName \
+keyVaultName=$keyVaultName objectId=$objectId \
+logWorkspaceInfo=$logWorkspaceInfo
 
 
 Setup

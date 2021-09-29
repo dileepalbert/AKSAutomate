@@ -1,21 +1,19 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: aks-workshop-apim-gateway-env
-  namespace: aks-workshop-dev
+  name: aks-workshop-gateway-env
 data:
-  config.service.endpoint: "https://hybrid-workshop-apim.management.azure-api.net/subscriptions/6bdcc705-8db6-4029-953a-e749070e6db6/resourceGroups/apim-workshop-rg/providers/Microsoft.ApiManagement/service/hybrid-workshop-apim?api-version=2019-12-01"
+  config.service.endpoint: "https://apim-workshop-hybrid.management.azure-api.net/subscriptions/6bdcc705-8db6-4029-953a-e749070e6db6/resourceGroups/apim-workshop-rg/providers/Microsoft.ApiManagement/service/apim-workshop-hybrid?api-version=2021-01-01-preview"
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: aks-workshop-apim-gateway
-  namespace: aks-workshop-dev
+  name: aks-workshop-gateway
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: aks-workshop-apim-gateway
+      app: aks-workshop-gateway
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -24,11 +22,11 @@ spec:
   template:
     metadata:
       labels:
-        app: aks-workshop-apim-gateway
+        app: aks-workshop-gateway
     spec:
       terminationGracePeriodSeconds: 60
       containers:
-      - name: aks-workshop-apim-gateway
+      - name: aks-workshop-gateway
         image: mcr.microsoft.com/azure-api-management/gateway:latest
         ports:
         - name: http
@@ -44,21 +42,29 @@ spec:
           periodSeconds: 5
           failureThreshold: 3
           successThreshold: 1
+        resources:
+          requests:
+            cpu: 500m
+            memory: 500Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
         env:
         - name: config.service.auth
           valueFrom:
             secretKeyRef:
-              name: aks-workshop-apim-gateway-token
+              name: aks-workshop-gateway-token
               key: value
         envFrom:
         - configMapRef:
-            name: aks-workshop-apim-gateway-env
+            name: aks-workshop-gateway-env
+      nodeSelector:
+        agentpool: akssyspool
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: aks-workshop-apim-gateway
-  namespace: aks-workshop-dev
+  name: aks-workshop-gateway
 spec:
   type: ClusterIP
   ports:
@@ -69,4 +75,4 @@ spec:
     port: 443
     targetPort: 8081
   selector:
-    app: aks-workshop-apim-gateway
+    app: aks-workshop-gateway

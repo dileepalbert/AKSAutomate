@@ -4,10 +4,11 @@ ingress:
   annotations:
    ingressClass: nginx
    enableCors: "true"
-   rewriteTarget: /$1
+   rewriteTarget: /$1   
   hosts:
   - name: smoke.internal.wkshpdev.com
     paths:
+    # - path: /nginx/?(.*)
     - path: /nginx/?(.*)
       service: nginx-svc
-      port: 80
+      port: 80    

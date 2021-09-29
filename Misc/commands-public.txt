@@ -1,45 +1,48 @@
 Public Cluster
 =============================================
-tenantId=""
-subscriptionId=""
-clusterName="aks-workshop-cluster"
-resourceGroup="aks-workshop-rg"
-aadAdminGroupIDs=@("")
-aadTenantID=""
-objectId=""
-baseFolderPath=""
-ingressHostName=""
-listenerHostName=""
-healthProbeHostName=""
-aksPrivateDNSHostName=""
-pfxCertFileName=""
+$tenantId=""
+$subscriptionId=""
+$clusterName="arm-workshop-cluster"
+$resourceGroup="arm-workshop-rg"
+$lwResourceGroup="arm-workshop-rg"
+$logworkspaceName="arm-workshop-lw"
+$location="eastus"
+$masterResourceGroup="master-workshop-rg"
+$acrName="armk8sacr"
+$keyVaultName="arm-workshop-kv"
+$appgwName="arm-workshop-appgw"
+$masterVNetName="master-workshop-vnet"
+$aksVNetName="arm-workshop-vnet"
+$aksSubnetName="arm-workshop-subnet"
+$spDisplayName="http://arm-workshop-cluster-sp"
+$aadAdminGroupIDs=@("")
+$aadTenantID=""
+$objectId=""
+$baseFolderPath=""
+$ingressHostName=""
+$listenerHostName=""
+$healthProbeHostName=""
+$aksPrivateDNSHostName=""
+$networkParametersFileName="network-deploy.parameters"
+$pfxCertFileName=""
+
+az login --tenant $tenantId
+Connect-AzAccount -TenantId $tenantId
 
 Pre-Config
 ==========
-
-./aksauto-cluster-preconfig.ps1 `
--resourceGroup $resourceGroup -lwResourceGroup "monitoring-workshop-rg" `
--masterResourceGroup "master-workshop-rg" -location "eastus" `
--clusterName $clusterName -acrName "akswkshpacr" `
--keyVaultName "aks-workshop-kv" `
--logworkspaceName "aks-workshop-lw" `
--appgwName "aks-workshop-appgw" `
--masterVNetName "master-workshop-vnet" `
--aksVNetName "aks-workshop-vnet" `
--aksVNetPrefix "12.0.0.0/16" `
--aksSubnetName "aks-workshop-subnet" `
--aksSubNetPrefix "12.0.0.0/22" `
--appgwSubnetName "aks-workshop-appgw-subnet" `
--appgwSubnetPrefix "12.0.4.0/27" `
--ingressSubnetName "aks-workshop-ing-subnet" `
--ingressSubnetPrefix "12.0.5.0/24" `
--vrnSubnetName "vrn-workshop-subnet" `
--vrnSubnetPrefix "12.0.7.0/24" `
--aksPrivateDNSHostName $aksPrivateDNSHostName `
--networkTemplateFileName "aksauto-network-deploy" `
--acrTemplateFileName "aksauto-acr-deploy" `
--kvTemplateFileName "aksauto-keyvault-deploy" `
+./preconfig.ps1 `
+-resourceGroup $resourceGroup `
+-masterResourceGroup $masterResourceGroup `
+-location "eastus" `
+-clusterName $clusterName `
+-acrName $acrName `
+-keyVaultName $keyVaultName `
+-appgwName $appgwName `
+-masterVNetName $masterVNetName `
+-aksVNetName $aksVNetName `
 -pfxCertFileName $pfxCertFileName `
+-spDisplayName $spDisplayName `
 -subscriptionId $subscriptionId `
 -aadAdminGroupIDs $aadAdminGroupIDs `
 -aadTenantID $aadTenantID `
@@ -49,60 +52,61 @@ Pre-Config
 Setup
 ==========
 
-./aksauto-cluster-setup.ps1 `
+./setup.ps1 `
+-isUdrCluster "false" `
 -isPrivateCluster "false" `
 -resourceGroup $resourceGroup `
--masterResourceGroup "master-workshop-rg" `
--lwResourceGroup "monitoring-workshop-rg" `
--location "eastus" `
+-masterResourceGroup $masterResourceGroup `
+-lwResourceGroup $lwResourceGroup `
+-location $location `
 -clusterName $clusterName `
--acrName "akswkshpacr" `
--keyVaultName "aks-workshop-kv" `
--logworkspaceName "aks-workshop-lw" `
--aksVNetName "aks-workshop-vnet" `
--aksSubnetName "aks-workshop-subnet" `
--version "1.18.17" -addons "monitoring" `
--nodeCount 3 -maxPods 40 `
+-acrName $acrName `
+-keyVaultName $keyVaultName `
+-logworkspaceName $logWorkspaceName `
+-aksVNetName $aksVNetName `
+-aksSubnetName $aksSubnetName `
+-version "1.19.13" -addons "monitoring" `
+-nodeCount 2 -maxPods 40 `
 -vmSetType "VirtualMachineScaleSets" `
--nodeVMSize "Standard_DS3_v2" `
--aksServicePrefix "12.0.6.0/24" `
--aksDNSServiceIP "12.0.6.10" `
+-nodeVMSize "Standard_DS2_v2" `
+-aksServicePrefix "25.0.6.0/24" `
+-aksDNSServiceIP "25.0.6.10" `
 -networkPlugin "azure" `
 -networkPolicy "azure" `
--nodePoolName "akssyspool" `
+-nodePoolName "armsyspool" `
 -aadAdminGroupIDs $aadAdminGroupIDs `
 -aadTenantID $aadTenantID
 
 Virtual Node
 =============
-./aksauto-cluster-setup.ps1 `
+./setup.ps1 `
 -resourceGroup $resourceGroup `
 -clusterName $clusterName `
--keyVaultName "aks-workshop-kv" `
+-keyVaultName "arm-workshop-kv" `
 -vrnSubnetName "vrn-workshop-subnet"
 
 Create API Nodepool
 ===================
-./aksauto-nodepool-config `
--nodePoolName "aksapipool" `
+./nodepool.ps1 `
+-nodePoolName "armapipool" `
 -resourceGroup $resourceGroup `
 -clusterName $clusterName `
--version "1.18.17" `
--nodeCount 3 `
+-version "1.19.13" `
+-nodeCount 2 `
 -minNodeCount $nodeCount `
 -maxNodeCount 20 `
 -maxPods 40 `
--nodePoolVMSize "Standard_DS3_V2" `
+-nodePoolVMSize "Standard_DS2_V2" `
 -osType "Linux" `
 -nodepoolMode "User"
 
 Create Devops Nodepool
 =======================
-./aksauto-nodepool-config `
--nodePoolName "aksdvopspool" `
+./nodepool.ps1 `
+-nodePoolName "armdvopspool" `
 -resourceGroup $resourceGroup `
 -clusterName $clusterName `
--version "1.18.17" `
+-version "1.19.11" `
 -nodeCount 3 `
 -minNodeCount $nodeCount `
 -maxNodeCount 20 `
@@ -113,17 +117,17 @@ Create Devops Nodepool
 
 Scale API Nodepool
 ===================
-./aksauto-nodepool-config `
--nodePoolName "aksapipool" `
+./nodepool.ps1 `
+-nodePoolName "armapipool" `
 -resourceGroup $resourceGroup `
 -clusterName $clusterName `
--minNodeCount 3 `
+-minNodeCount 2 `
 -maxNodeCount 20
 
 Scale Devops Nodepool
 ===================
-./aksauto-nodepool-config `
--nodePoolName "aksdvopspool" `
+./nodepool.ps1 `
+-nodePoolName "armdvopspool" `
 -resourceGroup $resourceGroup `
 -clusterName $clusterName `
 -minNodeCount 3 `
@@ -131,60 +135,58 @@ Scale Devops Nodepool
 
 Scale system Nodepool
 ===================
-./aksauto-nodepool-config `
--nodePoolName "akssyspool" `
+./nodepool.ps1 `
+-nodePoolName "armsyspool" `
 -resourceGroup $resourceGroup `
 -clusterName $clusterName `
--minNodeCount 3 `
+-minNodeCount 2 `
 -maxNodeCount 20
 
 Post-Config
-==========
-./aksauto-cluster-postconfig.ps1 `
+============
+./postconfig.ps1 `
 -resourceGroup $resourceGroup `
 -masterResourceGroup "master-workshop-rg" `
 -location "eastus" `
--httpsListeners @("dev", "qa", "smoke") `
--httpListeners @("dev", "qa") `
--namespaces @("aks-workshop-dev", "aks-workshop-qa", "smoke") `
+-namespaces @("arm-workshop-dev", "arm-workshop-qa", "smoke") `
 -clusterName $clusterName `
--acrName "akswkshpacr" `
--keyVaultName "aks-workshop-kv" `
+-acrName "armwkshpacr" `
+-keyVaultName "arm-workshop-kv" `
 -masterVNetName "master-workshop-vnet" `
--aksVNetName "aks-workshop-vnet" `
--ingressSubnetName "aks-workshop-ing-subnet" `
--ingressNodePoolName "akssyspool" `
--appgwName "aks-workshop-appgw" `
--appgwSubnetName "aks-workshop-appgw-subnet" `
--appgwTemplateFileName "aksauto-appgw-deploy" `
--appgwConfigFileName "aksauto-config-appgw" `
+-aksVNetName "arm-workshop-vnet" `
+-ingressSubnetName "arm-workshop-ing-subnet" `
+-ingressNodePoolName "armsyspool" `
+-appgwName "arm-workshop-appgw" `
+-appgwSubnetName "arm-workshop-appgw-subnet" `
+-appgwTemplateFileName "armauto-appgw-deploy" `
+-appgwConfigFileName "armauto-config-appgw" `
 -ingressControllerIPAddress "12.0.5.100" `
--ingressHostName $ingressHostName `
--listenerHostName $listenerHostName `
--healthProbeHostName $healthProbeHostName `
--healthProbePath "/nginx" `
 -subscriptionId $subscriptionId `
 -baseFolderPath $baseFolderPath
 
 
 Remove
 ==========
-./aksauto-cluster-remove.ps1 `
+./remove.ps1 `
 -resourceGroup $resourceGroup `
 -lwResourceGroup "monitoring-workshop-rg" `
 -masterResourceGroup "master-workshop-rg" `
 -clusterName $clusterName `
--acrName "akswkshpacr" `
--keyVaultName "aks-workshop-kv" `
--appGwName "aks-workshop-appgw" `
--logworkspaceName "aks-workshop-lw" `
+-acrName "armwkshpacr" `
+-keyVaultName "arm-workshop-kv" `
+-appGwName "arm-workshop-appgw" `
+-logworkspaceName "arm-workshop-lw" `
 -masterVNetName "master-workshop-vnet" `
--aksVNetName "aks-workshop-vnet" `
--ingressHostName $ingressHostName `
--subscriptionId $subscriptionId
+-aksVNetName "arm-workshop-vnet" `
+-ingressHostName "internal.wkshpdev.com" `
+-subscriptionId "6bdcc705-8db6-4029-953a-e749070e6db6"
+
+Get-AzKeyVault -InRemovedState 
+Remove-AzKeyVault -VaultName arm-workshop-kv -InRemovedState -Location eastus -Force
 
 Connect to Public Cluster
 ===========================
+az login --tenant $tenantId
 az aks get-credentials -g $resourceGroup -n $clusterName
 
 =================================================================================
@@ -215,21 +217,19 @@ helm create ingress-chart
 helm install  ingress-chart -n aks-workshop-dev ./ingress-chart/ -f ./ingress-chart/values-dev.yaml
 helm upgrade  ingress-chart -n aks-workshop-dev ./ingress-chart/ -f ./ingress-chart/values-dev.yaml
 
-helm install  ingress-chart-api -n aks-workshop-dev ./ingress-chart/ -f ./ingress-chart/values-api-dev.yaml
-helm upgrade  ingress-chart-api -n aks-workshop-dev ./ingress-chart/ -f ./ingress-chart/values-api-dev.yaml
+helm uninstall ingress-chart -n aks-workshop-dev
 
 helm install  ingress-chart -n aks-workshop-qa ./ingress-chart/ -f ./ingress-chart/values-qa.yaml
 helm upgrade  ingress-chart -n aks-workshop-qa ./ingress-chart/ -f ./ingress-chart/values-qa.yaml
 
-helm uninstall ingress-chart
-helm uninstall ingress-chart-api
+helm uninstall ingress-chart -n aks-workshop-qa
 
 helm create smoke-ingress-chart
 
 helm install  smoke-ingress-chart -n smoke ./ingress-chart/ -f ./ingress-chart/values-smoke.yaml
 helm upgrade  smoke-ingress-chart -n smoke ./ingress-chart/ -f ./ingress-chart/values-smoke.yaml
 
-helm uninstall smoke-ingress-chart
+helm uninstall smoke-ingress-chart -n smoke
 
 TESTS
 ======
@@ -262,15 +262,24 @@ k delete -f aks-workshop-apim-gateway.yaml
 
 OAuth2
 =======
+190f0a63-3460-4f1a-ba65-14adba3adb04
+9ebedfa6-518c-4e7a-b2cf-dcaa056d2cfc
+3851f269-b22b-4de6-97d6-aa9fe60fe301
+api://190f0a63-3460-4f1a-ba65-14adba3adb04
+
+b9cfc0ea-37f3-4314-86cd-fda8f6eff4df
+86d4be8c-5cf0-484b-bdea-9e5c365f631e
+3851f269-b22b-4de6-97d6-aa9fe60fe301
+aksclientappsecret: zbFsv9.PNN-HjL-qu-qMz~p3f6AP.V7I9z
 
 https://hybrid-workshop-apim.developer.azure-api.net/signin-oauth/code/callback/aksapioauth2
 https://hybrid-workshop-apim.developer.azure-api.net/signin-oauth/implicit/callback
 
 <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized. Access token is missing or invalid.">
-    <openid-config url="https://login.microsoftonline.com/$aadTenantID/.well-known/openid-configuration" />
+    <openid-config url="https://login.microsoftonline.com/3851f269-b22b-4de6-97d6-aa9fe60fe301/.well-known/openid-configuration" />
     <required-claims>
         <claim name="aud">
-            <value><appId></value>
+            <value>190f0a63-3460-4f1a-ba65-14adba3adb04</value>
         </claim>
     </required-claims>
 </validate-jwt>
@@ -319,3 +328,4 @@ helm install linkerd2 \
 
 
 ================================================================================
+

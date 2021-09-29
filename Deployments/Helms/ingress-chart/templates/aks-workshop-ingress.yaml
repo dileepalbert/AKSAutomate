@@ -8,7 +8,7 @@ metadata:
     kubernetes.io/ingress.class: {{ $ingress.annotations.ingressClass }}
     {{ if $ingress.annotations.rewriteTarget }}
     nginx.ingress.kubernetes.io/rewrite-target: {{ $ingress.annotations.rewriteTarget }}
-    {{ end }}
+    {{ end }}  
     nginx.ingress.kubernetes.io/enable-cors: {{ $ingress.annotations.enableCors | quote }}
   {{ if $ingress.annotations.proxyBodySize }}
     nginx.ingress.kubernetes.io/proxy-body-size: {{ $ingress.annotations.proxyBodySize }}

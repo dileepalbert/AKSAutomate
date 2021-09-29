@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",    
+  "parameters": {
+      "rootCertData": {
+        "reference": {
+            "keyVault": {
+                "id": "<keyVault_id>"
+              },
+          "secretName": "<secret_Name>"
+      }
+    },
+      "certData": {
+        "reference": {
+            "keyVault": {
+                "id": "<keyVault_id>"
+              },
+          "secretName": "<secret_Name>"
+      }
+    },
+    "certPassword": {
+        "reference": {
+            "keyVault": {
+                "id": "<keyVault_id>"
+              },
+          "secretName": "<secret_Name>"
+      }
+    }
+  }
+}
