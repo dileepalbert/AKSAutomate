@@ -1,0 +1,153 @@
+Azure Arc Extension
+===================
+
+tenantId="72f988bf-86f1-41af-91ab-2d7cd011db47"
+subscriptionId="6bdcc705-8db6-4029-953a-e749070e6db6"
+linkerdResourceGroup="linkerd-workshop-rg"
+location="eastus"
+clusterName="linkerd-aks-cluster"
+version=1.19.13
+acrName=lnkdakscacr
+acrId=
+aksVnetName=linkerd-aks-vnet
+aksVnetPrefix=30.0.0.0/23
+aksVnetId=
+aksSubnetName=linkerd-aks-subnet
+aksSubnetPrefix=30.0.0.0/24
+aksSubnetId=
+sysNodeSize="Standard_DS2_v2"
+sysNodeCount=3
+maxSysPods=30
+networkPlugin=azure
+networkPolicy=none
+sysNodePoolName=lnkdsyspool
+vmSetType=VirtualMachineScaleSets
+addons=monitoring
+spAppId="67ef9edb-3267-42a0-a186-2908cbb208d9"
+spPassword="mTMEPFq.~qoWGgTEV4RxAEzhMALxn-A8l~"
+
+Login to Azure
+===============
+
+az login --tenant $tenantId
+
+az ad sp create-for-rbac --skip-assignment -n https://lnkd-aks-sp
+{
+  "appId": "67ef9edb-3267-42a0-a186-2908cbb208d9",
+  "displayName": "https://lnkd-aks-sp",
+  "name": "67ef9edb-3267-42a0-a186-2908cbb208d9",
+  "password": "mTMEPFq.~qoWGgTEV4RxAEzhMALxn-A8l~",
+  "tenant": "72f988bf-86f1-41af-91ab-2d7cd011db47"
+}
+
+az group create -n $linkerdResourceGroup -l $location
+#az group delete -n $linkerdResourceGroup --yes
+
+az network vnet create -n $aksVnetName -g $linkerdResourceGroup --address-prefixes $aksVnetPrefix
+aksVnetId=$(az network vnet show -n $aksVnetName -g $linkerdResourceGroup --query="id" -o tsv)
+echo $aksVnetId
+
+az network vnet subnet create -n $aksSubnetName --vnet-name $aksVnetName -g $linkerdResourceGroup --address-prefixes $aksSubnetPrefix
+aksSubnetId=$(az network vnet subnet show -n $aksSubnetName --vnet-name $aksVnetName -g $linkerdResourceGroup --query="id" -o tsv)
+echo $aksSubnetId
+
+az role assignment create --assignee $spAppId --role "Network Contributor" --scope $aksVnetId
+az role assignment create --assignee $spAppId --role "Contributor" --scope "/subscriptions/$subscriptionId"
+
+az acr create -n $acrName -g $linkerdResourceGroup --sku STANDARD --admin-enabled false
+acrId=$(az acr show -n $acrName -g $linkerdResourceGroup --query="id" -o tsv)
+echo $acrId
+az role assignment create --assignee $spAppId --role "AcrPull" --scope $acrId
+
+az aks create --name $clusterName \
+--resource-group $linkerdResourceGroup \
+--kubernetes-version $version --location $location \
+--vnet-subnet-id "$aksSubnetId" --enable-addons $addons \
+--node-vm-size $sysNodeSize \
+--node-count $sysNodeCount --max-pods $maxSysPods \
+--service-principal $spAppId \
+--client-secret $spPassword \
+--nodepool-name $sysNodePoolName --vm-set-type $vmSetType \
+--enable-rbac \
+--generate-ssh-keys \
+--attach-acr $acrName
+
+az aks get-credentials -g $linkerdResourceGroup --name $clusterName --overwrite
+k get ns
+#az aks delete -g $linkerdResourceGroup -n $clusterName --yes
+
+Linkerd
+=======
+
+brew install step
+
+step certificate create root.linkerd.cluster.local root.crt root.key \
+  --profile root-ca --no-password --insecure
+
+step certificate create identity.linkerd.cluster.local issuer.crt issuer.key \
+  --profile intermediate-ca --not-after 8760h --no-password --insecure \
+  --ca root.crt --ca-key root.key
+
+export LINKERD2_VERSION=stable-2.10.0
+curl -sL https://run.linkerd.io/install | sh
+linkerd check --pre
+linkerd version
+
+
+========
+
+openssl genrsa -out rootCA.key 2048
+openssl req -x509 -new -nodes -key rootCA.key -sha256 -days 1024 -out rootCA.crt
+openssl genrsa -out issuer.key 2048
+openssl req -new -key issuer.key -out issuer.csr
+openssl req -in issuer.csr -noout -text
+openssl x509 -req -in issuer.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out issuer.crt -days 500 -sha256
+
+=======
+
+datta.monojit@gmail.com
+
+
+linkerd install config | kubectl apply -f -
+
+linkerd install-cni | kubectl apply -f -
+
+linkerd install | kubectl apply -f -
+OR
+linkerd install \
+  --identity-trust-anchors-file root.crt \
+  --identity-issuer-certificate-file issuer.crt \
+  --identity-issuer-key-file issuer.key \
+  | kubectl apply -f -
+  
+  
+  | tee \
+    >(kubectl apply -f -)
+
+linkerd check
+k get deploy nginx-deploy -n smoke -o yaml | linkerd inject - | k apply -f -
+k get deploy nginx-deploy -n smoke -o yaml | linkerd uninject - | k apply -f -
+
+linkerd viz install | kubectl apply -f -
+linkerd viz dashboard &
+#linkerd viz uninstall | kubectl delete -f -
+
+linkerd buoyant uninstall | kubectl delete -f -
+#linkerd jaeger uninstall | kubectl delete -f -
+#linkerd uninstall | kubectl delete -f -
+
+helm repo add linkerd https://helm.linkerd.io/stable
+exp=$(date -v+8760H +"%Y-%m-%dT%H:%M:%SZ")
+
+helm install linkerd2 \
+  --set-file identityTrustAnchorsPEM=root.crt \
+  --set-file identity.issuer.tls.crtPEM=issuer.crt \
+  --set-file identity.issuer.tls.keyPEM=issuer.key \
+  --set identity.issuer.crtExpiry=$exp \
+  linkerd/linkerd2
+
+
+================================================================================
+
+
+

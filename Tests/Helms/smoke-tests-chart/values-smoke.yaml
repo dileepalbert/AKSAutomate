@@ -3,8 +3,10 @@ deployment:
   namespace: smoke
   labels:
     app: nginx-deploy
+    version: v1
   selectorLabels:
     app: nginx-pod
+    version: v1
   replicas: 1
   strategyType: RollingUpdate
   maxSurge: 1

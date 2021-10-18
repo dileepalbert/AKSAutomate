@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:  
+  labels:
+    app: nginx-deploy-v2
+  name: nginx-deploy-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-deploy
+      version: v2
+  template:
+    metadata:      
+      labels:
+        app: nginx-deploy
+        version: v2
+    spec:
+      containers:
+      - image: nginx:alpine
+        name: nginx
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:  
+  name: nginx-svc-v2
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx-deploy
+    version: v2
+  type: ClusterIP
+
