@@ -2,3 +2,7 @@ Archive/CMDs
 Deployments/Certs
 Dump
 R&Ds
+Deployments/Linkerd/issuer.crt
+Deployments/Linkerd/issuer.key
+Deployments/Linkerd/root.crt
+Deployments/Linkerd/root.key
