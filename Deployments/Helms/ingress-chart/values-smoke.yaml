@@ -9,6 +9,6 @@ ingress:
   - name: smoke.internal.wkshpdev.com
     paths:  
     - path: /healthz/?(.*)
-      pathType: ImplementationSpecific
+      pathType: prefix
       service: nginx-svc
       port: 80    

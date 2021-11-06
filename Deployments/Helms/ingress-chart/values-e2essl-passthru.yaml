@@ -10,22 +10,28 @@ ingress:
   - name: proxy.internal.wkshpdev.com
     paths:
     - path: /
-      service: api-proxy-svc
+      pathType: Exact
+      service: api-proxy-svc      
       port: 443
     - path: /api/post
-      service: api-proxy-svc
+      pathType: Exact
+      service: api-proxy-svc      
       port: 443
     - path: /bkend
+      pathType: Exact
       service: api-proxy-svc
       port: 443
     - path: /api/post/bkend
+      pathType: Exact
       service: api-proxy-svc
       port: 443
   - name: bkend.internal.wkshpdev.com
     paths:
     - path: /
-      service: api-bkend-svc
+      pathType: Exact
+      service: api-bkend-svc      
       port: 443
     - path: /api/post
+      pathType: Exact
       service: api-bkend-svc
       port: 443    

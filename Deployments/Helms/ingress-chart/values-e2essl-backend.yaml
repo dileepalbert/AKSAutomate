@@ -15,10 +15,12 @@ ingress:
   - name: proxy.internal.wkshpdev.com
     paths:
     - path: /?(.*)
+      pathType: Prefix
       service: api-proxy-svc
       port: 443 
   - name: bkend.internal.wkshpdev.com
     paths:
     - path: /?(.*)
+      pathType: Prefix
       service: api-bkend-svc
       port: 443    

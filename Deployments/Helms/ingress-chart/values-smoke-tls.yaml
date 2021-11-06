@@ -13,6 +13,7 @@ ingress:
   - name: smoke-prv.internal.wkshpdev.com
     paths:
     - path: /nginx/?(.*)
+      pathType: prefix
       service: nginx-svc
       port: 80
   

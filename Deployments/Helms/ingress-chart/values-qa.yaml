@@ -10,5 +10,6 @@ ingress:
   - name: qa.internal.wkshpdev.com
     paths:
     - path: /?(.*)
+      pathType: prefix
       service: ratingsweb-service
       port: 80
