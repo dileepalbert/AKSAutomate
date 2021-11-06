@@ -641,4 +641,5 @@
 
 - Helm Docs - https://helm.sh/docs/
 - Helm Charts - https://helm.sh/docs/topics/charts/
+- Developer's Guide - https://helm.sh/docs/chart_template_guide/
 - Az DevOps with Helm - https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/deploy/helm-deploy?view=azure-devops
