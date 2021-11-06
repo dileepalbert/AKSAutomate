@@ -224,7 +224,7 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
     **<u>Backend Pool-View</u>**
 
-    ![backendPool-2](/Users/monojitd/Materials/Projects/AKSProjects/AKSWorkshop/AKSAutomate/Assets/backendPool-2.png)
+    ![backendPool-2](./Assets/backendPool-2.png)
 
     <u>**Backend Pool-Edit**</u>
 
