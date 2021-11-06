@@ -8,9 +8,22 @@
 
 ## Introduction
 
+[TBD}]
+
 ## What the Document does
 
+- An overview of Helm chart and its components
+- An insight into the Architecture of Helm
+- A deep look at how Helm chart can be used to deploy Containerized applications onto K8s clusters
+- Anatomy of Helm chart templates and configurations
+- Some hands-on examples
+- A quick showcase of how Helm can work with Azure DevOps to automate application deployment
+
 ## What It does not
+
+- This is NOT a tutorial for Helm chart
+- This is NOT a workshop or Hands-on-Lab for Helm chart
+- This does NOT teah K8s or AKS
 
 ## Components
 
