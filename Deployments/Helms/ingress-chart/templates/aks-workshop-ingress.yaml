@@ -47,7 +47,3 @@ spec:
     secretName: {{ $tls.secretName }}
   {{- end }}
   {{ end }}
-
-
-  
-
