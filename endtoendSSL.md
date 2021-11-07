@@ -35,8 +35,6 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 - Knowledge on Application Gateway  - *L200+*
 - Knowledge on Azure tools & services viz. *Azure CLI, KeyVault, VNET* etc. - L200+
 
-
-
 ## Plan
 
 - #### Overview of SSL Handshake flow
