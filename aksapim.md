@@ -115,7 +115,7 @@ We had discussed those steps in details in [endtoendSSL](./endtoendSSL.md). This
 
     - *Does NOT work for Self Hosted gateway*
 
-    - This is used to support HTTPS back end; and if NO custom Domain is configured for APIM
+    - This is used to support HTTPS back end
 
       ![apim-custom-domain-1](./Assets/apim-ca.png)
 
@@ -173,8 +173,6 @@ We had discussed those steps in details in [endtoendSSL](./endtoendSSL.md). This
 - #### Overview of SSL Handshake flow
 
   ![SSL-Overview](./Assets/SSL-Overview.png)
-
-  ​					**<u>SSL Handshake</u>**
 
   
 
@@ -288,24 +286,35 @@ We had discussed those steps in details in [endtoendSSL](./endtoendSSL.md). This
 
       
 
+  - Manage CA Certificates
+
+    ![apim-ca](./Assets/apim-ca-2.png)
+
+    - This should be a PEM Certificate
+    - All Certificates - *Root* and *Intermediate* - should be uploaded 
+  
   - Configure CA Certificates if mTLS is needed
-
-  - Certificates from KeyVault can be refrred Or Upload separately
-
+  
+  - Certificates from KeyVault can be referred Or Upload separately
+  
   - This is used for Client certificate validation; i.e. wher mTLS is intended
-
+  
     ![apim-mtls](./Assets/apim-mtls.png)
-
+  
   - Configure [OAuth setup](https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-protect-backend-with-aad)
-
+  
   - Add Backend APIs to work with OAuth setup
-
+  
     ![apim-oauth2](./Assets/apim-oauth2.png)
-
+  
+    
+  
   - Test the API through a REST client like POSTMAN
-
+  
     ![apim-oauth2](./Assets/apim-oauth-postman.png)
-
+  
+    
+  
 - #### Application Gateway
 
   - Create **Application Gateway**
@@ -746,17 +755,16 @@ We had discussed those steps in details in [endtoendSSL](./endtoendSSL.md). This
 ## Future Enhancements
 
 - InBound as well as OutBound Security with **Azure Firewall**
-- **Azure APIM** for Securing backend APIs with *OAuth Authentication* and *API Policies*
 
 ## References
 
-- Application gateway - https://docs.microsoft.com/en-us/azure/application-gateway/
-- Features - https://docs.microsoft.com/en-us/azure/application-gateway/features
-- Components - https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-components
-- Listeners - https://docs.microsoft.com/en-us/azure/application-gateway/configuration-listeners
-- Http Settings - https://docs.microsoft.com/en-us/azure/application-gateway/configuration-http-settings
-- Request Routing Rules - https://docs.microsoft.com/en-us/azure/application-gateway/configuration-request-routing-rules
-- SSL Termination - https://docs.microsoft.com/en-us/azure/application-gateway/ssl-overview
-- Health Probe - https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-probe-overview
-- Multi-Site Hosting - https://docs.microsoft.com/en-us/azure/application-gateway/multiple-site-overview
+- [Application Gateway](https://docs.microsoft.com/en-us/azure/application-gateway/)
+- [Features](https://docs.microsoft.com/en-us/azure/application-gateway/features)
+- [Components](https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-components)
+- [Listeners](https://docs.microsoft.com/en-us/azure/application-gateway/configuration-listeners)
+- [Http Settings](https://docs.microsoft.com/en-us/azure/application-gateway/configuration-http-settings)
+- [Request Routing Rules](https://docs.microsoft.com/en-us/azure/application-gateway/configuration-request-routing-rules)
+- [SSL Termination](https://docs.microsoft.com/en-us/azure/application-gateway/ssl-overview)
+- [Health Probe](https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-probe-overview)
+- [Multi-Site Hosting](https://docs.microsoft.com/en-us/azure/application-gateway/multiple-site-overview)
 
