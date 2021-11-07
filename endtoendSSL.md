@@ -654,13 +654,13 @@ The other container deployment option is to use Container Groups or ACI (Azure C
 
 ## References
 
-- Application gateway - https://docs.microsoft.com/en-us/azure/application-gateway/
-- Features - https://docs.microsoft.com/en-us/azure/application-gateway/features
-- Components - https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-components
-- Listeners - https://docs.microsoft.com/en-us/azure/application-gateway/configuration-listeners
-- Http Settings - https://docs.microsoft.com/en-us/azure/application-gateway/configuration-http-settings
-- Request Routing Rules - https://docs.microsoft.com/en-us/azure/application-gateway/configuration-request-routing-rules
-- SSL Termination - https://docs.microsoft.com/en-us/azure/application-gateway/ssl-overview
-- Health Probe - https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-probe-overview
-- Multi-Site Hosting - https://docs.microsoft.com/en-us/azure/application-gateway/multiple-site-overview
+- [Application Gateway](https://docs.microsoft.com/en-us/azure/application-gateway/)
+- [Features](https://docs.microsoft.com/en-us/azure/application-gateway/features)
+- [Components](https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-components)
+- [Listeners](https://docs.microsoft.com/en-us/azure/application-gateway/configuration-listeners)
+- [Http Settings](https://docs.microsoft.com/en-us/azure/application-gateway/configuration-http-settings)
+- [Request Routing Rules](https://docs.microsoft.com/en-us/azure/application-gateway/configuration-request-routing-rules)
+- [SSL Termination](https://docs.microsoft.com/en-us/azure/application-gateway/ssl-overview)
+- [Health Probe](https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-probe-overview)
+- [Multi-Site Hosting](https://docs.microsoft.com/en-us/azure/application-gateway/multiple-site-overview)
 
