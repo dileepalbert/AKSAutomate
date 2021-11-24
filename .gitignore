@@ -2,7 +2,9 @@ Archive/CMDs
 Deployments/Certs
 Dump
 R&Ds
+Archive
 Deployments/Linkerd/issuer.crt
 Deployments/Linkerd/issuer.key
 Deployments/Linkerd/root.crt
 Deployments/Linkerd/root.key
+.vscode/settings.json
