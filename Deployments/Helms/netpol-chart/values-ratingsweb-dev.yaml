@@ -1,0 +1,35 @@
+netpols:  
+  name: ratingsweb-netpol
+  namespace: aks-workshop-dev
+  podLabels:
+    app: ratingsweb-pod
+  policyTypes:
+  - Ingress
+  - Egress
+  ingresses:
+  - sources:
+    - namespaceSelector:
+        matchLabels:
+          name: aks-workshop-cluster-ing-ns          
+    ports:
+    - protocol: TCP
+      port: 8080
+  egresses:
+  # - {}
+  - destinations:
+    - podSelector:
+        matchLabels:
+          app: ratingsapi-pod
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: TCP
+      port: 3000
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
