@@ -1,0 +1,11 @@
+brew install dapr/tap/dapr-cli
+dapr --version
+dapr init
+docker ps
+dapr run --app-id myapp --dapr-http-port 3500
+curl -X POST -H "Content-Type: application/json" -d '[{ "key": "name", "value": "Bruce Wayne"}]' http://localhost:3500/v1.0/state/statestore
+curl http://localhost:3500/v1.0/state/statestore/name
+docker exec -it dapr_redis redis-cli
+
+
+

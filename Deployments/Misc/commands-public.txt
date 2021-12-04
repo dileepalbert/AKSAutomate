@@ -1,0 +1,810 @@
+Public Cluster
+=============================================
+$tenantId=""
+$subscriptionId=""
+$clusterName="aks-workshop-cluster"
+$resourceGroup="aks-workshop-rg"
+$lwResourceGroup="aks-workshop-rg"
+$logworkspaceName="aks-workshop-lw"
+$location="eastus"
+$masterResourceGroup="master-workshop-rg"
+$acrName=""
+$keyVaultName="aks-workshop-kv"
+$appgwName="aks-workshop-appgw"
+$masterVNetName="master-workshop-vnet"
+$aksVNetName="aks-workshop-vnet"
+$aksSubnetName="aks-workshop-subnet"
+$spDisplayName="http://aks-workshop-cluster-sp"
+$aadAdminGroupIDs=@("")
+$aadTenantID=""
+$objectId=""
+$baseFolderPath=""
+$ingressHostName=""
+$listenerHostName=""
+$healthProbeHostName=""
+$aksPrivateDNSHostName=""
+$networkParametersFileName="network-deploy.parameters"
+$pfxCertFileName=""
+
+az login --tenant $tenantId
+Connect-AzAccount -TenantId $tenantId
+
+Pre-Config
+==========
+./preconfig.ps1 `
+-resourceGroup $resourceGroup `
+-masterResourceGroup $masterResourceGroup `
+-location "eastus" `
+-clusterName $clusterName `
+-acrName $acrName `
+-keyVaultName $keyVaultName `
+-appgwName $appgwName `
+-masterVNetName $masterVNetName `
+-aksVNetName $aksVNetName `
+-pfxCertFileName $pfxCertFileName `
+-spDisplayName $spDisplayName `
+-subscriptionId $subscriptionId `
+-aadAdminGroupIDs $aadAdminGroupIDs `
+-aadTenantID $aadTenantID `
+-objectId $objectId `
+-baseFolderPath $baseFolderPath
+
+Setup
+==========
+
+./setup.ps1 `
+-isUdrCluster "false" `
+-isPrivateCluster "false" `
+-resourceGroup $resourceGroup `
+-masterResourceGroup $masterResourceGroup `
+-lwResourceGroup $lwResourceGroup `
+-location $location `
+-clusterName $clusterName `
+-acrName $acrName `
+-keyVaultName $keyVaultName `
+-logworkspaceName $logWorkspaceName `
+-aksVNetName $aksVNetName `
+-aksSubnetName $aksSubnetName `
+-version "1.19.13" -addons "monitoring" `
+-nodeCount 2 -maxPods 40 `
+-vmSetType "VirtualMachineScaleSets" `
+-nodeVMSize "Standard_DS2_v2" `
+-aksServicePrefix "25.0.6.0/24" `
+-aksDNSServiceIP "25.0.6.10" `
+-networkPlugin "azure" `
+-networkPolicy "azure" `
+-nodePoolName "akssyspool" `
+-aadAdminGroupIDs $aadAdminGroupIDs `
+-aadTenantID $aadTenantID
+
+Virtual Node
+=============
+./setup.ps1 `
+-resourceGroup $resourceGroup `
+-clusterName $clusterName `
+-keyVaultName "aks-workshop-kv" `
+-vrnSubnetName "vrn-workshop-subnet"
+
+Create API Nodepool
+===================
+./nodepool.ps1 `
+-nodePoolName "aksapipool" `
+-resourceGroup $resourceGroup `
+-clusterName $clusterName `
+-version "1.19.13" `
+-nodeCount 2 `
+-minNodeCount $nodeCount `
+-maxNodeCount 20 `
+-maxPods 40 `
+-nodePoolVMSize "Standard_DS2_V2" `
+-osType "Linux" `
+-nodepoolMode "User"
+
+Create Devops Nodepool
+=======================
+./nodepool.ps1 `
+-nodePoolName "aksdvopspool" `
+-resourceGroup $resourceGroup `
+-clusterName $clusterName `
+-version "1.19.11" `
+-nodeCount 3 `
+-minNodeCount $nodeCount `
+-maxNodeCount 20 `
+-maxPods 40 `
+-nodePoolVMSize "Standard_DS3_V2" `
+-osType "Linux" `
+-nodepoolMode "User"
+
+Scale API Nodepool
+===================
+./nodepool.ps1 `
+-nodePoolName "aksapipool" `
+-resourceGroup $resourceGroup `
+-clusterName $clusterName `
+-minNodeCount 2 `
+-maxNodeCount 20
+
+Scale Devops Nodepool
+===================
+./nodepool.ps1 `
+-nodePoolName "aksdvopspool" `
+-resourceGroup $resourceGroup `
+-clusterName $clusterName `
+-minNodeCount 3 `
+-maxNodeCount 20
+
+Scale system Nodepool
+===================
+./nodepool.ps1 `
+-nodePoolName "akssyspool" `
+-resourceGroup $resourceGroup `
+-clusterName $clusterName `
+-minNodeCount 2 `
+-maxNodeCount 20
+
+Post-Config
+============
+./postconfig.ps1 `
+-resourceGroup $resourceGroup `
+-masterResourceGroup "master-workshop-rg" `
+-location "eastus" `
+-namespaces @("aks-workshop-dev", "aks-workshop-qa", "smoke") `
+-clusterName $clusterName `
+-acrName "akswkshpacr" `
+-keyVaultName "aks-workshop-kv" `
+-masterVNetName "master-workshop-vnet" `
+-aksVNetName "aks-workshop-vnet" `
+-ingressSubnetName "aks-workshop-ing-subnet" `
+-ingressNodePoolName "akssyspool" `
+-appgwName "aks-workshop-appgw" `
+-appgwSubnetName "aks-workshop-appgw-subnet" `
+-appgwTemplateFileName "aksauto-appgw-deploy" `
+-appgwConfigFileName "aksauto-config-appgw" `
+-ingressControllerIPAddress "12.0.5.100" `
+-subscriptionId $subscriptionId `
+-baseFolderPath $baseFolderPath
+
+
+Remove
+==========
+./remove.ps1 `
+-resourceGroup $resourceGroup `
+-lwResourceGroup "monitoring-workshop-rg" `
+-masterResourceGroup "master-workshop-rg" `
+-clusterName $clusterName `
+-acrName "akswkshpacr" `
+-keyVaultName "aks-workshop-kv" `
+-appGwName "aks-workshop-appgw" `
+-logworkspaceName "aks-workshop-lw" `
+-masterVNetName "master-workshop-vnet" `
+-aksVNetName "aks-workshop-vnet" `
+-ingressHostName "internal.wkshpdev.com" `
+-subscriptionId "6bdcc705-8db6-4029-953a-e749070e6db6"
+
+Get-AzKeyVault -InRemovedState 
+Remove-AzKeyVault -VaultName aks-workshop-kv -InRemovedState -Location eastus -Force
+
+Connect to Public Cluster
+===========================
+az login --tenant $tenantId
+az aks get-credentials -g $resourceGroup -n $clusterName
+az aks get-credentials -g $resourceGroup -n $clusterName --admin
+
+=================================================================================
+
+k config set-context --current --namespace=aks-workshop-dev
+k config set-context --current --namespace=aks-workshop-qa
+k config set-context --current --namespace=smoke
+
+Helms
+=====
+/*
+
+#Ingress Controller (Outisde of postconfig script)
+aksIngControllerName=$clusterName-ing
+aksIngControllerNSName=$aksIngControllerName-ns
+backendIpAddress="12.0.5.100"
+sysPoolName="akssyspool"
+apipoolName="aksapipool"
+
+helm install $aksIngControllerName ingress-nginx/ingress-nginx --namespace $aksIngControllerNSName \
+-f $aksIngControllerFilePath \
+--set controller.service.loadBalancerIP=$backendIpAddress \
+--set controller.nodeSelector.agentpool=$sysPoolName \
+--set controller.defaultBackend.nodeSelector.agentpool=$sysPoolName
+
+*/
+
+
+RBAC
+=====
+helm create rbac-chart
+
+helm install rbac-chart -n aks-workshop-dev ./rbac-chart/ -f ./rbac-chart/values-dev.yaml
+helm upgrade rbac-chart -n aks-workshop-dev ./rbac-chart/ -f ./rbac-chart/values-dev.yaml
+
+helm install rbac-chart -n aks-workshop-qa ./rbac-chart/ -f ./rbac-chart/values-qa.yaml
+helm upgrade rbac-chart -n aks-workshop-qa ./rbac-chart/ -f ./rbac-chart/values-qa.yaml
+
+helm uninstall rbac-chart
+
+INGRESS
+========
+
+helm create ingress-chart
+
+helm install  ingress-chart -n aks-workshop-dev ./ingress-chart/ -f ./ingress-chart/values-dev.yaml
+helm upgrade  ingress-chart -n aks-workshop-dev ./ingress-chart/ -f ./ingress-chart/values-dev.yaml
+
+helm uninstall ingress-chart -n aks-workshop-dev
+
+helm install  ingress-chart -n aks-workshop-qa ./ingress-chart/ -f ./ingress-chart/values-qa.yaml
+helm upgrade  ingress-chart -n aks-workshop-qa ./ingress-chart/ -f ./ingress-chart/values-qa.yaml
+
+helm uninstall ingress-chart -n aks-workshop-qa
+
+helm create smoke-ingress-chart
+
+helm install  smoke-ingress-chart -n smoke ./ingress-chart/ -f ./ingress-chart/values-smoke.yaml
+helm upgrade  smoke-ingress-chart -n smoke ./ingress-chart/ -f ./ingress-chart/values-smoke.yaml
+
+helm uninstall smoke-ingress-chart -n smoke
+
+NETPOL
+========
+
+#Label namesapces for Network Policy
+kubectl label namespace aks-workshop-dev name=aks-workshop-dev --context=$CTX_CLUSTER1
+kubectl label namespace istio-system name=istio-system --context=$CTX_CLUSTER1
+kubectl label namespace db name=aks-workshop-dev --context=$CTX_CLUSTER1
+
+helm create netpol-chart
+
+helm install netpol-ratingsapi-chart -n aks-workshop-dev ./netpol-chart/ -f ./netpol-chart/values-ratingsapi-dev.yaml
+helm upgrade netpol-ratingsapi-chart -n aks-workshop-dev ./netpol-chart/ -f ./netpol-chart/values-ratingsapi-dev.yaml
+
+helm uninstall netpol-ratingsapi-chart -n aks-workshop-dev
+
+helm install netpol-ratingsweb-chart -n aks-workshop-dev ./netpol-chart/ -f ./netpol-chart/values-ratingsweb-dev.yaml
+helm upgrade  netpol-ratingsweb-chart -n aks-workshop-dev ./netpol-chart/ -f ./netpol-chart/values-ratingsweb-dev.yaml
+
+helm uninstall netpol-ratingsweb-chart -n aks-workshop-dev
+
+
+TESTS
+======
+az acr import -n akswkshpacr --source docker.io/library/nginx:alpine -t nginx:alpine (Public)
+az acr import -n akswkshpprvacr --source docker.io/library/nginx:alpine -t nginx:alpine (Private)
+
+helm create smoke-tests-chart
+
+helm install smoke-tests-chart -n smoke ./smoke-tests-chart/ -f ./smoke-tests-chart/values-smoke.yaml
+helm upgrade smoke-tests-chart -n smoke ./smoke-tests-chart/ -f ./smoke-tests-chart/values-smoke.yaml
+
+helm uninstall smoke-tests-chart -n smoke
+
+KEDA
+=====
+
+helm repo add kedacore https://kedacore.github.io/charts
+helm repo update
+
+kubectl create namespace keda
+helm install keda kedacore/keda --namespace keda
+
+#helm uninstall -n keda keda
+
+APIs
+=====
+az acr import -n akswkshpacr --source aksltacr.azurecr.io/ratings-api:v1.0.0 -t ratings-api:v1.0.0 (Public)
+az acr import -n akswkshpacr --source aksltacr.azurecr.io/ratings-web:v1.0.0 -t ratings-web:v1.0.0 (Public)
+
+az acr import -n akswkshpacr --source aksltacr.azurecr.io/ratings-api:v1.0.0 -t ratings-api:v1.0.0 (Private)
+az acr import -n akswkshpacr --source aksltacr.azurecr.io/ratings-web:v1.0.0 -t ratings-web:v1.0.0 (Private)
+
+APIM gateway
+=============
+
+k create secret generic aks-workshop-apim-gateway-token -n aks-workshop-dev --from-literal=value="GatewayKey aks-workshop-apim-gateway&202107051532&1CfKtrJgWNXhHtoRaftMjs7MXIacyDPT6J8KIk1wSPSq8suERa0t6zi70mhav46yqUSXE3MbpsP4sEPnubeKAQ=="  --type=Opaque
+k apply -f aks-workshop-apim-gateway.yaml
+
+k delete secrets/aks-workshop-apim-gateway-token -n aks-workshop-dev
+k delete -f aks-workshop-apim-gateway.yaml
+
+OAuth2
+=======
+190f0a63-3460-4f1a-ba65-14adba3adb04
+9ebedfa6-518c-4e7a-b2cf-dcaa056d2cfc
+3851f269-b22b-4de6-97d6-aa9fe60fe301
+api://190f0a63-3460-4f1a-ba65-14adba3adb04
+
+b9cfc0ea-37f3-4314-86cd-fda8f6eff4df
+86d4be8c-5cf0-484b-bdea-9e5c365f631e
+3851f269-b22b-4de6-97d6-aa9fe60fe301
+aksclientappsecret: zbFsv9.PNN-HjL-qu-qMz~p3f6AP.V7I9z
+
+https://hybrid-workshop-apim.developer.azure-api.net/signin-oauth/code/callback/aksapioauth2
+https://hybrid-workshop-apim.developer.azure-api.net/signin-oauth/implicit/callback
+
+<validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized. Access token is missing or invalid.">
+    <openid-config url="https://login.microsoftonline.com/3851f269-b22b-4de6-97d6-aa9fe60fe301/.well-known/openid-configuration" />
+    <required-claims>
+        <claim name="aud">
+            <value>190f0a63-3460-4f1a-ba65-14adba3adb04</value>
+        </claim>
+    </required-claims>
+</validate-jwt>
+
+OpenSSL
+=======
+https://www.sslshopper.com/article-most-common-openssl-commands.html
+https://www.thesslstore.com/blog/openssl-commands-cheat-sheet/
+https://www.digicert.com/kb/ssl-support/openssl-quick-reference-guide.htm
+
+
+Linkerd
+=======
+
+Download linkerdctl
+=====================
+export LINKERD2_VERSION=stable-2.10.0
+
+curl -sL https://run.linkerd.io/install | sh
+linkerd check --pre
+linkerd version
+
+Installations Linkerd
+======================
+linkerd install  | k apply -f -
+linkerd check
+
+Install Viz for Linkerd
+=========================
+linkerd viz install | k apply -f -
+linkerd check
+linkerd viz dashboard&
+
+Install Jaeger for Linkerd
+===========================
+linkerd jaeger install | k apply -f -
+linkerd jaeger check
+linkerd jaeger dashboard&
+
+Install Flagger for Linkerd (Optionsl)
+=======================================
+curl -sL https://run.linkerd.io/flagger.yml > flagger.yaml
+k apply -f flagger.yaml
+
+Distributed Tracing (Optional)
+==============================
+
+kubectl -n aks-workshop-dev set env --all deploy OC_AGENT_HOST=collector.linkerd-jaeger:55678
+for ((i=1;i<=100;i++)); do   curl -k "https://dev.wkshpdev.com/api/sites/fr"; done
+
+curl -sL run.linkerd.io/emojivoto.yaml > ./emojivoto.yml
+k apply -f ./emojivoto.yaml
+k get deploy -n emojivoto -o yaml | linkerd inject - | k apply -f -
+
+for ((i=1;i<=100;i++)); do   curl -k "https://emojivoto.wkshpdev.com/api/list"; done
+
+k -n emojivoto set env --all deploy OC_AGENT_HOST=collector.linkerd-jaeger:55678
+
+Inject Linkerd into Ingress Cntroller
+=======================================
+k -n aks-workshop-cluster-ing-ns get deploy/aks-workshop-cluster-ing-ingress-nginx-controller  -o yaml | linkerd inject --ingress - | kubectl apply -f -
+
+Inject Linkerd into Namespaces
+================================
+
+k get ns/aks-workshop-dev -o yaml | linkerd inject - | kubectl apply -f -
+k get ns/aks-workshop-qa -o yaml | linkerd inject - | kubectl apply -f -
+k get ns/smoke -o yaml | linkerd inject - | kubectl apply -f -
+
+
+UnInject Linkerd from Ingress Cntroller
+=======================================
+
+Uninject Linkerd from Ingress Cntroller
+=======================================
+#k -n aks-workshop-cluster-ing-ns get deploy/aks-workshop-cluster-ing-ingress-nginx-controller  -o yaml | linkerd uninject - | kubectl apply -f -
+
+Uninject Linkerd from Namespaces
+==================================
+#k get ns/aks-workshop-dev -o yaml | linkerd uninject - | kubectl apply -f -
+#k get ns/aks-workshop-qa -o yaml | linkerd uninject - | kubectl apply -f -
+#k get ns/smoke -o yaml | linkerd uninject - | kubectl apply -f -
+
+
+Uninstall Linkerd
+=======================================
+#linkerd viz uninstall | k delete -f -
+#linkerd buoyant uninstall | k delete -f -
+#linkerd jaeger uninstall | k delete -f -
+#k get deploy/emojivoto -n smoke -o yaml | linkerd uninject - | k apply -f -
+#k delete -f ./emojivoto.yml -n smoke
+#k delete -f flagger.yaml
+#linkerd uninstall | k delete -f -
+
+====================================================================================================================
+
+AKS Periscope
+====================================================================================================================
+aksStorageAccount="akswkshpstg"
+aksStorageSaStoken="https://akswkshpstg.blob.core.windows.net/$logs?sp=r&st=2021-11-12T19:42:00Z&se=2021-11-13T03:42:00Z&spr=https&sv=2020-08-04&sr=c&sig=AAR2OMIXr29ASyqAWab4VxcGUtS9h2FzPQ%2BLiLgCr9c%3D"
+
+az extension add --name aks-preview
+az aks kollect -g $resourceGroup -n $clusterName --storage-account $aksStorageAccount \
+--sas-token $aksStorageAccount
+
+Service Mesh
+================================================================================
+
+Features
+- Observability
+- Distributed Tracing
+- Traffic Splitting
+- Blue/Green deployment
+- Fault Injection
+- Circuit Breaking
+- Multi Cluster
+  - Traffic Mirroring or Shadowing
+  - Multi Cluster Connecitivity
+
+Remove Nginx Ingress Controller
+- The in-built Ingress Gateway from Service mesh would be used
+
+#Set CLI Variables for Istio
+================================================================================
+primaryResourceGroup=$resourceGroup
+primaryClusterName=$clusterName
+secondaryResourceGroup="secondary-workshop-rg"
+secondaryClusterName="secondary-mesh-cluster"
+primaryAcrName=$acrName
+istioPath="$baseFolderPath/Istio"
+
+#Set Env Variable for Primary Cluster
+#This helps to switch context easily between multiple clusters
+export CTX_CLUSTER1=primary
+
+#Connect to Public AKS Cluster with Primary Context
+az aks get-credentials -g $primaryResourceGroup -n $primaryClusterName --context $CTX_CLUSTER1
+
+================================================================================
+
+Download Istio
+================================================================================
+#Download Istio binary
+curl -L https://istio.io/downloadIstio | sh -
+
+#Download specific version of Istio viz. 1.11.3
+curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.11.3 TARGET_ARCH=x86_64 sh -
+
+#The istioctl client binary in the bin/ directory
+#Add the istioctl client to your path (Linux or macOS):
+export PATH=$PWD/bin:$PATH
+
+================================================================================
+
+Install and Configure Istio
+================================================================================
+#Create namespaces for Istio
+kubectl create namespace istio-system --context $CTX_CLUSTER1
+kubectl create namespace primary --context $CTX_CLUSTER1
+
+#Install Istio CLI
+
+#Select Default Istio Profile settings
+#Ingress Gateway with Public IP Address
+istioctl install --context=$CTX_CLUSTER1 --set profile=default -y
+
+#Install Istio with custom configurations
+#Ingress Gateway with Privae IP Address
+#Another Publicly exposed LoadBalancer Service(L7) would be needed to access this Private IP
+istioctl install --context=$CTX_CLUSTER1 -f $istioPath/Components/values-primary.yaml -y
+
+#Check Deployments within istio-system
+#Istio Ingress gateway with public or private IP
+kubectl get svc -n istio-system -w
+
+#Inject Istio into the namespace
+#Ensures sidecar container to be added for every deployment in the namespace
+kubectl label namespace primary istio-injection=enabled --context=$CTX_CLUSTER1
+kubectl label namespace smoke istio-injection=enabled --context=$CTX_CLUSTER1
+kubectl label namespace aks-workshop-dev istio-injection=enabled --context=$CTX_CLUSTER1
+
+#Disable sidecar injection namespace
+#kubectl label namespace primary istio-injection- --context=$CTX_CLUSTER1
+#kubectl label namespace smoke istio-injection- --context=$CTX_CLUSTER1
+#kubectl label namespace aks-workshop-dev istio-injection- --context=$CTX_CLUSTER1
+
+#Secret for TLS for all namespaces
+kubectl create secret tls aks-workshop-tls-secret -n istio-system --cert="$baseFolderPath/Certs/star_internal_wkshpdev_com.pem" --key="$baseFolderPath/Certs/star.internal.wkshpdev.com.key"
+
+#Install Istio Addons
+#This primarily installs all dependencies for observability by Istio viz. Grafana, Kiali dashboard etc.
+kubectl apply -f $istioPath/Components/samples/addons --context=$CTX_CLUSTER1
+
+#Check rollout status of the Kiali deployment - usually takes sometime
+kubectl rollout status deployment/kiali -n istio-system
+
+#Check Deployments within istio-system
+#Istio Ingress gateway with public or private IP
+kubectl get svc -n istio-system
+
+#Need a Gateway to expose the Smoke service outside as health probe
+#Replace <dns-name>
+kubectl apply -f $istioPath/Examples/Networking/smoke-gateway.yaml -n smoke --context=$CTX_CLUSTER1
+
+#If Ingress Gateway installed with Public IP Address
+#Launch Kiali on localhost as a background process
+istioctl dashboard kial&
+
+#If Ingress Gateway installed with Private IP Address
+#Need a Gateway to expose the Kiali service outside
+#Check Routing definitions
+#Replace <dns-name>
+kubectl apply -f $istioPath/Examples/Networking/kiali-gateway.yaml -n istio-system --context=$CTX_CLUSTER1
+
+#Modify Application Gateway to accommodate Kiali Gateway to access Kiali Services
+Configure Private DNS Zone for Kiali Gateway with Istio Ingress Gateway IP
+Add Listener for Kiali Gateway
+Add Http Settings for Kiali Gateway
+Add Rules for Kiali Gateway Listener
+
+#Launch Kiali in the browser
+curl -k https://kiali-<appgw-dns-name>/kiali/console/workloads
+
+================================================================================
+
+Observability
+================================================================================
+#Deploy Apps to view in Istio
+
+#Install BookInfo app onto the cluster
+kubectl apply -f $istioPath/Examples/BookInfo/bookinfo.yaml -n primary --context=$CTX_CLUSTER1
+
+#Check Deployed Components
+kubectl get svc -n primary --context=$CTX_CLUSTER1
+kubectl get pods -n primary --context=$CTX_CLUSTER1
+
+#Quick check to test BookInfo app
+podName=$(kubectl get pod -l app=ratings -n primary -o jsonpath='{.items[0].metadata.name}')
+kubectl exec $podName -n primary -c ratings -- curl -sS productpage:9080/productpage | grep -o "<title>.*</title>"
+
+#Need a Gateway to expose the service outside
+#Check Routing definitions
+#Replace <dns-name>
+kubectl apply -f $istioPath/Examples/Networking/primary-gateway.yaml -n primary --context=$CTX_CLUSTER1
+
+#Need a Gateway to expose the Ratings service outside
+#Replace <dns-name>
+kubectl apply -f $istioPath/Examples/Networking/ratingsweb-gateway.yaml -n aks-workshop-dev --context=$CTX_CLUSTER1
+
+#Get GATEWAY_URL
+kubectl get svc istio-ingressgateway -n istio-system
+export INGRESS_HOST=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
+export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].port}')
+
+#Call services using GATEWAY_URL
+export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
+echo "$GATEWAY_URL"
+
+#Modify Application Gateway to accommodate RatingsApp Gateway to access RatingsApp Services
+Configure Private DNS Zone for RatingsApp Gateway with Istio Ingress Gateway IP
+Add Listener for RatingsApp Gateway
+Add Http Settings for RatingsApp Gateway
+Add Rules for RatingsApp Gateway Listener
+
+#Try the follwoing URL in the Browser or do a cUrl
+curl -k https://ratings-<appgw-dns-name>/
+
+kubectl apply -f $istioPath/Examples/Networking/apiproxy-gateway-sslpassthru.yaml -n ssltest --context=$CTX_CLUSTER1
+#kubectl delete -f $istioPath/Examples/Networking/apiproxy-gateway-sslpassthru.yaml -n ssltest --context=$CTX_CLUSTER1
+
+kubectl apply -f $istioPath/Examples/Networking/apiproxy-gateway-bkendssl.yaml -n ssltest --context=$CTX_CLUSTER1
+kubectl apply -f $istioPath/Examples/Networking/apiproxy-destination-rule.yaml -n ssltest --context=$CTX_CLUSTER1
+
+#kubectl delete -f $istioPath/Examples/Networking/apiproxy-gateway-bkendssl.yaml -n ssltest --context=$CTX_CLUSTER1
+#kubectl delete -f $istioPath/Examples/Networking/apiproxy-destination-rule.yaml -n ssltest --context=$CTX_CLUSTER1
+
+================================================================================
+
+Traffic Shifting
+================================================================================
+#Traffic Shifting
+kubectl apply -f $istioPath/Examples/HelloWorld/helloworld-app.yaml -n primary --context=$CTX_CLUSTER1
+kubectl get po -n primary --context=$CTX_CLUSTER1
+
+#Check Routing definitions
+kubectl apply -f $istioPath/Examples/Networking/primary-gateway.yaml -n primary --context=$CTX_CLUSTER1
+
+kubectl apply -f $istioPath/Examples/HelloWorld/helloworld-app-v2.yaml -n primary --context=$CTX_CLUSTER1
+kubectl get po -n primary --context=$CTX_CLUSTER1
+
+#Check Routing behaviour
+#UNCOMMENT: Test Traffic Shifting
+#Update Primary Gateway Routes - Change Traffic weight
+kubectl apply -f $istioPath/Examples/Networking/primary-gateway.yaml -n primary --context=$CTX_CLUSTER1
+
+#Destination Rule
+kubectl apply -f $istioPath/Examples/Networking/helloworld-destination-rule.yaml -n primary --context=$CTX_CLUSTER1
+
+#Check Routing behaviour again
+
+=====================================================================================
+
+Blue/Green
+================================================================================
+#Blue/Green
+#Deploy PodInfo Blue
+kubectl apply -f $istioPath/Examples/BlueGreen/podinfo-blue.yaml -n primary --context=$CTX_CLUSTER1
+
+#Check Routing definitions
+kubectl apply -f $istioPath/Examples/Networking/primary-gateway.yaml -n primary --context=$CTX_CLUSTER1
+
+#Destination Rule
+kubectl apply -f $istioPath/Examples/Networking/podinfo-destination-rule.yaml -n primary --context=$CTX_CLUSTER1
+
+#Deploy PodInfo green
+kubectl apply -f $istioPath/Examples/BlueGreen/podinfo-green.yaml -n primary --context=$CTX_CLUSTER1
+
+#Check Routing behaviour
+#UNCOMMENT: Test Blue/Green
+#Update Primary Gateway Routes - Change Traffic weight
+kubectl apply -f $istioPath/Examples/Networking/primary-gateway.yaml -n primary --context=$CTX_CLUSTER1
+
+#Destination Rule
+kubectl apply -f $istioPath/Examples/Networking/podinfo-destination-rule.yaml -n primary --context=$CTX_CLUSTER1
+
+#Check Routing behaviour again
+
+=============================================================================
+
+Fault Injection
+================================================================================
+#Fault Injection
+#Deploy Fault in Ratinsg API
+kubectl apply -f $istioPath/Examples/Network/ratingsfault-virtual-service.yaml -n primary --context=$CTX_CLUSTER1
+
+#Check Comments in the file
+#Introduce Delay
+#Check Routing behaviour
+
+#Introduce Fix
+kubectl apply -f $istioPath/Examples/Networking/reviewsfix-virtual-service.yaml -n primary --context=$CTX_CLUSTER1
+
+#Check Comments in the file
+#Check Routing behaviour
+
+=============================================================================
+
+Circuit Breaker
+================================================================================
+#Circuit Breaker
+#Deploy HttpBin App
+kubectl apply -f $istioPath/Examples/HttpBin/httpbin.yaml -n primary --context=$CTX_CLUSTER1
+kubectl apply -f $istioPath/Examples/Networking/primary-gateway.yaml -n primary --context=$CTX_CLUSTER1
+
+#Deploy HttpBin Destination Rule
+kubectl apply -f $istioPath/Examples/Networking/httpbin-destination-rule.yaml -n primary --context=$CTX_CLUSTER1
+
+#Check Routing behaviour
+#UNCOMMENT: Test Circuit Breaking
+kubectl apply -f $istioPath/Examples/Networking/primary-gateway.yaml -n primary --context=$CTX_CLUSTER1
+
+#Generate Load - e.g. JMeter or Fortio or any other Laod Testing client
+
+#Deploy Fortio client
+kubectl apply -f $istioPath/Examples/HttpBin/sample-client/fortio-deploy.yaml -n primary --context=$CTX_CLUSTER1
+
+#Make calls from Fortio client
+export FORTIO_POD=$(kubectl get pods -l app=fortio -o 'jsonpath={.items[0].metadata.name}')
+kubectl exec "$FORTIO_POD" -c fortio -- /usr/bin/fortio curl -quiet http://httpbin:8000/get
+
+#Check Routing behaviour
+#Observer many calls being failed and circuit is broken and joined automatically
+#Change parameters in the $istioPath/Examples/Networking/httpbin-destination-rule.yaml file
+#Play around and see the chnage in the behaviour
+
+=============================================================================
+
+Service Mirroring or Shadowing
+=============================================================================
+#Service Mirroring or Shadowing
+#Create Secondary Cluster - CLI or Portal
+export CTX_CLUSTER2=secondary
+
+#Connect to Public AKS Cluster with Primary Context
+az aks get-credentials -g $primaryResourceGroup -n $secondaryClusterName --context $CTX_CLUSTER2
+
+kubectl config use-context $CTX_CLUSTER2
+
+#Check Cluster Health - Secondary
+kubectl get no --context=$CTX_CLUSTER2
+kubectl get ns --context=$CTX_CLUSTER2
+kubectl create namespace istio-system --context $CTX_CLUSTER2
+kubectl create namespace secondary --context $CTX_CLUSTER2
+
+#Install Istio CLI
+#Select Default Istio Profile settings
+#Ingress Gateway with Public IP Address
+istioctl install --context=$CTX_CLUSTER2 --set profile=default -y
+
+#Install Istio with custom configurations
+#Ingress Gateway with Privae IP Address
+#Another Publicly exposed LoadBalancer Service(L7) would be needed to access this Private IP
+istioctl install --context=$CTX_CLUSTER2 -f $istioPath/Components/values-secondary.yaml -y
+
+#Inject Istio into Secondary namespace of the cluster 
+#This ensures sidecar container to be added for every deployment in this namespace
+kubectl label namespace secondary istio-injection=enabled --context=$CTX_CLUSTER2
+
+#Install Istio Addons
+#This primarily installs all dependencies for observability by Istio viz. Grafana, Kiali dashboard etc.
+kubectl apply -f $istioPath/Components/samples/addons --context=$CTX_CLUSTER2
+
+kubectl get svc istio-ingressgateway -n istio-system
+export INGRESS_HOST=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
+export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].port}')
+
+export GATEWAY_URL2=$INGRESS_HOST:$INGRESS_PORT
+echo "$GATEWAY_URL2"
+
+#Modify Application Gateway to accommodate Secondary Gateway to access Services deployed
+Configure Private DNS Zone for Secondary Gateway with Istio Ingress Gateway IP
+Add Listener for Secondary Gateway 
+Add Http Settings for Secondary Gateway
+Add Rules for Secondary Gateway Listener
+
+#Need a Gateway to expose deployed services outside
+#Check Routing definitions
+#Replace <dns-name>
+kubectl apply -f $istioPath/Examples/Networking/secondary-gateway.yaml -n secondary --context=$CTX_CLUSTER2
+
+kubectl apply -f $istioPath/Examples/HelloWorld/helloworld-app-v2.yaml -n secondary --context=$CTX_CLUSTER2
+kubectl get po -n secondary --context=$CTX_CLUSTER2
+
+#Destination Rule
+kubectl apply -f $istioPath/Examples/Networking/helloworld-v2-destination-rule.yaml -n secondary --context=$CTX_CLUSTER2
+
+kubectl get svc -n secondary --context=$CTX_CLUSTER2
+kubectl describe svc -n secondary --context=$CTX_CLUSTER2
+kubectl get svc -A --context=$CTX_CLUSTER2
+
+#Switch to the Primary Cluster
+kubectl config use-context $CTX_CLUSTER1
+
+#Check Routing definitions
+kubectl apply -f $istioPath/Examples/Networking/primary-gateway.yaml -n primary --context=$CTX_CLUSTER1
+
+#Deploy components so that Mirroring can work
+#Replace <dns-name>
+kubectl apply -f $istioPath/Examples/Networking/primary-serviceentry.yaml -n primary --context=$CTX_CLUSTER1
+
+#Destination Rule
+#Replace <dns-name>
+kubectl apply -f $istioPath/Examples/Networking/helloworld-destination-rule.yaml -n primary --context=$CTX_CLUSTER1
+
+kubectl get svc -n primary --context=$CTX_CLUSTER1
+kubectl describe svc -n primary --context=$CTX_CLUSTER1
+kubectl get svc -A --context=$CTX_CLUSTER1
+
+#Call helloworld-v1
+#Observe that all calls being replicated to helloworld-v2 of secondary cluster
+
+Cleanup
+=============================================================================
+#Cleanup
+
+#Uninstall Istio setup - primary cluster
+istioctl x uninstall --set profile=default --purge --context=$CTX_CLUSTER1
+kubectl delete namespace istio-system --context=$CTX_CLUSTER1
+kubectl delete namespace primary --context=$CTX_CLUSTER1
+
+#Uninstall Istio setup - secondary cluster
+istioctl x uninstall --set profile=default --purge --context=$CTX_CLUSTER2
+kubectl delete namespace istio-system --context=$CTX_CLUSTER2
+kubectl delete namespace secondary --context=$CTX_CLUSTER1
+
