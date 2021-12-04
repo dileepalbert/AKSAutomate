@@ -76,10 +76,14 @@ The other container deployment option is to use Container Groups or ACI (Azure C
   
 
   - Application Gateway acts as a *reverse-proxy* and works at L7 protocol stack
+
   - Exposes *Public* IP and/or *Private* IP
-  - **Backend Pool** - *Set of IP Addresses/FQDNs*, *Virtual Machine/VMSS*, *App Services*. This is the pool where Application Gateway can forward the Client request
+
   - For this exercise, we would use the **Ingress Controller** of *AKS* cluster as the Backend Pool. We will discuss in details below! So, the Private IP of the Ingress Controller would be our only entry in the Backend Pool
+
   - Provides *Web Application Firewall* (**WAF**) as one if its Tier; allowing protection from common vulnerabilities and is based on the **[OWASP](https://owasp.org/)** rules
+
+  - **Backend Pool** - *Set of IP Addresses/FQDNs*, *Virtual Machine/VMSS*, *App Services*. This is the pool where Application Gateway can forward the Client request
 
   - **Http/s Listeners**
 
