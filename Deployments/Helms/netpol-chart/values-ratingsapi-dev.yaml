@@ -5,6 +5,7 @@ netpols:
     app: ratingsapi-pod
   policyTypes:
   - Ingress
+  - Egress
   ingresses:
   - sources:
     - podSelector:
@@ -12,8 +13,44 @@ netpols:
           app: ratingsweb-pod
     - namespaceSelector:
         matchLabels:
-          name: aks-workshop-cluster-ing-ns      
+          name: istio-system      
     ports:
     - protocol: TCP
       port: 3000
+    - protocol: TCP
+      port: 15021
+  egresses:
+  # - {}
+  - destinations:    
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    - namespaceSelector:
+        matchLabels:
+          name: istio-system
+      podSelector:
+        matchLabels:
+          app: istiod 
+    - namespaceSelector:
+        matchLabels:
+          name: db
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: mongodb
+    ports:    
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53 
+    - protocol: TCP
+      port: 27017
+    - protocol: TCP
+      port: 15010
+    - protocol: TCP
+      port: 15012
+    - protocol: TCP
+      port: 15014
     
