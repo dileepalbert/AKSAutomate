@@ -8,21 +8,21 @@ metadata:
     nginx.ingress.kubernetes.io/enable-cors: "true"
 spec:  
   rules:
-  - host: apim-smoke.wkshpdev.com
+  - host: apim-smoke<dns-name>
     http:
       paths:      
       - path: /status/?(.*)
         backend:
           serviceName: aks-workshop-gateway
           servicePort: 80
-  - host: apim-dev.wkshpdev.com
+  - host: apim-dev.<dns-name>
     http:
       paths:            
       - path: /?(.*)
         backend:
           serviceName: aks-workshop-gateway
           servicePort: 80      
-  - host: apim-qa.wkshpdev.com
+  - host: apim-qa.<dns-name>
     http:
       paths:            
       - path: /?(.*)
