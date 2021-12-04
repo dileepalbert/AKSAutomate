@@ -10,13 +10,15 @@ netpols:
   - sources:
     - namespaceSelector:
         matchLabels:
-          name: aks-workshop-cluster-ing-ns          
-    ports:
+          name: istio-system
+    ports:    
     - protocol: TCP
       port: 8080
+    - protocol: TCP
+      port: 15021    
   egresses:
   # - {}
-  - destinations:
+  - destinations:  
     - podSelector:
         matchLabels:
           app: ratingsapi-pod
@@ -26,10 +28,22 @@ netpols:
       podSelector:
         matchLabels:
           k8s-app: kube-dns
+    - namespaceSelector:
+        matchLabels:
+          name: istio-system
+      podSelector:
+        matchLabels:
+          app: istiod         
     ports:
     - protocol: TCP
       port: 3000
     - protocol: TCP
       port: 53
     - protocol: UDP
-      port: 53
+      port: 53 
+    - protocol: TCP
+      port: 15010
+    - protocol: TCP
+      port: 15012
+    - protocol: TCP
+      port: 15014
