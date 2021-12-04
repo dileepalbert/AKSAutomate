@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: apiproxy-dest-rule
+spec:
+  host: apiproxywks.internal.wkshpdev.com
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+      credentialName: aks-workshop-tls-secret
+    portLevelSettings:
+    - port:
+        number: 443            
+      loadBalancer:
+        simple: ROUND_ROBIN

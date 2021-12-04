@@ -1,0 +1,41 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: apiproxy-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: aks-workshop-tls-secret
+    hosts:
+#Ingress Gateway DNS host of Primary Cluster
+    - "apiproxywks.internal.wkshpdev.com"    
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: apiproxy-virtual-service
+spec:
+  hosts:
+#Ingress Gateway DNS host of Primary Cluster
+  - "apiproxywks.internal.wkshpdev.com"  
+  gateways:
+  - apiproxy-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /     
+    route:
+    - destination:
+        host: apiproxy-service
+        port:
+          number: 443          
+       
+    
